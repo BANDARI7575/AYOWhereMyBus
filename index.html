@@ -78,4 +78,747 @@
         }
 
         .creator-mark {
-            border: 1
+            border: 1px solid var(--yellow);
+            color: var(--yellow);
+            padding: 9px 14px;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+        }
+
+        .hero {
+            position: relative;
+            min-height: 560px;
+            padding: 95px 7%;
+            overflow: hidden;
+            background:
+                linear-gradient(
+                    90deg,
+                    #080a0e 10%,
+                    rgba(8,10,14,.88) 55%,
+                    rgba(8,10,14,.5)
+                ),
+                radial-gradient(
+                    ellipse at 85% 60%,
+                    #705813 0%,
+                    transparent 50%
+                ),
+                #080a0e;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            right: 5%;
+            bottom: 0;
+            width: 45%;
+            height: 65%;
+            opacity: .24;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent 0 28px,
+                #f5c518 29px 31px,
+                transparent 32px 65px
+            );
+            pointer-events: none;
+        }
+
+        .eyebrow {
+            color: var(--yellow);
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            position: relative;
+            font-size: clamp(52px, 8vw, 110px);
+            line-height: .93;
+            text-transform: uppercase;
+            margin: 28px 0;
+            max-width: 850px;
+            letter-spacing: -2px;
+        }
+
+        .hero p {
+            position: relative;
+            max-width: 520px;
+            color: #b7bec8;
+            font-size: 21px;
+            line-height: 1.5;
+        }
+
+        .primary-btn {
+            background: var(--yellow);
+            color: #080a0e;
+            border: none;
+            padding: 16px 30px;
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: .2s;
+        }
+
+        .primary-btn:hover {
+            background: #ffe16a;
+        }
+
+        .primary-btn:disabled {
+            opacity: .6;
+            cursor: wait;
+        }
+
+        .hero-actions {
+            margin-top: 30px;
+        }
+
+        section {
+            padding: 80px 7%;
+        }
+
+        .section-title {
+            font-size: clamp(34px, 5vw, 54px);
+            margin: 10px 0 25px;
+            text-transform: uppercase;
+        }
+
+        .search-panel {
+            max-width: 1100px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            padding: 35px;
+        }
+
+        .search-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 15px;
+        }
+
+        input {
+            background: #080a0e;
+            color: white;
+            border: 1px solid #414751;
+            padding: 16px;
+            width: 100%;
+            outline: none;
+            font-size: 18px;
+        }
+
+        input:focus {
+            border-color: var(--yellow);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 16px;
+            background: #0a0d12;
+            border-left: 3px solid var(--yellow);
+            font-size: 19px;
+            display: none;
+        }
+
+        .map-heading {
+            margin: 30px 0 12px;
+            font-size: 25px;
+            text-transform: uppercase;
+        }
+
+        #map {
+            height: 500px;
+            width: 100%;
+            border: 2px solid var(--yellow);
+            background: #222;
+            z-index: 1;
+        }
+
+        .disclaimer {
+            color: var(--muted);
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            line-height: 1.8;
+            margin-top: 20px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .feature {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            padding: 32px;
+            min-height: 220px;
+        }
+
+        .feature .number {
+            color: var(--yellow);
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+        }
+
+        .feature h3 {
+            font-size: 28px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .feature p {
+            color: var(--muted);
+            line-height: 1.6;
+            font-size: 17px;
+        }
+
+        .architect {
+            background:
+                radial-gradient(
+                    circle at 50% 40%,
+                    #2c2510,
+                    transparent 55%
+                ),
+                #080a0e;
+            border-top: 1px solid #242831;
+            text-align: center;
+        }
+
+        .identity-symbol {
+            width: 110px;
+            height: 110px;
+            border: 1px solid var(--yellow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 35px auto;
+            color: var(--yellow);
+            font-family: 'Space Mono', monospace;
+            font-size: 26px;
+            box-shadow: 0 0 35px #f5c51820;
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 12px #f5c51820;
+            }
+            50% {
+                box-shadow: 0 0 45px #f5c51855;
+            }
+        }
+
+        .architect h2 {
+            font-size: clamp(45px, 8vw, 90px);
+            margin: 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .architect .role {
+            color: var(--yellow);
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 3px;
+        }
+
+        .architect blockquote {
+            font-size: clamp(22px, 3vw, 32px);
+            font-style: italic;
+            max-width: 650px;
+            margin: 35px auto;
+            color: #d2d5dc;
+        }
+
+        .reveal-btn {
+            background: transparent;
+            border: 1px solid var(--yellow);
+            color: var(--yellow);
+            padding: 15px 28px;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+        }
+
+        .reveal-btn:hover {
+            background: var(--yellow);
+            color: black;
+        }
+
+        #identityDetails {
+            display: none;
+            margin: 25px auto 0;
+            max-width: 480px;
+            padding: 22px;
+            border: 1px solid var(--border);
+            background: #10141b;
+            color: #cbd0da;
+            font-size: 18px;
+        }
+
+        footer {
+            padding: 28px 7%;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        footer strong {
+            color: var(--yellow);
+        }
+
+        @media (max-width: 700px) {
+            nav {
+                padding: 18px 5%;
+            }
+
+            .logo {
+                font-size: 20px;
+            }
+
+            .nav-right a {
+                display: none;
+            }
+
+            .hero {
+                padding: 75px 6%;
+                min-height: 480px;
+            }
+
+            section {
+                padding: 60px 6%;
+            }
+
+            .search-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-panel {
+                padding: 22px;
+            }
+
+            #map {
+                height: 400px;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            footer {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVIGATION -->
+    <nav>
+        <div class="logo">
+            AYO<span>WHERE</span>MYBUS.
+        </div>
+
+        <div class="nav-right">
+            <a href="#search">Find Bus</a>
+            <a href="#features">The System</a>
+            <a href="#architect">The Architect</a>
+            <a class="creator-mark" href="#architect">
+                AB / 01
+            </a>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <header class="hero">
+        <div class="eyebrow">
+            Milwaukee // Transit Intelligence System
+        </div>
+
+        <h1>
+            THE CITY<br>
+            NEVER <span class="yellow">WAITS.</span>
+        </h1>
+
+        <p>
+            Ayo, where's my bus? Know your route.
+            Stay ahead of delays. Spend less time
+            standing in the cold.
+        </p>
+
+        <div class="hero-actions">
+            <a href="#search">
+                <button class="primary-btn">
+                    Locate Your Bus →
+                </button>
+            </a>
+        </div>
+    </header>
+
+    <!-- BUS SEARCH SECTION -->
+    <section id="search">
+        <div class="eyebrow">
+            01 // Transit Command Center
+        </div>
+
+        <h2 class="section-title">
+            Find Your <span class="yellow">Ride.</span>
+        </h2>
+
+        <div class="search-panel">
+            <h3>LIVE BUS ROUTE LOOKUP</h3>
+
+            <p style="color:#929aa8">
+                Enter your Milwaukee bus route number.
+                See reported bus locations on the map.
+            </p>
+
+            <div class="search-grid">
+                <input
+                    type="text"
+                    id="busNumber"
+                    placeholder="Enter route number, e.g. 19"
+                    aria-label="Bus route number"
+                >
+
+                <button
+                    class="primary-btn"
+                    id="searchButton"
+                    onclick="findBus()"
+                >
+                    Search Route
+                </button>
+            </div>
+
+            <div
+                id="busResult"
+                class="result"
+                role="status"
+                aria-live="polite"
+            ></div>
+
+            <h3 class="map-heading">
+                Milwaukee <span class="yellow">Bus Map</span>
+            </h3>
+
+            <div id="map"></div>
+
+            <p class="disclaimer">
+                SYSTEM STATUS: LOCAL LIVE DATA CONNECTION
+                <br>
+                Data source: Milwaukee MCTS GTFS-Realtime
+                <br>
+                Markers show last reported vehicle positions.
+                They are not continuously tracked.
+                <br>
+                Not an official MCTS website.
+            </p>
+        </div>
+    </section>
+
+    <!-- FEATURES SECTION -->
+    <section id="features">
+        <div class="eyebrow">
+            02 // System Capabilities
+        </div>
+
+        <h2 class="section-title">
+            BUILT FOR THE
+            <span class="yellow">STREETS.</span>
+        </h2>
+
+        <div class="feature-grid">
+            <div class="feature">
+                <div class="number">MODULE_01</div>
+
+                <h3>Live Tracking</h3>
+
+                <p>
+                    Search Milwaukee bus routes and
+                    view the latest reported vehicle
+                    positions on an interactive map.
+                </p>
+            </div>
+
+            <div class="feature">
+                <div class="number">MODULE_02</div>
+
+                <h3>Nearby Stops</h3>
+
+                <p>
+                    Planned: discover nearby bus
+                    stops using your location.
+                </p>
+            </div>
+
+            <div class="feature">
+                <div class="number">MODULE_03</div>
+
+                <h3>Street Alerts</h3>
+
+                <p>
+                    Planned: report icy sidewalks,
+                    snow, accidents, and delays.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CREATOR SECTION -->
+    <section class="architect" id="architect">
+        <div class="eyebrow">
+            03 // Classified Creator Identity
+        </div>
+
+        <div class="identity-symbol">
+            AB/01
+        </div>
+
+        <div class="role">
+            IDENTITY VERIFIED // SYSTEM ARCHITECT
+        </div>
+
+        <h2>
+            ABHIRAJ<br>
+            <span class="yellow">BANDARI.</span>
+        </h2>
+
+        <div class="role">
+            FOUNDER & CREATOR OF AYOWHEREMYBUS
+        </div>
+
+        <blockquote>
+            "The city moves. I make it visible."
+        </blockquote>
+
+        <button
+            class="reveal-btn"
+            onclick="revealIdentity()"
+        >
+            [ DECLASSIFY CREATOR FILE ]
+        </button>
+
+        <div id="identityDetails">
+            <p>
+                <strong style="color:#f5c518">
+                    IDENTITY: ABHIRAJ BANDARI
+                </strong>
+            </p>
+
+            <p>Codename: AB / 01</p>
+            <p>Project: AYOWhereMyBus</p>
+
+            <p>
+                Mission: Make Milwaukee transit easier,
+                safer, and smarter for everyday riders.
+            </p>
+
+            <p>Location: Milwaukee, Wisconsin</p>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div>
+            © 2026 AYOWhereMyBus.
+            Independent transit project.
+        </div>
+
+        <div>
+            DESIGNED & DEVELOPED BY
+            <strong>ABHIRAJ BANDARI // AB/01</strong>
+        </div>
+    </footer>
+
+    <!-- LEAFLET JAVASCRIPT -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // Step 1: Initialize the Milwaukee map
+        const map = L.map("map").setView(
+            [43.0389, -87.9065],
+            11
+        );
+
+        // Step 2: Add OpenStreetMap tiles
+        L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+                maxZoom: 19,
+                attribution:
+                    '&copy; OpenStreetMap contributors'
+            }
+        ).addTo(map);
+
+        // Store markers for the searched route
+        const busMarkers = L.layerGroup().addTo(map);
+
+        // Step 3: Search the live bus API
+        async function findBus() {
+            const input = document.getElementById(
+                "busNumber"
+            );
+
+            const result = document.getElementById(
+                "busResult"
+            );
+
+            const button = document.getElementById(
+                "searchButton"
+            );
+
+            const routeNumber = input.value.trim();
+
+            result.style.display = "block";
+
+            if (routeNumber === "") {
+                result.textContent =
+                    "Please enter a bus route number.";
+
+                result.style.color = "#ff7777";
+                return;
+            }
+
+            result.style.color = "#f5c518";
+            result.textContent = "Loading bus locations...";
+            button.disabled = true;
+
+            // Clear old markers
+            busMarkers.clearLayers();
+
+            try {
+                // Request data from our Flask backend
+                const response = await fetch("/api/buses");
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Server returned " + response.status
+                    );
+                }
+
+                const data = await response.json();
+
+                // Select buses matching the route
+                const matchingBuses = data.buses.filter(
+                    bus =>
+                        String(bus.route).toUpperCase() ===
+                        routeNumber.toUpperCase()
+                );
+
+                if (matchingBuses.length === 0) {
+                    result.textContent =
+                        "No vehicles currently reported for Route " +
+                        routeNumber + ".";
+
+                    return;
+                }
+
+                // Create map markers
+                const bounds = [];
+
+                matchingBuses.forEach(bus => {
+                    const latitude = Number(bus.latitude);
+                    const longitude = Number(bus.longitude);
+
+                    if (
+                        !Number.isFinite(latitude) ||
+                        !Number.isFinite(longitude)
+                    ) {
+                        return;
+                    }
+
+                    const marker = L.circleMarker(
+                        [latitude, longitude],
+                        {
+                            radius: 10,
+                            color: "#080a0e",
+                            fillColor: "#f5c518",
+                            fillOpacity: 1,
+                            weight: 2
+                        }
+                    );
+
+                    // Safe popup construction
+                    const popup = document.createElement("div");
+
+                    const heading = document.createElement("strong");
+                    heading.textContent = "AYOWhereMyBus";
+
+                    const details = document.createElement("p");
+                    details.textContent =
+                        "Bus ID: " + bus.bus_id +
+                        " | Route: " + bus.route;
+
+                    popup.appendChild(heading);
+                    popup.appendChild(details);
+
+                    marker.bindPopup(popup);
+                    marker.addTo(busMarkers);
+
+                    bounds.push([latitude, longitude]);
+                });
+
+                // Zoom map to matching buses
+                if (bounds.length > 0) {
+                    map.fitBounds(bounds, {
+                        padding: [35, 35],
+                        maxZoom: 14
+                    });
+                }
+
+                result.textContent =
+                    "Route " + routeNumber +
+                    " | " + bounds.length +
+                    " buses displayed on the map.";
+
+            } catch (error) {
+                result.style.color = "#ff7777";
+
+                result.textContent =
+                    "Could not load live bus data. " +
+                    "Make sure your Flask server is running.";
+
+                console.error(error);
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        // Step 4: Search by pressing Enter
+        document.getElementById(
+            "busNumber"
+        ).addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                findBus();
+            }
+        });
+
+        // Step 5: Creator identity reveal
+        function revealIdentity() {
+            const details = document.getElementById(
+                "identityDetails"
+            );
+
+            const button = document.querySelector(
+                ".reveal-btn"
+            );
+
+            if (details.style.display === "block") {
+                details.style.display = "none";
+
+                button.textContent =
+                    "[ DECLASSIFY CREATOR FILE ]";
+            } else {
+                details.style.display = "block";
+
+                button.textContent =
+                    "[ CLASSIFY CREATOR FILE ]";
+            }
+        }
+    </script>
+
+</body>
+</html>
