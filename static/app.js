@@ -165,11 +165,14 @@ function initializeMap() {
   // Dark map tiles match our editorial theme.
   // Attribution stays visible because map creators deserve credit.
   L.tileLayer(
-    "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-    {
-      maxZoom: 19,
-      attribution:
-        '&copy; OpenStreetMap contributors &copy; CARTO'
+    // OpenStreetMap tiles for our local prototype.
+// The buses are real; the map should show real streets too. 😅
+  "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap contributors"
+  }
+).addTo(state.map);
     }
   ).addTo(state.map);
 
