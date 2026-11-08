@@ -1,0 +1,172 @@
+# 🚌 AYOWhereMyBus
+
+### A Milwaukee Bus Tracking Project
+
+Hey, I'm Abhiraj Bandari.
+
+I'm a Computer and Information Science master's student at Concordia University Wisconsin, and I'm currently learning more about Python, Data Engineering, and web development.
+
+I already have experience with web development and app development, which helped me a lot while building this website. Now I'm trying to combine those skills with what I'm learning in Data Engineering and AI/ML.
+
+I started building AYOWhereMyBus because of one simple problem.
+
+Milwaukee winters are crazy. Sometimes you're standing at a bus stop in freezing weather, waiting for a bus, and you have no idea where it is.
+
+I thought, why not build something that helps people see where their bus is?
+
+That's how AYOWhereMyBus started.
+
+I'm building this project from scratch, learning things as I go, making mistakes, fixing them, and trying to improve the website step by step.
+
+## What I've Built So Far
+
+Right now, the website can:
+
+- Show reported Milwaukee buses on a live map.
+- Search buses by route number.
+- Display a bus's ID, speed, direction, and location.
+- Refresh bus locations automatically every 15 seconds.
+- Find nearby buses using the user's location.
+- Save favorite bus routes.
+- Switch between light and dark mode.
+- Switch between English and Spanish for parts of the website.
+- Work on desktop and mobile screen sizes.
+
+I also added a few flying bats to the homepage.
+
+Why bats? I just thought they looked cool. 🦇
+
+## Technologies I'm Using
+
+- Python
+- Flask
+- HTML
+- CSS
+- JavaScript
+- Leaflet.js
+- OpenStreetMap
+- GTFS-Realtime
+- Git and GitHub
+
+I'm using Python and Flask for the backend, and HTML, CSS, and JavaScript for the website.
+
+The bus locations come from Milwaukee's MCTS real-time vehicle feed.
+
+## How the Project Works
+
+This is the basic flow:
+
+MCTS Real-Time Data
+        ↓
+Python
+        ↓
+Flask API
+        ↓
+JavaScript
+        ↓
+Live Bus Map
+
+Python gets the bus information, Flask makes it available to the website, and JavaScript displays the buses on the map.
+
+It sounds simple when I explain it like this, but getting everything to work together took some effort. 😂
+
+## How to Run This Project
+
+First, clone the repository:
+
+    git clone https://github.com/BANDARI7575/AYOWhereMyBus.git
+
+Open the project folder:
+
+    cd AYOWhereMyBus
+
+Create a virtual environment:
+
+    python3 -m venv .venv
+
+Activate it on Mac or Linux:
+
+    source .venv/bin/activate
+
+Install the required libraries:
+
+    python -m pip install -r requirements.txt
+
+Start the website:
+
+    python app.py
+
+Open this address in your browser:
+
+http://127.0.0.1:5000/
+
+You need an internet connection for the live bus information and map.
+
+## What I'm Working on Next
+
+This project is far from finished.
+
+There are a lot of things I still want to build:
+
+- Show nearby bus stops.
+- Show when the next bus is expected to arrive.
+- Help users plan trips from one location to another.
+- Add Milwaukee snow and winter alerts.
+- Let people report problems at bus stops.
+- Send notifications when a bus is approaching.
+- Add an AI voice assistant.
+- Analyze bus delays using Data Engineering and Machine Learning.
+- Make the website installable on phones.
+
+I'm planning to add these features one by one instead of trying to build everything at once.
+
+## Why I'm Building This
+
+My career goal is to work in AI/ML Data Engineering.
+
+I don't want to learn only by watching tutorials. I want to build real projects where I can understand how APIs, databases, data pipelines, backend systems, and websites work together.
+
+This project gives me a chance to practice those skills while building something that might actually help people in Milwaukee.
+
+## Things I've Learned
+
+A few things this project has already taught me:
+
+- How to work with real-time API data.
+- How Python can communicate with a website.
+- How to build a Flask backend.
+- How to work with JSON.
+- How to show GPS locations on a map.
+- How to organize HTML, CSS, JavaScript, and Python files.
+- How to debug code when something doesn't work.
+- How to use Git and GitHub.
+
+And probably the biggest lesson:
+
+Sometimes one extra bracket can break the whole website. 😭
+
+## About Me
+
+**Abhiraj Bandari**
+
+Master's in Computer and Information Science  
+Concordia University Wisconsin  
+Milwaukee, Wisconsin
+
+Interested in Data Engineering, AI/ML, Python, and building websites.
+
+## Note
+
+This is my personal learning project, not an official MCTS website.
+
+The bus locations are based on the latest reported transit data, so they may not always be exact or up to date.
+
+I'm still learning and improving the project.
+
+If something isn't working perfectly, there's a good chance I'm already trying to fix it. 😂
+
+---
+
+Built by Abhiraj Bandari.
+
+One bus at a time. 🚌
