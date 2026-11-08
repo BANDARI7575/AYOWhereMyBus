@@ -23,15 +23,14 @@ while True:
         continue
 
     try:
-        # Fetch fresh bus data
+        # Request fresh vehicle data
         response = requests.get(vehicle_url, timeout=10)
         response.raise_for_status()
 
-        # Decode the GTFS feed
+        # Decode the feed
         feed = gtfs_realtime_pb2.FeedMessage()
         feed.ParseFromString(response.content)
 
-        # Search for matching vehicles
         matching_buses = []
 
         for entity in feed.entity:
@@ -45,16 +44,25 @@ while True:
                 ):
                     matching_buses.append(bus)
 
-        # Display search results
         print("Status Code:", response.status_code)
         print("Route:", route_number)
         print("Buses found:", len(matching_buses))
 
         for bus in matching_buses:
+            latitude = bus.position.latitude
+            longitude = bus.position.longitude
+
+            # Generate Google Maps link
+            maps_link = (
+                f"https://www.google.com/maps/search/"
+                f"?api=1&query={latitude}%2C{longitude}"
+            )
+
             print("----------------------")
             print("Bus ID:", bus.vehicle.id)
-            print("Latitude:", bus.position.latitude)
-            print("Longitude:", bus.position.longitude)
+            print("Latitude:", latitude)
+            print("Longitude:", longitude)
+            print("Google Maps:", maps_link)
 
         if not matching_buses:
             print("No matching vehicles in the current feed.")
