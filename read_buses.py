@@ -1,15 +1,12 @@
 
-import json
+import requests
+from google.transit import gtfs_realtime_pb2
 
-# Step 1: Load saved bus data
-with open("buses.json", "r") as file:
-    data = json.load(file)
+# Milwaukee MCTS live vehicle feed
+vehicle_url = "https://realtime.ridemcts.com/gtfsrt/vehicles"
 
 print("Welcome to AYOWhereMyBus!")
-print("Total buses:", data["total_buses"])
-print("Last updated:", data["last_updated"])
 
-# Step 2: Keep searching until the user exits
 while True:
     print("\n----------------------")
 
@@ -17,27 +14,53 @@ while True:
         "Enter bus route (or type exit): "
     ).strip()
 
-    # Step 3: Exit the program
     if route_number.lower() == "exit":
         print("Thank you for using AYOWhereMyBus!")
         break
 
-    # Step 4: Search for matching buses
-    matching_buses = []
+    if not route_number:
+        print("Please enter a route number.")
+        continue
 
-    for bus in data["buses"]:
-        if bus["route"].upper() == route_number.upper():
-            matching_buses.append(bus)
+    try:
+        # Fetch fresh bus data
+        response = requests.get(vehicle_url, timeout=10)
+        response.raise_for_status()
 
-    # Step 5: Display results
-    if len(matching_buses) > 0:
+        # Decode the GTFS feed
+        feed = gtfs_realtime_pb2.FeedMessage()
+        feed.ParseFromString(response.content)
+
+        # Search for matching vehicles
+        matching_buses = []
+
+        for entity in feed.entity:
+            if entity.HasField("vehicle"):
+                bus = entity.vehicle
+
+                if (
+                    bus.HasField("position")
+                    and bus.trip.route_id.upper()
+                    == route_number.upper()
+                ):
+                    matching_buses.append(bus)
+
+        # Display search results
+        print("Status Code:", response.status_code)
         print("Route:", route_number)
         print("Buses found:", len(matching_buses))
 
         for bus in matching_buses:
             print("----------------------")
-            print("Bus ID:", bus["bus_id"])
-            print("Latitude:", bus["latitude"])
-            print("Longitude:", bus["longitude"])
-    else:
-        print("No buses found for route:", route_number)
+            print("Bus ID:", bus.vehicle.id)
+            print("Latitude:", bus.position.latitude)
+            print("Longitude:", bus.position.longitude)
+
+        if not matching_buses:
+            print("No matching vehicles in the current feed.")
+
+    except requests.RequestException as error:
+        print("Could not retrieve bus data:", error)
+
+    except Exception as error:
+        print("Could not process bus data:", error)
