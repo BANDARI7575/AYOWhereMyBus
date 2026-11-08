@@ -8,7 +8,7 @@
 
     <title>AYOWhereMyBus | Milwaukee Transit Intelligence</title>
 
-    <!-- Leaflet Map Library -->
+    <!-- Leaflet Map -->
     <link rel="stylesheet"
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
@@ -23,13 +23,9 @@
             --border: #30343a;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
-        html {
-            scroll-behavior: smooth;
-        }
+        html { scroll-behavior: smooth; }
 
         body {
             margin: 0;
@@ -38,13 +34,8 @@
             font-family: 'Rajdhani', sans-serif;
         }
 
-        button, input {
-            font: inherit;
-        }
-
-        button {
-            cursor: pointer;
-        }
+        button, input { font: inherit; }
+        button { cursor: pointer; }
 
         nav {
             display: flex;
@@ -61,9 +52,7 @@
             letter-spacing: 1px;
         }
 
-        .yellow, .logo span {
-            color: var(--yellow);
-        }
+        .yellow, .logo span { color: var(--yellow); }
 
         .nav-right {
             display: flex;
@@ -157,25 +146,13 @@
             font-weight: 700;
             letter-spacing: 1px;
             text-transform: uppercase;
-            transition: .2s;
         }
 
-        .primary-btn:hover {
-            background: #ffe16a;
-        }
+        .primary-btn:hover { background: #ffe16a; }
 
-        .primary-btn:disabled {
-            opacity: .6;
-            cursor: wait;
-        }
+        .hero-actions { margin-top: 30px; }
 
-        .hero-actions {
-            margin-top: 30px;
-        }
-
-        section {
-            padding: 80px 7%;
-        }
+        section { padding: 80px 7%; }
 
         .section-title {
             font-size: clamp(34px, 5vw, 54px);
@@ -206,9 +183,7 @@
             font-size: 18px;
         }
 
-        input:focus {
-            border-color: var(--yellow);
-        }
+        input:focus { border-color: var(--yellow); }
 
         .result {
             margin-top: 20px;
@@ -231,6 +206,32 @@
             border: 2px solid var(--yellow);
             background: #222;
             z-index: 1;
+        }
+
+        .live-status {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 15px;
+            color: var(--yellow);
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+        }
+
+        .live-dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            background: var(--yellow);
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulseDot 2s infinite;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .35; }
         }
 
         .disclaimer {
@@ -296,16 +297,6 @@
             font-family: 'Space Mono', monospace;
             font-size: 26px;
             box-shadow: 0 0 35px #f5c51820;
-            animation: pulse 3s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                box-shadow: 0 0 12px #f5c51820;
-            }
-            50% {
-                box-shadow: 0 0 45px #f5c51855;
-            }
         }
 
         .architect h2 {
@@ -365,51 +356,19 @@
             font-size: 14px;
         }
 
-        footer strong {
-            color: var(--yellow);
-        }
+        footer strong { color: var(--yellow); }
 
         @media (max-width: 700px) {
-            nav {
-                padding: 18px 5%;
-            }
-
-            .logo {
-                font-size: 20px;
-            }
-
-            .nav-right a {
-                display: none;
-            }
-
-            .hero {
-                padding: 75px 6%;
-                min-height: 480px;
-            }
-
-            section {
-                padding: 60px 6%;
-            }
-
-            .search-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .search-panel {
-                padding: 22px;
-            }
-
-            #map {
-                height: 400px;
-            }
-
-            .feature-grid {
-                grid-template-columns: 1fr;
-            }
-
-            footer {
-                flex-direction: column;
-            }
+            nav { padding: 18px 5%; }
+            .logo { font-size: 20px; }
+            .nav-right a { display: none; }
+            .hero { padding: 75px 6%; min-height: 480px; }
+            section { padding: 60px 6%; }
+            .search-grid { grid-template-columns: 1fr; }
+            .search-panel { padding: 22px; }
+            #map { height: 400px; }
+            .feature-grid { grid-template-columns: 1fr; }
+            footer { flex-direction: column; }
         }
     </style>
 </head>
@@ -432,7 +391,7 @@
         </div>
     </nav>
 
-    <!-- HERO SECTION -->
+    <!-- HERO -->
     <header class="hero">
         <div class="eyebrow">
             Milwaukee // Transit Intelligence System
@@ -450,15 +409,14 @@
         </p>
 
         <div class="hero-actions">
-            <a href="#search">
-                <button class="primary-btn">
-                    Locate Your Bus →
-                </button>
+            <a href="#search" class="primary-btn"
+               style="display:inline-block;text-decoration:none">
+                Locate Your Bus →
             </a>
         </div>
     </header>
 
-    <!-- BUS SEARCH SECTION -->
+    <!-- SEARCH AND MAP -->
     <section id="search">
         <div class="eyebrow">
             01 // Transit Command Center
@@ -472,8 +430,8 @@
             <h3>LIVE BUS ROUTE LOOKUP</h3>
 
             <p style="color:#929aa8">
-                Enter your Milwaukee bus route number.
-                See reported bus locations on the map.
+                Search Milwaukee bus routes and see
+                reported bus positions on the map.
             </p>
 
             <div class="search-grid">
@@ -484,42 +442,54 @@
                     aria-label="Bus route number"
                 >
 
-                <button
-                    class="primary-btn"
-                    id="searchButton"
-                    onclick="findBus()"
-                >
+                <button class="primary-btn"
+                        id="searchButton"
+                        onclick="findBus()">
                     Search Route
                 </button>
             </div>
 
-            <div
-                id="busResult"
-                class="result"
-                role="status"
-                aria-live="polite"
-            ></div>
+            <div id="busResult"
+                 class="result"
+                 role="status"
+                 aria-live="polite"></div>
 
             <h3 class="map-heading">
-                Milwaukee <span class="yellow">Bus Map</span>
+                Milwaukee
+                <span class="yellow">Bus Map</span>
             </h3>
 
             <div id="map"></div>
+
+            <div class="live-status">
+                <span>
+                    <span class="live-dot"></span>
+                    <span id="trackingStatus">
+                        TRACKING NOT STARTED
+                    </span>
+                </span>
+
+                <span id="lastRefresh">
+                    LAST REFRESH: --
+                </span>
+            </div>
 
             <p class="disclaimer">
                 SYSTEM STATUS: LOCAL LIVE DATA CONNECTION
                 <br>
                 Data source: Milwaukee MCTS GTFS-Realtime
                 <br>
-                Markers show last reported vehicle positions.
-                They are not continuously tracked.
+                Positions refresh every 15 seconds
+                while this tab is active.
+                The underlying transit feed may update
+                less frequently.
                 <br>
                 Not an official MCTS website.
             </p>
         </div>
     </section>
 
-    <!-- FEATURES SECTION -->
+    <!-- FEATURES -->
     <section id="features">
         <div class="eyebrow">
             02 // System Capabilities
@@ -533,21 +503,17 @@
         <div class="feature-grid">
             <div class="feature">
                 <div class="number">MODULE_01</div>
-
                 <h3>Live Tracking</h3>
-
                 <p>
-                    Search Milwaukee bus routes and
-                    view the latest reported vehicle
-                    positions on an interactive map.
+                    Search Milwaukee bus routes and view
+                    regularly refreshed vehicle positions
+                    on an interactive map.
                 </p>
             </div>
 
             <div class="feature">
                 <div class="number">MODULE_02</div>
-
                 <h3>Nearby Stops</h3>
-
                 <p>
                     Planned: discover nearby bus
                     stops using your location.
@@ -556,9 +522,7 @@
 
             <div class="feature">
                 <div class="number">MODULE_03</div>
-
                 <h3>Street Alerts</h3>
-
                 <p>
                     Planned: report icy sidewalks,
                     snow, accidents, and delays.
@@ -573,9 +537,7 @@
             03 // Classified Creator Identity
         </div>
 
-        <div class="identity-symbol">
-            AB/01
-        </div>
+        <div class="identity-symbol">AB/01</div>
 
         <div class="role">
             IDENTITY VERIFIED // SYSTEM ARCHITECT
@@ -594,10 +556,8 @@
             "The city moves. I make it visible."
         </blockquote>
 
-        <button
-            class="reveal-btn"
-            onclick="revealIdentity()"
-        >
+        <button class="reveal-btn"
+                onclick="revealIdentity()">
             [ DECLASSIFY CREATOR FILE ]
         </button>
 
@@ -607,15 +567,12 @@
                     IDENTITY: ABHIRAJ BANDARI
                 </strong>
             </p>
-
             <p>Codename: AB / 01</p>
             <p>Project: AYOWhereMyBus</p>
-
             <p>
                 Mission: Make Milwaukee transit easier,
                 safer, and smarter for everyday riders.
             </p>
-
             <p>Location: Milwaukee, Wisconsin</p>
         </div>
     </section>
@@ -629,21 +586,22 @@
 
         <div>
             DESIGNED & DEVELOPED BY
-            <strong>ABHIRAJ BANDARI // AB/01</strong>
+            <strong>
+                ABHIRAJ BANDARI // AB/01
+            </strong>
         </div>
     </footer>
 
-    <!-- LEAFLET JAVASCRIPT -->
+    <!-- LEAFLET -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        // Step 1: Initialize the Milwaukee map
+        // Initialize the Milwaukee map
         const map = L.map("map").setView(
             [43.0389, -87.9065],
             11
         );
 
-        // Step 2: Add OpenStreetMap tiles
         L.tileLayer(
             "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
             {
@@ -653,71 +611,93 @@
             }
         ).addTo(map);
 
-        // Store markers for the searched route
+        // Store our current bus markers
         const busMarkers = L.layerGroup().addTo(map);
 
-        // Step 3: Search the live bus API
-        async function findBus() {
-            const input = document.getElementById(
-                "busNumber"
-            );
+        // Automatic refresh interval in milliseconds
+        const REFRESH_INTERVAL = 15000;
 
-            const result = document.getElementById(
-                "busResult"
-            );
+        let selectedRoute = "";
+        let refreshTimer = null;
+        let activeRequest = null;
+        let searchVersion = 0;
 
-            const button = document.getElementById(
-                "searchButton"
-            );
+        // Build a popup for a bus
+        function createBusPopup(bus) {
+            const popup = document.createElement("div");
 
-            const routeNumber = input.value.trim();
+            const title = document.createElement("strong");
+            title.textContent = "AYOWhereMyBus";
 
-            result.style.display = "block";
+            const description = document.createElement("p");
+            description.textContent =
+                "Bus ID: " + bus.bus_id +
+                " | Route: " + bus.route;
 
-            if (routeNumber === "") {
-                result.textContent =
-                    "Please enter a bus route number.";
+            popup.appendChild(title);
+            popup.appendChild(description);
 
-                result.style.color = "#ff7777";
+            return popup;
+        }
+
+        // Update the map using fresh bus data
+        async function updateBusLocations(
+            zoomToBuses = false,
+            version = searchVersion
+        ) {
+            if (!selectedRoute || document.hidden) {
                 return;
             }
 
-            result.style.color = "#f5c518";
-            result.textContent = "Loading bus locations...";
-            button.disabled = true;
+            // Prevent overlapping requests
+            if (activeRequest) {
+                return;
+            }
 
-            // Clear old markers
-            busMarkers.clearLayers();
+            const controller = new AbortController();
+            activeRequest = controller;
+
+            const result = document.getElementById("busResult");
+            const status = document.getElementById(
+                "trackingStatus"
+            );
+
+            result.style.display = "block";
+
+            status.textContent = "REFRESHING DATA...";
 
             try {
-                // Request data from our Flask backend
-                const response = await fetch("/api/buses");
+                const response = await fetch(
+                    "/api/buses",
+                    {
+                        cache: "no-store",
+                        signal: controller.signal
+                    }
+                );
 
                 if (!response.ok) {
                     throw new Error(
-                        "Server returned " + response.status
+                        "Server error: " + response.status
                     );
                 }
 
                 const data = await response.json();
 
-                // Select buses matching the route
-                const matchingBuses = data.buses.filter(
-                    bus =>
-                        String(bus.route).toUpperCase() ===
-                        routeNumber.toUpperCase()
-                );
-
-                if (matchingBuses.length === 0) {
-                    result.textContent =
-                        "No vehicles currently reported for Route " +
-                        routeNumber + ".";
-
+                // Ignore an outdated search response
+                if (version !== searchVersion) {
                     return;
                 }
 
-                // Create map markers
+                const matchingBuses = data.buses.filter(
+                    bus =>
+                        String(bus.route).toUpperCase() ===
+                        selectedRoute.toUpperCase()
+                );
+
                 const bounds = [];
+
+                // Replace old markers with fresh positions
+                busMarkers.clearLayers();
 
                 matchingBuses.forEach(bus => {
                     const latitude = Number(bus.latitude);
@@ -741,62 +721,184 @@
                         }
                     );
 
-                    // Safe popup construction
-                    const popup = document.createElement("div");
+                    marker.bindPopup(
+                        createBusPopup(bus)
+                    );
 
-                    const heading = document.createElement("strong");
-                    heading.textContent = "AYOWhereMyBus";
-
-                    const details = document.createElement("p");
-                    details.textContent =
-                        "Bus ID: " + bus.bus_id +
-                        " | Route: " + bus.route;
-
-                    popup.appendChild(heading);
-                    popup.appendChild(details);
-
-                    marker.bindPopup(popup);
                     marker.addTo(busMarkers);
 
                     bounds.push([latitude, longitude]);
                 });
 
-                // Zoom map to matching buses
-                if (bounds.length > 0) {
+                // Zoom only when a new route is searched
+                if (zoomToBuses && bounds.length > 0) {
                     map.fitBounds(bounds, {
                         padding: [35, 35],
                         maxZoom: 14
                     });
                 }
 
+                result.style.color = "#f5c518";
+
                 result.textContent =
-                    "Route " + routeNumber +
+                    "Route " + selectedRoute +
                     " | " + bounds.length +
                     " buses displayed on the map.";
 
+                if (bounds.length === 0) {
+                    result.textContent =
+                        "No vehicles currently reported for Route " +
+                        selectedRoute + ".";
+                }
+
+                status.textContent = "AUTO TRACKING ACTIVE";
+
+                const currentTime =
+                    new Date().toLocaleTimeString();
+
+                document.getElementById(
+                    "lastRefresh"
+                ).textContent =
+                    "LAST REFRESH: " + currentTime;
+
+                console.log(
+                    "Updated route:",
+                    selectedRoute,
+                    "Vehicles:",
+                    bounds.length
+                );
+
             } catch (error) {
+                if (error.name === "AbortError") {
+                    return;
+                }
+
+                if (version !== searchVersion) {
+                    return;
+                }
+
+                console.error(
+                    "Bus tracking error:",
+                    error
+                );
+
+                status.textContent = "CONNECTION ERROR";
+
+                result.style.display = "block";
                 result.style.color = "#ff7777";
 
                 result.textContent =
-                    "Could not load live bus data. " +
-                    "Make sure your Flask server is running.";
+                    "Unable to refresh bus locations. " +
+                    "The last successfully loaded markers " +
+                    "may no longer be current.";
 
-                console.error(error);
             } finally {
-                button.disabled = false;
+                if (activeRequest === controller) {
+                    activeRequest = null;
+                }
             }
         }
 
-        // Step 4: Search by pressing Enter
+        // Start tracking a selected bus route
+        async function findBus() {
+            const input = document.getElementById(
+                "busNumber"
+            );
+
+            const result = document.getElementById(
+                "busResult"
+            );
+
+            const route = input.value.trim();
+
+            if (!route) {
+                result.style.display = "block";
+                result.style.color = "#ff7777";
+                result.textContent =
+                    "Please enter a route number.";
+                return;
+            }
+
+            // Stop the previous refresh loop
+            stopTracking();
+
+            // Set our new selected route
+            selectedRoute = route;
+            searchVersion++;
+
+            busMarkers.clearLayers();
+
+            result.style.display = "block";
+            result.style.color = "#f5c518";
+            result.textContent =
+                "Searching Route " + route + "...";
+
+            // Request the first set of positions
+            await updateBusLocations(
+                true,
+                searchVersion
+            );
+
+            // Start repeating requests
+            startTracking();
+        }
+
+        function startTracking() {
+            if (refreshTimer !== null) {
+                clearInterval(refreshTimer);
+            }
+
+            if (!selectedRoute || document.hidden) {
+                return;
+            }
+
+            refreshTimer = setInterval(() => {
+                updateBusLocations(false);
+            }, REFRESH_INTERVAL);
+        }
+
+        function stopTracking() {
+            if (refreshTimer !== null) {
+                clearInterval(refreshTimer);
+                refreshTimer = null;
+            }
+
+            if (activeRequest) {
+                activeRequest.abort();
+                activeRequest = null;
+            }
+        }
+
+        // Stop background requests in hidden tabs
+        document.addEventListener(
+            "visibilitychange",
+            () => {
+                if (document.hidden) {
+                    stopTracking();
+
+                    document.getElementById(
+                        "trackingStatus"
+                    ).textContent = "TRACKING PAUSED";
+                } else if (selectedRoute) {
+                    updateBusLocations(false);
+                    startTracking();
+                }
+            }
+        );
+
+        // Search when Enter is pressed
         document.getElementById(
             "busNumber"
-        ).addEventListener("keydown", function(event) {
-            if (event.key === "Enter") {
-                findBus();
+        ).addEventListener(
+            "keydown",
+            event => {
+                if (event.key === "Enter") {
+                    findBus();
+                }
             }
-        });
+        );
 
-        // Step 5: Creator identity reveal
+        // Creator identity section
         function revealIdentity() {
             const details = document.getElementById(
                 "identityDetails"
@@ -808,12 +910,10 @@
 
             if (details.style.display === "block") {
                 details.style.display = "none";
-
                 button.textContent =
                     "[ DECLASSIFY CREATOR FILE ]";
             } else {
                 details.style.display = "block";
-
                 button.textContent =
                     "[ CLASSIFY CREATOR FILE ]";
             }
