@@ -6,11 +6,11 @@ from google.transit import gtfs_realtime_pb2
 # Create Flask application
 app = Flask(__name__)
 
-# Milwaukee MCTS real-time bus data
+# Milwaukee MCTS real-time vehicle feed
 VEHICLE_URL = "https://realtime.ridemcts.com/gtfsrt/vehicles"
 
 
-# Step 1: Serve our website
+# Serve our website
 @app.route("/")
 def home():
     return send_from_directory(
@@ -19,11 +19,10 @@ def home():
     )
 
 
-# Step 2: Create the bus tracking API
+# Return real-time bus information
 @app.route("/api/buses")
 def get_buses():
     try:
-        # Connect to the Milwaukee transit server
         response = requests.get(
             VEHICLE_URL,
             timeout=10
@@ -31,17 +30,12 @@ def get_buses():
 
         response.raise_for_status()
 
-        # Decode the GTFS real-time feed
         feed = gtfs_realtime_pb2.FeedMessage()
-
         feed.ParseFromString(response.content)
 
-        # Create a list for bus information
         buses = []
 
-        # Step 3: Extract vehicle information
         for entity in feed.entity:
-
             if not entity.HasField("vehicle"):
                 continue
 
@@ -50,25 +44,45 @@ def get_buses():
             if not vehicle.HasField("position"):
                 continue
 
-            # Only include entries with a route ID
             if not vehicle.HasField("trip"):
                 continue
 
-            route_id = vehicle.trip.route_id
-
-            if not route_id:
+            if not vehicle.trip.route_id:
                 continue
+
+            position = vehicle.position
+
+            # GTFS speed is measured in meters/second.
+            # Convert to kilometers/hour when provided.
+            speed_kmh = None
+
+            if position.HasField("speed"):
+                speed_kmh = round(
+                    position.speed * 3.6,
+                    1
+                )
+
+            # Bearing: 0 = North, 90 = East,
+            # 180 = South, 270 = West.
+            direction = None
+
+            if position.HasField("bearing"):
+                direction = round(
+                    position.bearing,
+                    1
+                )
 
             bus_info = {
                 "bus_id": vehicle.vehicle.id,
-                "route": route_id,
-                "latitude": vehicle.position.latitude,
-                "longitude": vehicle.position.longitude
+                "route": vehicle.trip.route_id,
+                "latitude": position.latitude,
+                "longitude": position.longitude,
+                "speed_kmh": speed_kmh,
+                "direction_degrees": direction
             }
 
             buses.append(bus_info)
 
-        # Step 4: Return JSON to the website
         return jsonify({
             "status": "success",
             "total_buses": len(buses),
@@ -92,7 +106,7 @@ def get_buses():
         }), 500
 
 
-# Step 5: Start the local development server
+# Run the development server
 if __name__ == "__main__":
     print("Starting AYOWhereMyBus...")
     print("Open http://127.0.0.1:5000")
