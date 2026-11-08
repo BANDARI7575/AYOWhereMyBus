@@ -1,23 +1,35 @@
 
 import json
 
-# Step 1: Open the saved bus data
+# Step 1: Load saved bus data
 with open("buses.json", "r") as file:
     data = json.load(file)
 
-# Step 2: Show total buses
 print("Total buses:", data["total_buses"])
-
-# Step 3: Show when data was saved
 print("Last updated:", data["last_updated"])
 
-# Step 4: Display each bus
-for bus in data["buses"]:
-    print("----------------------")
-    print("Bus ID:", bus["bus_id"])
-    print("Route:", bus["route"])
-    print("Latitude:", bus["latitude"])
-    print("Longitude:", bus["longitude"])
+# Step 2: Ask the user for a route number
+route_number = input("Enter bus route number: ").strip()
 
+# Step 3: Search for matching buses
+matching_buses = []
+
+for bus in data["buses"]:
+    if bus["route"].upper() == route_number.upper():
+        matching_buses.append(bus)
+
+# Step 4: Display search results
 print("----------------------")
-print("Finished reading all buses!")
+
+if len(matching_buses) > 0:
+    print("Route:", route_number)
+    print("Buses found:", len(matching_buses))
+
+    for bus in matching_buses:
+        print("----------------------")
+        print("Bus ID:", bus["bus_id"])
+        print("Latitude:", bus["latitude"])
+        print("Longitude:", bus["longitude"])
+else:
+    print("No buses found for route:", route_number)
+    print("Try another route or refresh the saved data.")
