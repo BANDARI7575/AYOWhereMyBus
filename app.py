@@ -1,165 +1,244 @@
 
-"""AYOWhereMyBus | Milwaukee transit tracking backend.
+"""AYO! Where's My Bus? — Milwaukee transit tracking backend.
 
-Project notes:
-    Flask serves our website and talks to the MCTS GTFS-Realtime feed.
-    The browser never needs to decode protobuf itself. Teamwork!
+Run locally: python app.py
+
+Uses MCTS GTFS-Realtime vehicle positions.
+GPS positions are not arrival predictions.
 """
 
 from datetime import datetime, timezone
 from pathlib import Path
+import math
+import threading
 import time
 
 import requests
-from flask import Flask, jsonify, send_from_directory, request
+from flask import Flask, jsonify, request, send_from_directory
 from google.transit import gtfs_realtime_pb2
+
 
 ROOT = Path(__file__).resolve().parent
 FEED_URL = "https://realtime.ridemcts.com/gtfsrt/vehicles"
+
 app = Flask(__name__, static_folder="static")
 
-# Tiny cache: prevents several open tabs from hammering the transit server.
-# I love buses, but let's not send 500 requests per second. 😅
 CACHE_SECONDS = 10
-_cache = {"time": 0.0, "payload": None}
+
+_cache = {
+    "time": 0.0,
+    "payload": None
+}
+
+_cache_lock = threading.Lock()
 
 
 def parse_vehicle_feed(raw: bytes) -> dict:
-    """Convert GTFS-Realtime protobuf into browser-friendly JSON."""
+    """Convert MCTS GTFS-Realtime data into JSON."""
+
     feed = gtfs_realtime_pb2.FeedMessage()
     feed.ParseFromString(raw)
-    vehicles = []
+
+    buses = []
 
     for entity in feed.entity:
+
         if not entity.HasField("vehicle"):
             continue
 
-        v = entity.vehicle
+        vehicle = entity.vehicle
 
-        if not (v.HasField("position") and v.HasField("trip")):
+        if not vehicle.HasField("position"):
             continue
 
-        if not v.trip.route_id:
+        if not vehicle.HasField("trip"):
             continue
 
-        p = v.position
-        vehicle_id = (
-            v.vehicle.id if v.HasField("vehicle") else entity.id
-        )
+        route = vehicle.trip.route_id.strip()
 
-        # GTFS speed is meters/second. Most humans prefer km/h here.
-        speed = (
-            round(p.speed * 3.6, 1)
-            if p.HasField("speed")
-            else None
-        )
+        if not route:
+            continue
 
-        heading = (
-            round(p.bearing, 1)
-            if p.HasField("bearing")
-            else None
-        )
+        pos = vehicle.position
 
-        updated = (
-            int(v.timestamp)
-            if v.HasField("timestamp") and v.timestamp
-            else None
-        )
+        if not (
+            math.isfinite(pos.latitude)
+            and math.isfinite(pos.longitude)
+        ):
+            continue
 
-        vehicles.append({
-            "bus_id": vehicle_id or entity.id,
-            "route": v.trip.route_id,
-            "latitude": round(p.latitude, 6),
-            "longitude": round(p.longitude, 6),
-            "speed_kmh": speed,
-            "direction_degrees": heading,
-            "reported_at": updated,
+        if not (
+            -90 <= pos.latitude <= 90
+            and -180 <= pos.longitude <= 180
+        ):
+            continue
+
+        buses.append({
+            "bus_id": (
+                vehicle.vehicle.id
+                if vehicle.HasField("vehicle")
+                else ""
+            ) or entity.id,
+
+            "route": route,
+
+            "latitude": round(pos.latitude, 6),
+
+            "longitude": round(pos.longitude, 6),
+
+            "speed_kmh": (
+                round(pos.speed * 3.6, 1)
+                if pos.HasField("speed")
+                else None
+            ),
+
+            "direction_degrees": (
+                round(pos.bearing, 1)
+                if pos.HasField("bearing")
+                else None
+            ),
+
+            "reported_at": (
+                int(vehicle.timestamp)
+                if vehicle.HasField("timestamp")
+                and vehicle.timestamp
+                else None
+            ),
         })
 
     return {
         "status": "ok",
-        "total_buses": len(vehicles),
+
+        "total_buses": len(buses),
+
         "feed_timestamp": (
             int(feed.header.timestamp)
             if feed.header.HasField("timestamp")
             else None
         ),
-        "retrieved_at": datetime.now(timezone.utc).isoformat(),
-        "buses": vehicles,
+
+        "retrieved_at": datetime.now(
+            timezone.utc
+        ).isoformat(),
+
+        "buses": buses,
     }
 
 
 def live_vehicles() -> dict:
-    """Fetch new data only when the short in-memory cache expires."""
+    """Fetch MCTS vehicle data with a short cache."""
+
     now = time.monotonic()
 
-    if (
-        _cache["payload"] is not None
-        and now - _cache["time"] < CACHE_SECONDS
-    ):
-        return _cache["payload"]
+    with _cache_lock:
 
-    response = requests.get(FEED_URL, timeout=12)
-    response.raise_for_status()
+        if (
+            _cache["payload"] is not None
+            and now - _cache["time"] < CACHE_SECONDS
+        ):
+            return _cache["payload"]
 
-    data = parse_vehicle_feed(response.content)
+        response = requests.get(
+            FEED_URL,
+            timeout=12
+        )
 
-    _cache.update(
-        time=now,
-        payload=data
-    )
+        response.raise_for_status()
 
-    return data
+        parsed = parse_vehicle_feed(
+            response.content
+        )
+
+        _cache.update(
+            time=time.monotonic(),
+            payload=parsed
+        )
+
+        return parsed
 
 
 @app.get("/")
 def homepage():
-    return send_from_directory(ROOT, "index.html")
+    """Serve the main website."""
+
+    return send_from_directory(
+        ROOT,
+        "index.html"
+    )
 
 
 @app.get("/api/health")
 def health():
-    return jsonify({
-        "status": "ok",
-        "service": "AYOWhereMyBus"
-    })
+    """Backend health endpoint."""
+
+    return jsonify(
+        status="ok",
+        service="AYO! Where's My Bus?"
+    )
 
 
 @app.get("/api/buses")
 def buses():
-    route = request.args.get("route", "").strip().upper()
+    """Return all buses or filter by route."""
+
+    route = request.args.get(
+        "route",
+        ""
+    ).strip().upper()
+
+    allowed = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_ "
+
+    if (
+        len(route) > 12
+        or any(char not in allowed for char in route)
+    ):
+        return jsonify(
+            status="error",
+            message="Invalid route value."
+        ), 400
 
     try:
+
         data = live_vehicles()
 
-        # Route filter is optional; nearby-bus mode needs ALL vehicles.
         matching = [
-            b for b in data["buses"]
-            if not route or b["route"].upper() == route
+            bus
+            for bus in data["buses"]
+            if (
+                not route
+                or bus["route"].upper() == route
+            )
         ]
 
         return jsonify({
             **{
-                k: v
-                for k, v in data.items()
-                if k != "buses"
+                key: value
+                for key, value in data.items()
+                if key != "buses"
             },
+
             "buses": matching,
+
             "matches": len(matching),
+
             "selected_route": route or None,
         })
 
     except Exception as error:
-        app.logger.warning("MCTS feed problem: %s", error)
 
-        return jsonify({
-            "status": "error",
-            "message": "Live vehicle data is unavailable right now."
-        }), 502
+        app.logger.warning(
+            "MCTS feed unavailable: %s",
+            error
+        )
+
+        return jsonify(
+            status="error",
+            message="Live vehicle data is unavailable right now."
+        ), 502
 
 
 if __name__ == "__main__":
-    # Local development only. Public launch needs proper production hosting.
+
     app.run(
         host="127.0.0.1",
         port=5000,

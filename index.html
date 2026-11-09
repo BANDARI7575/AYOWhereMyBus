@@ -1,97 +1,165 @@
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#11110f">
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+
+  <meta name="theme-color" content="#0A0D12">
+
   <meta name="description"
-        content="AYOWhereMyBus: independent Milwaukee bus tracking with a little cinematic attitude.">
+        content="AYO! Where's My Bus? — Milwaukee live bus tracking and transit intelligence.">
 
-  <title>AYOWhereMyBus — The City Never Waits</title>
+  <title>AYO! Where's My Bus? | Milwaukee Transit</title>
 
-  <!-- Fonts: elegant headline + clean readable body text -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Fonts -->
+  <link rel="preconnect"
+        href="https://fonts.googleapis.com">
 
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@500;600;700&display=swap"
-        rel="stylesheet">
+  <link rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin>
 
-  <!-- Leaflet powers the map -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Leaflet Maps -->
   <link rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin="">
 
-  <!-- Our own CSS, where all the visual magic happens -->
-  <link rel="stylesheet" href="/static/style.css">
+  <!-- Our website styles -->
+  <link rel="stylesheet"
+        href="/static/style.css">
+
 </head>
 
 <body>
 
-  <!-- =====================================================
-       01 / NAVIGATION
-       A bus tracker, but make it look like a magazine cover.
-       ===================================================== -->
-
+  <!-- ACCESSIBILITY -->
   <a href="#main" class="skip-link">
-    Skip to map and route search
+    Skip to bus tracking
   </a>
 
-  <nav class="nav" aria-label="Main navigation">
-    <a href="#home" class="brand" aria-label="AYOWhereMyBus home">
-      <span class="brand-symbol" aria-hidden="true">▣</span>
-      <span>
-        AYOWhereMy<span class="gold">Bus</span><span class="brand-dot">.</span>
+  <!-- ========================================
+       01. PREMIUM NAVIGATION
+  ========================================= -->
+
+  <nav class="nav" id="navbar"
+       aria-label="Main navigation">
+
+    <a href="#home" class="brand"
+       aria-label="AYO! Where's My Bus? Home">
+
+      <span class="brand-name">
+
+        <span class="brand-ayo">
+          AYO!
+        </span>
+
+        <span class="brand-subtitle">
+          Where's My Bus?
+        </span>
+
       </span>
+
+      <span class="logo-weather"
+            id="logoWeather"
+            aria-hidden="true"></span>
+
     </a>
 
-    <div class="nav-links">
-      <a href="#home" data-i18n="navHome">Home</a>
-      <a href="#main" data-i18n="navMap">Live Map</a>
-      <a href="#features" data-i18n="navFeatures">The Future</a>
-      <a href="#creator" data-i18n="navAbout">Creator</a>
+    <div class="nav-links" id="navLinks">
+
+      <a href="#home" data-i18n="navHome">
+        Home
+      </a>
+
+      <a href="#main" data-i18n="navMap">
+        Live Tracking
+      </a>
+
+      <a href="#journey">
+        Plan Trip
+      </a>
+
+      <a href="#winter-watch">
+        Winter Watch
+      </a>
+
+      <a href="#features" data-i18n="navFeatures">
+        Features
+      </a>
+
+      <a href="#creator" data-i18n="navAbout">
+        Creator
+      </a>
+
     </div>
 
     <div class="nav-actions">
-      <button type="button"
-              class="mini-button"
-              id="languageButton"
-              aria-label="Switch language">ES</button>
+
+      <div class="weather-widget"
+           id="weatherWidget"
+           aria-label="Milwaukee weather">
+
+        <span id="weatherIcon">◐</span>
+
+        <span id="weatherTemp">--°F</span>
+
+        <span id="weatherCondition">
+          Weather unavailable
+        </span>
+
+      </div>
 
       <button type="button"
+              id="languageButton"
               class="mini-button"
+              aria-label="Switch language">
+        ES
+      </button>
+
+      <button type="button"
               id="themeButton"
-              aria-label="Switch day or night appearance"
-              title="Switch appearance">☀</button>
+              class="mini-button"
+              aria-label="Switch appearance">
+        ☀
+      </button>
+
+      <button type="button"
+              class="mobile-menu-button"
+              id="mobileMenuButton"
+              aria-label="Toggle navigation"
+              aria-expanded="false"
+              aria-controls="navLinks">
+        ☰
+      </button>
+
     </div>
+
   </nav>
 
-  <!-- =====================================================
-       02 / EDITORIAL HOMEPAGE
-       Skyline is drawn using CSS.
-       No giant image downloads needed.
-       ===================================================== -->
+
+  <!-- ========================================
+       02. CINEMATIC MILWAUKEE HERO
+  ========================================= -->
 
   <header class="hero" id="home">
 
-    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="hero-background"
+         aria-hidden="true"></div>
 
-    <div class="skyline" aria-hidden="true">
-      <span style="--w:48px;--h:83px"></span>
-      <span style="--w:37px;--h:125px"></span>
-      <span style="--w:58px;--h:103px"></span>
-      <span style="--w:48px;--h:186px"></span>
-      <span style="--w:35px;--h:139px"></span>
-      <span style="--w:57px;--h:234px"></span>
-      <span style="--w:36px;--h:160px"></span>
-      <span style="--w:64px;--h:120px"></span>
-      <span style="--w:50px;--h:193px"></span>
-      <span style="--w:42px;--h:104px"></span>
-    </div>
+    <div class="hero-overlay"
+         aria-hidden="true"></div>
 
-    <!-- Four tiny bats.
-         Unlike my first Python loop, these actually fly. 🦇 -->
+    <div class="hero-glow"
+         aria-hidden="true"></div>
+
+    <!-- Decorative bats -->
     <div class="bats" aria-hidden="true">
 
       <svg class="bat bat-one" viewBox="0 0 100 46">
@@ -103,54 +171,98 @@
       </svg>
 
       <svg class="bat bat-three" viewBox="0 0 100 46">
-        <path d="M50 13 44 6 40 17C22 4 9 10 0 12c8 6 10 11 12 19 9-5 16-3 21 4 4-7 10-8 17-3 7-5 13-4 17 3 5-7 12-9 21-4 2-8 4-13 12-19-9-2-22-8-40 5L56 6Z"/>
+        <path d="M50 13 44 6 40 17C22 4 9 10 0 12c8 6 10 11 12 19 9-5 16-3 21 4 4-7 10-8 17-3 7-5 13-4 17 3 5-7 12-9 21-4 2-8 4-13-4 17 3 5-7 12-9 21-4 2-8 4-13 12-19-9-2-22-8-40 5L56 6Z"/>
       </svg>
 
       <svg class="bat bat-four" viewBox="0 0 100 46">
         <path d="M50 13 44 6 40 17C22 4 9 10 0 12c8 6 10 11 12 19 9-5 16-3 21 4 4-7 10-8 17-3 7-5 13-4 17 3 5-7 12-9 21-4 2-8 4-13 12-19-9-2-22-8-40 5L56 6Z"/>
       </svg>
 
+      <svg class="bat bat-five" viewBox="0 0 100 46">
+        <path d="M50 13 44 6 40 17C22 4 9 10 0 12c8 6 10 11 12 19 9-5 16-3 21 4 4-7 10-8 17-3 7-5 13-4 17 3 5-7 12-9 21-4 2-8 4-13 12-19-9-2-22-8-40 5L56 6Z"/>
+      </svg>
+
+      <svg class="bat bat-six" viewBox="0 0 100 46">
+        <path d="M50 13 44 6 40 17C22 4 9 10 0 12c8 6 10 11 12 19 9-5 16-3 21 4 4-7 10-8 17-3 7-5 13-4 17 3 5-7 12-9 21-4 2-8 4-13 12-19-9-2-22-8-40 5L56 6Z"/>
+      </svg>
+
     </div>
 
     <div class="hero-content wrap">
+
       <p class="eyebrow" data-i18n="eyebrow">
         MILWAUKEE // TRANSIT INTELLIGENCE
       </p>
 
       <h1 data-i18n-html="heroTitle">
-        THE CITY<br>NEVER <em>WAITS.</em>
+        <span class="hero-ayo">AYO!</span>
+        <span class="hero-question">
+          Where's My Bus?
+        </span>
       </h1>
 
       <p class="hero-sub" data-i18n="heroSubtitle">
-        Know your route. Spend less time standing in the cold.
+        The city never waits.
+        Know your route before you step outside.
       </p>
 
       <div class="hero-bottom">
-        <a class="gold-button" href="#main" data-i18n="findRide">
-          FIND YOUR RIDE <span aria-hidden="true">↗</span>
+
+        <a href="#main"
+           class="gold-button"
+           data-i18n="findRide">
+          TRACK MY BUS ↗
         </a>
 
-        <span class="small-serif" data-i18n="builtFor">
-          Built for the streets of Milwaukee.
-        </span>
+        <a href="#main"
+           class="outline-button"
+           id="heroNearbyButton">
+          ⌖ NEAR ME
+        </a>
+
+        <a href="#journey"
+           class="outline-button">
+          PLAN MY TRIP ↗
+        </a>
+
       </div>
+
+      <p class="hero-caption" data-i18n="builtFor">
+        BUILT FOR THE STREETS OF MILWAUKEE
+      </p>
+
     </div>
 
-    <p class="hero-side" aria-hidden="true">
-      43.0389° N / 87.9065° W
-    </p>
+    <div class="city-signal"
+         aria-label="Milwaukee city coordinates">
+
+      <span class="signal-label">
+        CITY SIGNAL / 001
+      </span>
+
+      <strong>
+        MILWAUKEE, WI
+      </strong>
+
+      <span>
+        43.0389° N / 87.9065° W
+      </span>
+
+    </div>
+
   </header>
 
-  <!-- =====================================================
-       03 / TRANSIT DASHBOARD
-       This is where the actual useful stuff lives.
-       Fancy fonts won't tell you where your bus is. 😅
-       ===================================================== -->
+
+  <!-- ========================================
+       03. LIVE TRANSIT DASHBOARD
+  ========================================= -->
 
   <main id="main" class="wrap dashboard">
 
     <div class="section-intro">
+
       <div>
+
         <p class="eyebrow">
           01 / TRANSIT COMMAND CENTER
         </p>
@@ -158,114 +270,269 @@
         <h2 data-i18n-html="mapHeading">
           Find your <em>ride.</em>
         </h2>
+
+        <p class="section-description">
+          Real vehicle locations.
+          Clear information.
+          Less time waiting.
+        </p>
+
       </div>
 
       <div class="live-clock"
            id="clock"
-           aria-label="Milwaukee local time">--:--</div>
+           aria-label="Milwaukee local time">
+        --:--
+      </div>
+
     </div>
 
-    <div class="tracker panel">
+    <section class="tracker panel"
+             aria-label="Bus tracking dashboard">
 
       <div class="tracker-top">
+
         <div>
+
           <p class="eyebrow muted" data-i18n="routeLookup">
             BUS ROUTE LOOKUP
           </p>
 
           <p class="helper" data-i18n="routeHelp">
-            Enter a route like 19, 21, BLU, or PUR.
+            Search a route such as 19, 21, BLU, or PUR.
           </p>
+
         </div>
 
-        <span class="pill" id="connectionBadge">
+        <span id="connectionBadge" class="pill">
           ● STANDBY
         </span>
+
       </div>
 
-      <!-- Route search -->
+      <!-- Search -->
       <form id="routeForm" class="route-form">
-        <label class="sr-only" for="routeInput">
+
+        <label for="routeInput" class="sr-only">
           Bus route number
         </label>
 
-        <input id="routeInput"
-               name="route"
-               placeholder="Route 19"
-               autocomplete="off"
-               maxlength="12">
+        <input
+          id="routeInput"
+          name="route"
+          placeholder="Enter route number..."
+          autocomplete="off"
+          maxlength="12">
 
-        <button class="gold-button"
-                type="submit"
+        <button type="submit"
+                class="gold-button"
                 data-i18n="search">
           SEARCH ROUTE ↗
         </button>
 
-        <button class="outline-button"
-                type="button"
+        <button type="button"
                 id="nearbyButton"
+                class="outline-button"
                 data-i18n="nearby">
           ⌖ NEAR ME
         </button>
+
       </form>
 
-      <!-- Favorite routes are saved in this browser -->
+      <!-- Favorites -->
       <div class="favorites-line">
+
         <button type="button"
-                class="text-button"
                 id="favoriteButton"
+                class="text-button"
                 data-i18n="saveRoute">
           ☆ Save this route
         </button>
 
         <div id="favorites"
              class="favorite-chips"
-             aria-label="Saved routes"></div>
+             aria-label="Favorite routes">
+        </div>
+
       </div>
 
-      <div class="status-line"
-           id="message"
+      <div id="message"
+           class="status-line"
            role="status"
            aria-live="polite">
-        Choose a route or use your location to start.
+        Choose a route to begin live tracking.
       </div>
 
-      <!-- Actual Leaflet map -->
+      <!-- Map -->
       <div class="map-header">
+
         <h3 data-i18n="mapTitle">
-          MILWAUKEE <span class="gold">LIVE MAP</span>
+          MILWAUKEE LIVE MAP
         </h3>
 
-        <span id="busCount" class="map-count">—</span>
+        <span id="busCount" class="map-count">
+          —
+        </span>
+
       </div>
 
       <div id="map"
            role="region"
-           aria-label="Interactive map of Milwaukee bus locations"></div>
+           aria-label="Interactive Milwaukee bus map">
+      </div>
 
-      <!-- Useful, honest status information -->
+      <!-- Tracking status -->
       <div class="map-footer">
-        <span id="trackingState">● NOT TRACKING</span>
-        <span id="refreshTime">LAST REQUEST: —</span>
-        <span id="dataFreshness">VEHICLE AGE: —</span>
+
+        <span id="trackingState">
+          ● NOT TRACKING
+        </span>
+
+        <span id="refreshTime">
+          LAST REQUEST: —
+        </span>
+
+        <span id="dataFreshness">
+          VEHICLE AGE: —
+        </span>
+
       </div>
 
       <p class="tiny-note" data-i18n="disclaimer">
-        Independent project. Map positions are last reported
-        by MCTS, not guaranteed arrivals. Updates requested
-        every 15 seconds while the tab is open.
+        Independent transit project.
+        Bus positions reflect the latest reported MCTS
+        information and are not guaranteed arrivals.
       </p>
-    </div>
 
-    <!-- =====================================================
-         04 / FUTURE FEATURES
-         Planned tools are labeled honestly.
-         No fake AI magic buttons here.
-         ===================================================== -->
+    </section>
+
+
+    <!-- ======================================
+         04. JOURNEY PLANNER
+    ======================================= -->
+
+    <section id="journey" class="feature-section">
+
+      <p class="eyebrow">
+        02 / YOUR JOURNEY
+      </p>
+
+      <h2>
+        The journey <em>starts here.</em>
+      </h2>
+
+      <p class="section-description">
+        Plan journeys across Milwaukee.
+      </p>
+
+      <div class="journey-panel panel">
+
+        <div class="journey-fields">
+
+          <div class="journey-field">
+            <label for="fromLocation">
+              FROM
+            </label>
+
+            <input
+              type="text"
+              id="fromLocation"
+              placeholder="Starting location"
+              disabled>
+          </div>
+
+          <div class="journey-field">
+            <label for="toLocation">
+              TO
+            </label>
+
+            <input
+              type="text"
+              id="toLocation"
+              placeholder="Destination"
+              disabled>
+          </div>
+
+        </div>
+
+        <button class="gold-button"
+                type="button"
+                disabled>
+          JOURNEY PLANNER COMING SOON
+        </button>
+
+        <p class="tiny-note">
+          Route planning will become available after
+          official stop and timetable data are integrated.
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- ======================================
+         05. WINTER WATCH
+    ======================================= -->
+
+    <section id="winter-watch" class="feature-section">
+
+      <p class="eyebrow">
+        03 / MILWAUKEE WINTER WATCH
+      </p>
+
+      <h2>
+        Know before <em>you go.</em>
+      </h2>
+
+      <p class="section-description">
+        Helping riders stay informed about
+        challenging winter conditions.
+      </p>
+
+      <div class="winter-panel panel">
+
+        <div class="winter-heading">
+
+          <span class="winter-icon">❄</span>
+
+          <div>
+            <h3>Winter Watch</h3>
+
+            <p>
+              Stop conditions and community alerts.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="winter-features">
+
+          <span>Snow & Ice</span>
+          <span>Stop Conditions</span>
+          <span>Community Reports</span>
+          <span>Safety Information</span>
+
+        </div>
+
+        <p class="tiny-note">
+          Community reports are planned.
+          No reports are being accepted yet.
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- ======================================
+         06. FUTURE FEATURES
+    ======================================= -->
 
     <section id="features" class="feature-section">
+
       <p class="eyebrow">
-        02 / WHAT COMES NEXT
+        04 / THE FUTURE OF AYO
       </p>
 
       <h2 data-i18n-html="featureHeading">
@@ -276,132 +543,210 @@
 
         <article class="feature-card">
           <span class="feature-icon">⌖</span>
-          <span class="tag">IN PROGRESS</span>
+          <span class="tag">IN DEVELOPMENT</span>
+
           <h3>Nearby Stops</h3>
           <p>
-            Find stops around you, with trustworthy
-            arrival predictions.
+            Discover nearby stops and real arrival
+            predictions when supported.
           </p>
         </article>
 
         <article class="feature-card">
           <span class="feature-icon">⇄</span>
           <span class="tag">PLANNED</span>
-          <h3>Plan a Journey</h3>
-          <p>
-            From → To routing, transfers,
-            and accessible journeys.
-          </p>
-        </article>
 
-        <article class="feature-card">
-          <span class="feature-icon">❄</span>
-          <span class="tag">PLANNED</span>
-          <h3>Winter Watch</h3>
+          <h3>Smart Journey Planner</h3>
           <p>
-            Snow, ice, and moderated
-            community stop reports.
+            From-to routing, transfers,
+            and walking directions.
           </p>
         </article>
 
         <article class="feature-card">
           <span class="feature-icon">◎</span>
           <span class="tag">PLANNED</span>
+
           <h3>AYO Voice</h3>
           <p>
-            Ask for your bus by speaking naturally.
+            Multilingual voice assistance
+            powered by verified transit data.
           </p>
         </article>
 
         <article class="feature-card">
           <span class="feature-icon">◷</span>
           <span class="tag">PLANNED</span>
+
           <h3>Arrival Alerts</h3>
           <p>
-            Opt-in notifications backed
-            by real predictions.
+            Notifications for approaching buses
+            and relevant service changes.
+          </p>
+        </article>
+
+        <article class="feature-card">
+          <span class="feature-icon">★</span>
+          <span class="tag">PARTIALLY AVAILABLE</span>
+
+          <h3>My Stops</h3>
+          <p>
+            Save frequent stops and routes.
+            Favorite routes are available now.
           </p>
         </article>
 
         <article class="feature-card">
           <span class="feature-icon">↗</span>
           <span class="tag">RESEARCH</span>
-          <h3>Reliability Score</h3>
+
+          <h3>Reliability Intelligence</h3>
           <p>
-            Historic route performance
-            with data engineering and ML.
+            Explore delays, service disruptions,
+            and historical transit performance.
           </p>
         </article>
 
       </div>
 
       <p class="roadmap-note">
-        Also on the roadmap: crowding, saved stops,
-        accessibility, language expansion, route shapes,
-        data freshness improvements, offline/PWA support,
-        and community reporting. We'll test these before
-        we call them live.
+        Also planned: accessible travel support,
+        bus crowding reports, route shapes,
+        accurate arrival information, offline
+        functionality, and an installable PWA.
       </p>
+
     </section>
 
-    <!-- =====================================================
-         05 / CREATOR SECTION
-         Yes, I finally made the footer look professional.
-         ===================================================== -->
+
+    <!-- ======================================
+         07. CINEMATIC CREATOR SECTION
+    ======================================= -->
 
     <section class="creator" id="creator">
 
+      <div class="creator-atmosphere"
+           aria-hidden="true"></div>
+
       <div class="creator-top">
+
         <span class="eyebrow">
-          03 / THE MIND BEHIND THE SYSTEM
+          THE MIND BEHIND AYO!
         </span>
 
-        <span class="creator-number">AB / 01</span>
+        <span class="creator-number">
+          AB / 001
+        </span>
+
       </div>
 
-      <h2>
-        Abhiraj <em>Bandari.</em>
-      </h2>
+      <div class="creator-content">
 
-      <p class="creator-role">
-        FOUNDER & CREATOR · AYOWHEREMYBUS
-      </p>
+        <h2 class="creator-name">
+          <span class="creator-first">
+            Abhiraj
+          </span>
 
-      <blockquote>
-        “The city moves. I make it visible.”
-      </blockquote>
+          <span class="creator-last">
+            Bandari.
+          </span>
+        </h2>
 
-      <p class="creator-bio">
-        Data Engineer · Python · SQL · Apache Spark · AWS ·
-        ETL/ELT · Data Pipelines · Data Warehousing
-      </p>
+        <p class="creator-role">
+          FOUNDER & CREATOR — AYO! WHERE'S MY BUS?
+        </p>
 
-      <p class="creator-meta">
-        Concordia University Wisconsin
-        <span>•</span>
-        Milwaukee, Wisconsin
-      </p>
+        <blockquote>
+          “The city moves. I make it visible.”
+        </blockquote>
+
+        <p class="creator-story">
+          Built in Milwaukee to help riders make
+          more informed journeys, especially during
+          unpredictable winter weather.
+        </p>
+
+        <p class="creator-bio">
+          Data Engineering · Python · SQL ·
+          Apache Spark · AWS · ETL/ELT ·
+          Data Pipelines · Data Warehousing
+        </p>
+
+        <p class="creator-meta">
+          Concordia University Wisconsin
+          <span>•</span>
+          Milwaukee, Wisconsin
+        </p>
+
+      </div>
+
+      <div class="creator-signature"
+           aria-hidden="true"></div>
+
     </section>
 
   </main>
 
-  <!-- FINAL FOOTER -->
-  <footer class="footer wrap">
-    <span>
-      © 2026 AYOWhereMyBus · Independent transit project
-    </span>
 
-    <span>
-      Designed & developed by Abhiraj Bandari
-    </span>
+  <!-- ========================================
+       08. FOOTER
+  ========================================= -->
+
+  <footer class="footer wrap">
+
+    <div>
+      <strong>AYO! Where's My Bus?</strong>
+
+      <p>
+        © 2026 · Independent Milwaukee
+        transit intelligence project.
+      </p>
+    </div>
+
+    <div>
+      <p>
+        Designed & developed by Abhiraj Bandari.
+      </p>
+
+      <p>
+        Not affiliated with or endorsed by MCTS.
+      </p>
+    </div>
+
   </footer>
 
-  <!-- Leaflet is loaded before our JavaScript -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-          crossorigin=""></script>
+
+  <!-- ========================================
+       09. MOBILE BOTTOM NAVIGATION
+  ========================================= -->
+
+  <nav class="mobile-bottom-nav"
+       aria-label="Mobile navigation">
+
+    <a href="#home">⌂ Home</a>
+    <a href="#main">▣ Map</a>
+    <a href="#features">★ Features</a>
+    <a href="#journey">⇄ Trip</a>
+
+  </nav>
+
+
+  <!-- ========================================
+       10. JAVASCRIPT
+  ========================================= -->
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin="">
+  </script>
 
   <script src="/static/app.js" defer></script>
+
+  <script
+    src="/static/ayo-enhancements.js"
+    defer>
+  </script>
 
 </body>
 </html>
