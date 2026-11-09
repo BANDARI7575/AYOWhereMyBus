@@ -27,6 +27,7 @@ const state = {
   lastSuccessfulUpdate: null,
   lastBuses: []
 };
+window.state = state;
 
 /* ==========================================================
    01. LOCAL STORAGE
@@ -467,7 +468,7 @@ async function refresh(zoom = false) {
         "● RECENT REPORTS";
 
       setStatus(
-        `${buses.length} reported buses within 3 km. Nearby bus stops and ETAs are not available yet.`
+        `${buses.length} reported buses within 3 km. Nearby stops are availabe in the Find Nearby Stops section.Live arrival predictios are not available yet.`
       );
     } else {
       $("connectionBadge").textContent =

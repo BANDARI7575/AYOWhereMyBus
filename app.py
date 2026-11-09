@@ -3,8 +3,13 @@
 
 Run locally: python app.py
 
-Uses MCTS GTFS-Realtime vehicle positions.
-GPS positions are not arrival predictions.
+Features:
+- Live MCTS GTFS-Realtime vehicle tracking
+- Route-based bus searches
+- Vehicle GPS freshness information
+- Nearby MCTS bus stop discovery using GTFS data
+
+GPS positions are not guaranteed arrival predictions.
 """
 
 from datetime import datetime, timezone
@@ -17,11 +22,21 @@ import requests
 from flask import Flask, jsonify, request, send_from_directory
 from google.transit import gtfs_realtime_pb2
 
+from stops_service import find_nearby_stops
+
+
+# ==========================================================
+# 01. APPLICATION CONFIGURATION
+# ==========================================================
 
 ROOT = Path(__file__).resolve().parent
+
 FEED_URL = "https://realtime.ridemcts.com/gtfsrt/vehicles"
 
-app = Flask(__name__, static_folder="static")
+app = Flask(
+    __name__,
+    static_folder="static"
+)
 
 CACHE_SECONDS = 10
 
@@ -33,8 +48,12 @@ _cache = {
 _cache_lock = threading.Lock()
 
 
+# ==========================================================
+# 02. PARSE LIVE MCTS VEHICLE DATA
+# ==========================================================
+
 def parse_vehicle_feed(raw: bytes) -> dict:
-    """Convert MCTS GTFS-Realtime data into JSON."""
+    """Convert MCTS GTFS-Realtime vehicle data into JSON."""
 
     feed = gtfs_realtime_pb2.FeedMessage()
     feed.ParseFromString(raw)
@@ -82,9 +101,15 @@ def parse_vehicle_feed(raw: bytes) -> dict:
 
             "route": route,
 
-            "latitude": round(pos.latitude, 6),
+            "latitude": round(
+                pos.latitude,
+                6
+            ),
 
-            "longitude": round(pos.longitude, 6),
+            "longitude": round(
+                pos.longitude,
+                6
+            ),
 
             "speed_kmh": (
                 round(pos.speed * 3.6, 1)
@@ -125,8 +150,12 @@ def parse_vehicle_feed(raw: bytes) -> dict:
     }
 
 
+# ==========================================================
+# 03. GET LIVE MCTS VEHICLES
+# ==========================================================
+
 def live_vehicles() -> dict:
-    """Fetch MCTS vehicle data with a short cache."""
+    """Fetch MCTS vehicles using a short-lived cache."""
 
     now = time.monotonic()
 
@@ -157,9 +186,13 @@ def live_vehicles() -> dict:
         return parsed
 
 
+# ==========================================================
+# 04. HOMEPAGE
+# ==========================================================
+
 @app.get("/")
 def homepage():
-    """Serve the main website."""
+    """Serve the AYO! website."""
 
     return send_from_directory(
         ROOT,
@@ -167,9 +200,13 @@ def homepage():
     )
 
 
+# ==========================================================
+# 05. HEALTH CHECK
+# ==========================================================
+
 @app.get("/api/health")
 def health():
-    """Backend health endpoint."""
+    """Return backend service status."""
 
     return jsonify(
         status="ok",
@@ -177,9 +214,13 @@ def health():
     )
 
 
+# ==========================================================
+# 06. LIVE BUS TRACKING API
+# ==========================================================
+
 @app.get("/api/buses")
 def buses():
-    """Return all buses or filter by route."""
+    """Return all active buses or filter by route."""
 
     route = request.args.get(
         "route",
@@ -236,6 +277,73 @@ def buses():
             message="Live vehicle data is unavailable right now."
         ), 502
 
+
+# ==========================================================
+# 07. NEARBY MCTS BUS STOPS API
+# ==========================================================
+
+@app.get("/api/stops/nearby")
+def nearby_stops():
+    """Return the nearest MCTS bus stops to a GPS location."""
+
+    try:
+
+        latitude = float(
+            request.args["lat"]
+        )
+
+        longitude = float(
+            request.args["lon"]
+        )
+
+        # Validate geographic coordinates.
+        if not (
+            math.isfinite(latitude)
+            and math.isfinite(longitude)
+            and -90 <= latitude <= 90
+            and -180 <= longitude <= 180
+        ):
+            return jsonify(
+                status="error",
+                message="Invalid GPS coordinates."
+            ), 400
+
+        # Find the ten nearest official MCTS stops.
+        stops = find_nearby_stops(
+            latitude,
+            longitude,
+            limit=10
+        )
+
+        return jsonify(
+            status="ok",
+            count=len(stops),
+            stops=stops,
+            distance_type="straight_line"
+        )
+
+    except (KeyError, ValueError, TypeError):
+
+        return jsonify(
+            status="error",
+            message="Provide valid lat and lon coordinates."
+        ), 400
+
+    except OSError:
+
+        app.logger.exception(
+            "Unable to read MCTS bus stop data"
+        )
+
+        return jsonify(
+            status="error",
+            message="Bus stop data is unavailable."
+        ), 503
+
+
+# ==========================================================
+# 08. START DEVELOPMENT SERVER
+# ==========================================================
 
 if __name__ == "__main__":
 

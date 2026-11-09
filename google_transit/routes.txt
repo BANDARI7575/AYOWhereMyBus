@@ -1,0 +1,50 @@
+route_long_name,route_type,route_text_color,route_color,agency_id,route_id,route_url,route_desc,route_short_name
+Via Rt 30 & Blueline,3,FFFFFF,008556,MCTS,HF2,https://www.ridemcts.com/routes-schedules/HF2/,,HF2
+Vliet - 84th Street,3,000000,FFBE00,MCTS,33,https://www.ridemcts.com/routes-schedules/33/,,33
+60th Street,3,000000,FFD600,MCTS,60,https://www.ridemcts.com/routes-schedules/60/,,60
+S. 13th Street - Howell Avenue,3,FFFFFF,0075C9,MCTS,82,https://www.ridemcts.com/routes-schedules/82/,,82
+Brown Deer Road,3,000000,FF8300,MCTS,88,https://www.ridemcts.com/routes-schedules/88/,,88
+Silver Spring Drive,3,000000,00B2E3,MCTS,63,https://www.ridemcts.com/routes-schedules/63/,,63
+35th Street,3,000000,FF8300,MCTS,35,https://www.ridemcts.com/routes-schedules/35/,,35
+Burleigh Street,3,FFFFFF,863399,MCTS,66,https://www.ridemcts.com/routes-schedules/66/,,66
+Port Washington - Capitol,3,000000,93D500,MCTS,68,https://www.ridemcts.com/routes-schedules/68/,,68
+6th Street,3,000000,E50695,MCTS,80,https://www.ridemcts.com/routes-schedules/80/,,80
+Amazon Oak Creek,3,000000,FF8300,MCTS,81,https://www.ridemcts.com/routes-schedules/81/,,81
+RedLine,3,FFFFFF,C33223,MCTS,RED,https://www.ridemcts.com/routes-schedules/RedLine/,,RED
+Forest Home - 16th Street,3,000000,A67CB7,MCTS,24,https://www.ridemcts.com/routes-schedules/24/,,24
+S. 20th Street,3,000000,93D500,MCTS,20,https://www.ridemcts.com/routes-schedules/20/,,20
+North Avenue,3,000000,00B2E3,MCTS,21,https://www.ridemcts.com/routes-schedules/21/,,21
+Center Street,3,000000,EA0029,MCTS,22,https://www.ridemcts.com/routes-schedules/22/,,22
+Connect 1 Wisconsin Ave,3,000000,379ED7,MCTS,CN1,https://www.ridemcts.com/routes-schedules/connect1/,,CN1
+M.L. King - S.13th Street,3,000000,FFD600,MCTS,19,https://www.ridemcts.com/routes-schedules/19/,,19
+108th Street,3,000000,FFD600,MCTS,28,https://www.ridemcts.com/routes-schedules/28/,,28
+Fair Park - Whitnall  UBUS,3,FFFFFF,008556,MCTS,44U,https://www.ridemcts.com/routes-schedules/44U/,,44U
+BlueLine,3,FFFFFF,153E83,MCTS,BLU,https://www.ridemcts.com/routes-schedules/BlueLine/,,BLU
+Hopkins - Congress,3,000000,A67CB7,MCTS,34,https://www.ridemcts.com/routes-schedules/34/,,34
+76th Street,3,FFFFFF,B31983,MCTS,76,https://www.ridemcts.com/routes-schedules/76/,,76
+College   UBUS,3,FFFFFF,008556,MCTS,40U,https://www.ridemcts.com/routes-schedules/40U/,,40U
+GreenLine,3,000000,008B73,MCTS,GRE,https://www.ridemcts.com/routes-schedules/GreenLine/,,GRE
+Mill Road,3,000000,A67CB7,MCTS,73,https://www.ridemcts.com/routes-schedules/73/,,73
+Sherman - Wisconsin,3,000000,00AF9A,MCTS,30,https://www.ridemcts.com/routes-schedules/30/,,30
+Holton - Kinnickinnic,3,000000,FF8300,MCTS,15,https://www.ridemcts.com/routes-schedules/15/,,15
+92nd Street,3,FFFFFF,0080FF,MCTS,92,https://www.ridemcts.com/routes-schedules/92/,,92
+Via Rt 20 & Blueline,3,000000,EA0029,MCTS,RR3,https://www.ridemcts.com/routes-schedules/RR3/,,RR3
+Via PurpleLine,3,000000,EA0029,MCTS,RR2,https://www.ridemcts.com/routes-schedules/RR2/,,RR2
+Via Rt 19,3,000000,EA0029,MCTS,RR1,https://www.ridemcts.com/routes-schedules/RR1/,,RR1
+Humboldt Blvd - Wisconsin,3,FFFFFF,0055B8,MCTS,14,https://www.ridemcts.com/routes-schedules/14/,,14
+Hampton Avenue,3,000000,00B451,MCTS,11,https://www.ridemcts.com/routes-schedules/11/,,11
+Teutonia Avenue,3,000000,93D500,MCTS,12,https://www.ridemcts.com/routes-schedules/12/,,12
+Drexel Avenue,3,000000,A67CB7,MCTS,59,https://www.ridemcts.com/routes-schedules/59/,,59
+Villard Avenue,3,000000,FF8300,MCTS,58,https://www.ridemcts.com/routes-schedules/58/,,58
+Via Rt 12,3,FFFFFF,008556,MCTS,HF1,https://www.ridemcts.com/routes-schedules/HF1/,,HF1
+National - Greenfield,3,000000,00B2E3,MCTS,18,https://www.ridemcts.com/routes-schedules/18/,,18
+Walnut - Appleton,3,FFFFFF,0075C9,MCTS,57,https://www.ridemcts.com/routes-schedules/57/,,57
+Greenfield  Avenue - Beloit,3,FFFFFF,863399,MCTS,56,https://www.ridemcts.com/routes-schedules/56/,,56
+Oklahoma Avenue,3,000000,E50695,MCTS,51,https://www.ridemcts.com/routes-schedules/51/,,51
+Lincoln Avenue,3,000000,00B2E3,MCTS,53,https://www.ridemcts.com/routes-schedules/53/,,53
+Clement - Pennsylvania,3,000000,93D500,MCTS,52,https://www.ridemcts.com/routes-schedules/52/,,52
+Layton Avenue,3,000000,EA0029,MCTS,55,https://www.ridemcts.com/routes-schedules/55/,,55
+S. 43rd Street,3,000000,00B451,MCTS,74,https://www.ridemcts.com/routes-schedules/74/,,74
+Mitchell - Burnham,3,000000,EA0029,MCTS,54,https://www.ridemcts.com/routes-schedules/54/,,54
+State - Highland,3,000000,00B451,MCTS,31,https://www.ridemcts.com/routes-schedules/31/,,31
+PurpleLine,3,FFFFFF,533073,MCTS,PUR,https://www.ridemcts.com/routes-schedules/PurpleLine/,,PUR
