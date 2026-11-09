@@ -679,6 +679,10 @@ em {
 }
 
 #map {
+  /* Contain Leaflet panes within the map, including during pan/zoom. */
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   width: 100%;
   height: 490px;
   border: 1px solid #46515d;

@@ -38,3 +38,7 @@ Evidence is in [qa](qa/): `full-release-accessibility.json`, `full-release-live-
 ## Required next actions
 
 Complete every unchecked gate in the [production launch checklist](PRODUCTION_LAUNCH_CHECKLIST.md), following the [production runbook](PRODUCTION_RUNBOOK.md). Keep publication blocked until physical-device/native push, Spanish and screen-reader acceptance, human moderation/privacy decisions, host security/capacity, monitoring and recovery evidence are signed off. Obtain explicit permission before pushing, merging or deploying. There is no reduced-feature beta exception.
+
+## Post-checkpoint map regression
+
+After committed checkpoint `31173be`, a real stylesheet-integrity mismatch was reproduced and fixed locally. See [map layout fix and browser evidence](MAP_LAYOUT_FIX.md). Six WebKit/Chromium viewport scenarios passed, together with 75 backend executions, 11 Node tests and 9 feature contracts. This does not change external public-launch gates.

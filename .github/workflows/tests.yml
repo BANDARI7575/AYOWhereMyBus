@@ -28,3 +28,4 @@ jobs:
           npm run test:a11y
           npm run test:features
           npm run test:release
+          AYO_TEST_URL=http://127.0.0.1:5099 npm run test:map
