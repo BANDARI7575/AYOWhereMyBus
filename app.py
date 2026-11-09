@@ -23,6 +23,7 @@ from flask import Flask, jsonify, request, send_from_directory
 from google.transit import gtfs_realtime_pb2
 
 from stops_service import find_nearby_stops
+from routes_service import routes_for_stop
 
 
 # ==========================================================
@@ -344,7 +345,45 @@ def nearby_stops():
 # ==========================================================
 # 08. START DEVELOPMENT SERVER
 # ==========================================================
+# ==========================================================
+# 08. ROUTES SERVING AN MCTS BUS STOP
+# ==========================================================
 
+@app.get("/api/stops/<stop_id>/routes")
+def stop_routes(stop_id):
+    """Return scheduled MCTS routes serving a bus stop."""
+
+    # Accept numeric GTFS stop IDs only.
+    if not stop_id.isdigit() or len(stop_id) > 12:
+        return jsonify(
+            status="error",
+            message="Invalid bus stop ID."
+        ), 400
+
+    try:
+        routes = routes_for_stop(stop_id)
+
+        return jsonify(
+            status="ok",
+            stop_id=stop_id,
+            count=len(routes),
+            routes=routes,
+            data_type="scheduled",
+            message=(
+                "Routes are from the downloaded MCTS "
+                "schedule, not live arrival predictions."
+            )
+        )
+
+    except OSError:
+        app.logger.exception(
+            "Unable to read MCTS route data"
+        )
+
+        return jsonify(
+            status="error",
+            message="Bus route data is unavailable."
+        ), 503
 if __name__ == "__main__":
 
     app.run(

@@ -3,24 +3,34 @@
 
 /* ==========================================================
    AYO! WHERE'S MY BUS?
-   NEARBY MCTS BUS STOPS
+   NEARBY MCTS STOPS + ROUTES SERVING EACH STOP
    ========================================================== */
 
 (() => {
-
-  const API = "/api/stops/nearby";
+  const STOPS_API = "/api/stops/nearby";
 
   let stopMarkers = null;
   let locationMarker = null;
 
+  const markerByStopId = new Map();
+  const routesCache = new Map();
+
+  function getMap() {
+    return window.state?.map || null;
+  }
+
   /* ========================================================
-     01. CREATE NEARBY STOPS INTERFACE
+     01. CREATE STOPS INTERFACE
      ======================================================== */
 
   function createInterface() {
     const form = document.getElementById("routeForm");
 
     if (!form) return;
+
+    if (document.getElementById("nearbyStopsPanel")) {
+      return;
+    }
 
     const container = document.createElement("section");
     container.id = "nearbyStopsPanel";
@@ -36,6 +46,7 @@
 
     const heading = document.createElement("h3");
     heading.textContent = "Nearby MCTS Bus Stops";
+
     heading.style.cssText = `
       margin: 0 0 8px;
       color: #d2b995;
@@ -85,34 +96,22 @@
       results
     );
 
-    form.insertAdjacentElement(
-      "afterend",
-      container
-    );
+    form.insertAdjacentElement("afterend", container);
 
-    button.addEventListener(
-      "click",
-      findNearbyStops
-    );
+    button.addEventListener("click", findNearbyStops);
   }
 
   /* ========================================================
-     02. STATUS MESSAGE
+     02. HELPERS
      ======================================================== */
 
   function setStopsStatus(message) {
-    const element = document.getElementById(
-      "stopsStatus"
-    );
+    const element = document.getElementById("stopsStatus");
 
     if (element) {
       element.textContent = message;
     }
   }
-
-  /* ========================================================
-     03. FORMAT DISTANCE
-     ======================================================== */
 
   function formatDistance(meters) {
     const value = Number(meters);
@@ -122,14 +121,167 @@
     }
 
     if (value < 1000) {
-      return `${value} m away`;
+      return `${Math.round(value)} m away`;
     }
 
     return `${(value / 1000).toFixed(2)} km away`;
   }
 
+  function createText(tag, content) {
+    const element = document.createElement(tag);
+    element.textContent = content;
+    return element;
+  }
+
   /* ========================================================
-     04. DISPLAY BUS STOPS
+     03. FETCH ROUTES SERVING A STOP
+     ======================================================== */
+
+  async function getRoutesForStop(stopId) {
+    const id = String(stopId);
+
+    if (routesCache.has(id)) {
+      return routesCache.get(id);
+    }
+
+    const url =
+      `/api/stops/${encodeURIComponent(id)}/routes`;
+
+    const response = await fetch(url, {
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Route lookup returned ${response.status}`
+      );
+    }
+
+    const data = await response.json();
+
+    if (!Array.isArray(data.routes)) {
+      throw new Error("Invalid route information.");
+    }
+
+    routesCache.set(id, data.routes);
+
+    return data.routes;
+  }
+
+  /* ========================================================
+     04. CREATE STOP POPUP
+     ======================================================== */
+
+  function createStopPopup(stop) {
+    const popup = document.createElement("div");
+
+    popup.style.cssText = `
+      min-width: 210px;
+      color: #e8edf1;
+    `;
+
+    const title = createText(
+      "strong",
+      stop.stop_name
+    );
+
+    title.style.cssText = `
+      display: block;
+      color: #d2b995;
+      font-size: 16px;
+      margin-bottom: 8px;
+    `;
+
+    const details = createText(
+      "p",
+      `Stop ${stop.stop_code || stop.stop_id} · ` +
+      formatDistance(stop.distance_meters)
+    );
+
+    details.style.cssText = `
+      font-size: 12px;
+      color: #a8b2bd;
+    `;
+
+    const routeTitle = createText(
+      "strong",
+      "ROUTES SERVING THIS STOP"
+    );
+
+    routeTitle.style.cssText = `
+      display: block;
+      margin-top: 12px;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      color: #d2b995;
+    `;
+
+    const routesHolder = document.createElement("div");
+
+    routesHolder.textContent = "Loading routes...";
+
+    routesHolder.style.cssText = `
+      margin-top: 8px;
+      font-size: 13px;
+    `;
+
+    const note = createText(
+      "p",
+      "Routes are based on downloaded MCTS schedule data. " +
+      "They are not live arrival predictions."
+    );
+
+    note.style.cssText = `
+      margin-top: 12px;
+      font-size: 11px;
+      color: #a8b2bd;
+      line-height: 1.5;
+    `;
+
+    popup.append(
+      title,
+      details,
+      routeTitle,
+      routesHolder,
+      note
+    );
+
+    getRoutesForStop(stop.stop_id)
+      .then(routes => {
+        routesHolder.replaceChildren();
+
+        if (routes.length === 0) {
+          routesHolder.textContent =
+            "No scheduled routes found in this dataset.";
+          return;
+        }
+
+        for (const route of routes) {
+          const line = createText(
+            "p",
+            `Route ${route.route_number} — ${route.route_name}`
+          );
+
+          line.style.cssText = `
+            margin: 5px 0;
+            color: #e8edf1;
+          `;
+
+          routesHolder.append(line);
+        }
+      })
+      .catch(error => {
+        console.warn("Route lookup failed:", error);
+
+        routesHolder.textContent =
+          "Route information is unavailable right now.";
+      });
+
+    return popup;
+  }
+
+  /* ========================================================
+     05. DISPLAY NEARBY STOP CARDS
      ======================================================== */
 
   function displayStops(stops) {
@@ -141,7 +293,7 @@
 
     results.replaceChildren();
 
-    if (!stops.length) {
+    if (stops.length === 0) {
       setStopsStatus("No nearby stops found.");
       return;
     }
@@ -151,7 +303,6 @@
     );
 
     stops.forEach((stop, index) => {
-
       const card = document.createElement("button");
 
       card.type = "button";
@@ -173,13 +324,15 @@
 
       const details = document.createElement("div");
 
-      const title = document.createElement("strong");
-      title.textContent =
-        `${index + 1}. ${stop.stop_name}`;
+      const title = createText(
+        "strong",
+        `${index + 1}. ${stop.stop_name}`
+      );
 
-      const subtitle = document.createElement("div");
-      subtitle.textContent =
-        `Stop ${stop.stop_code || stop.stop_id}`;
+      const subtitle = createText(
+        "div",
+        `Stop ${stop.stop_code || stop.stop_id}`
+      );
 
       subtitle.style.cssText = `
         color: #a8b2bd;
@@ -189,9 +342,9 @@
 
       details.append(title, subtitle);
 
-      const distance = document.createElement("span");
-      distance.textContent = formatDistance(
-        stop.distance_meters
+      const distance = createText(
+        "span",
+        formatDistance(stop.distance_meters)
       );
 
       distance.style.cssText = `
@@ -211,19 +364,18 @@
   }
 
   /* ========================================================
-     05. DISPLAY STOPS ON MAP
+     06. DRAW STOP MARKERS
      ======================================================== */
 
   function showStopsOnMap(stops, userLocation) {
-    if (
-      !window.L ||
-      !window.state ||
-      !window.state.map
-    ) {
+    const map = getMap();
+
+    if (!map || !window.L) {
+      setStopsStatus(
+        "Stops found, but the map is unavailable."
+      );
       return;
     }
-
-    const map = window.state.map;
 
     if (stopMarkers) {
       map.removeLayer(stopMarkers);
@@ -233,15 +385,16 @@
       map.removeLayer(locationMarker);
     }
 
+    markerByStopId.clear();
+
     stopMarkers = L.layerGroup().addTo(map);
 
     const bounds = [];
 
     for (const stop of stops) {
-
       const position = [
-        stop.latitude,
-        stop.longitude
+        Number(stop.latitude),
+        Number(stop.longitude)
       ];
 
       const marker = L.circleMarker(position, {
@@ -252,21 +405,22 @@
         fillOpacity: 0.95
       });
 
-      const popup = document.createElement("div");
+      marker.bindPopup(
+        createText("span", stop.stop_name)
+      );
 
-      const name = document.createElement("strong");
-      name.textContent = stop.stop_name;
-
-      const details = document.createElement("p");
-      details.textContent =
-        `Stop ${stop.stop_code || stop.stop_id} · ` +
-        formatDistance(stop.distance_meters);
-
-      popup.append(name, details);
-
-      marker.bindPopup(popup);
+      marker.on("popupopen", () => {
+        marker.setPopupContent(
+          createStopPopup(stop)
+        );
+      });
 
       marker.addTo(stopMarkers);
+
+      markerByStopId.set(
+        String(stop.stop_id),
+        marker
+      );
 
       bounds.push(position);
     }
@@ -284,7 +438,10 @@
       fillOpacity: 1
     });
 
-    locationMarker.bindPopup("Your approximate location");
+    locationMarker.bindPopup(
+      "Your approximate location"
+    );
+
     locationMarker.addTo(map);
 
     bounds.push(userPosition);
@@ -298,35 +455,28 @@
   }
 
   /* ========================================================
-     06. FOCUS SELECTED STOP
+     07. FOCUS A STOP FROM THE LIST
      ======================================================== */
 
   function focusStop(stop) {
-    if (
-      !window.state ||
-      !window.state.map
-    ) {
+    const map = getMap();
+
+    if (!map) {
+      setStopsStatus("The map is unavailable.");
       return;
     }
-
-    const map = window.state.map;
 
     map.setView(
       [stop.latitude, stop.longitude],
       16
     );
 
-    if (stopMarkers) {
-      stopMarkers.eachLayer(marker => {
-        const position = marker.getLatLng();
+    const marker = markerByStopId.get(
+      String(stop.stop_id)
+    );
 
-        if (
-          Math.abs(position.lat - stop.latitude) < 0.000001 &&
-          Math.abs(position.lng - stop.longitude) < 0.000001
-        ) {
-          marker.openPopup();
-        }
-      });
+    if (marker) {
+      marker.openPopup();
     }
 
     document.getElementById("map")?.scrollIntoView({
@@ -336,13 +486,13 @@
   }
 
   /* ========================================================
-     07. REQUEST LOCATION AND NEARBY STOPS
+     08. FIND NEARBY STOPS
      ======================================================== */
 
   function findNearbyStops() {
     if (!navigator.geolocation) {
       setStopsStatus(
-        "Your browser does not support location access."
+        "Location access is not supported."
       );
       return;
     }
@@ -354,25 +504,20 @@
     button.disabled = true;
     button.textContent = "FINDING STOPS...";
 
-    setStopsStatus(
-      "Requesting your location..."
-    );
+    setStopsStatus("Requesting your location...");
 
     navigator.geolocation.getCurrentPosition(
       async position => {
-
         const location = {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude
         };
 
         try {
-          setStopsStatus(
-            "Loading official MCTS bus stop locations..."
-          );
+          setStopsStatus("Loading MCTS stops...");
 
           const url =
-            `${API}?lat=${encodeURIComponent(location.latitude)}` +
+            `${STOPS_API}?lat=${encodeURIComponent(location.latitude)}` +
             `&lon=${encodeURIComponent(location.longitude)}`;
 
           const response = await fetch(url, {
@@ -381,7 +526,7 @@
 
           if (!response.ok) {
             throw new Error(
-              `Stop API returned ${response.status}`
+              `Stop search returned ${response.status}`
             );
           }
 
@@ -399,17 +544,16 @@
           );
 
         } catch (error) {
-          console.error(error);
+          console.error("Nearby stops failed:", error);
 
           setStopsStatus(
-            "Unable to load nearby bus stops. Please try again."
+            "Unable to load nearby stops. Please try again."
           );
 
         } finally {
           button.disabled = false;
           button.textContent = "⌖ FIND NEARBY STOPS";
         }
-
       },
 
       error => {
@@ -435,7 +579,7 @@
   }
 
   /* ========================================================
-     08. INITIALIZE
+     09. START
      ======================================================== */
 
   function start() {
