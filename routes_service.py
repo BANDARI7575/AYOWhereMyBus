@@ -1,10 +1,10 @@
 
-"""AYO! Where's My Bus? — MCTS stop route lookup.
+"""AYO! Where's My Bus? — MCTS stop-specific route lookup.
 
-Uses official GTFS schedule data to identify
-which bus routes are associated with a stop.
+Uses GTFS schedule files to identify which routes and
+scheduled destinations serve a particular bus stop.
 
-This does not provide real-time arrivals.
+Does not provide real-time arrivals or current service status.
 """
 
 import csv
@@ -20,14 +20,14 @@ ROUTES_FILE = GTFS / "routes.txt"
 
 
 def routes_for_stop(stop_id):
-    """Return scheduled routes serving a specific stop."""
+    """Find scheduled routes and destinations serving a stop."""
 
     stop_id = str(stop_id).strip()
 
     if not stop_id:
         return []
 
-    # STEP 1: Find trips that visit this stop.
+    # STEP 1: Find trips that actually visit this stop.
     trip_ids = set()
 
     with STOP_TIMES_FILE.open(
@@ -35,7 +35,6 @@ def routes_for_stop(stop_id):
         encoding="utf-8-sig",
         newline=""
     ) as file:
-
         reader = csv.DictReader(file)
 
         for row in reader:
@@ -45,22 +44,32 @@ def routes_for_stop(stop_id):
     if not trip_ids:
         return []
 
-    # STEP 2: Find the routes assigned to those trips.
-    route_ids = set()
+    # STEP 2: Match those trips to routes and destinations.
+    route_destinations = {}
 
     with TRIPS_FILE.open(
         "r",
         encoding="utf-8-sig",
         newline=""
     ) as file:
-
         reader = csv.DictReader(file)
 
         for row in reader:
-            if row["trip_id"] in trip_ids:
-                route_ids.add(row["route_id"])
+            if row["trip_id"] not in trip_ids:
+                continue
 
-    # STEP 3: Get the route names and numbers.
+            route_id = row["route_id"]
+            direction_id = row["direction_id"].strip()
+            headsign = row["trip_headsign"].strip()
+
+            if route_id not in route_destinations:
+                route_destinations[route_id] = set()
+
+            route_destinations[route_id].add(
+                (direction_id, headsign)
+            )
+
+    # STEP 3: Add route names from routes.txt.
     results = []
 
     with ROUTES_FILE.open(
@@ -68,23 +77,35 @@ def routes_for_stop(stop_id):
         encoding="utf-8-sig",
         newline=""
     ) as file:
-
         reader = csv.DictReader(file)
 
         for row in reader:
-            if row["route_id"] not in route_ids:
+            route_id = row["route_id"]
+
+            if route_id not in route_destinations:
                 continue
 
+            destinations = [
+                {
+                    "direction_id": direction,
+                    "headsign": headsign
+                }
+                for direction, headsign in sorted(
+                    route_destinations[route_id]
+                )
+            ]
+
             results.append({
-                "route_id": row["route_id"],
+                "route_id": route_id,
                 "route_number": (
                     row["route_short_name"]
-                    or row["route_id"]
+                    or route_id
                 ),
-                "route_name": row["route_long_name"]
+                "route_name": row["route_long_name"],
+                "destinations": destinations
             })
 
-    # STEP 4: Sort routes by their displayed number.
+    # STEP 4: Sort by displayed route number.
     results.sort(
         key=lambda route: route["route_number"]
     )

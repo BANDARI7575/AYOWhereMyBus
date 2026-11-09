@@ -256,19 +256,42 @@
           return;
         }
 
-        for (const route of routes) {
-          const line = createText(
-            "p",
-            `Route ${route.route_number} — ${route.route_name}`
-          );
+for (const route of routes) {
+  const routeBox = document.createElement("div");
 
-          line.style.cssText = `
-            margin: 5px 0;
-            color: #e8edf1;
-          `;
+  routeBox.style.cssText = `
+    margin: 10px 0;
+    padding-bottom: 9px;
+    border-bottom: 1px solid #39434e;
+  `;
 
-          routesHolder.append(line);
-        }
+  const heading = createText(
+    "strong",
+    `Route ${route.route_number} — ${route.route_name}`
+  );
+
+  heading.style.color = "#d2b995";
+  routeBox.append(heading);
+
+  if (Array.isArray(route.destinations)) {
+    for (const destination of route.destinations) {
+      const line = createText(
+        "p",
+        `↳ ${destination.headsign || "Destination unavailable"}`
+      );
+
+      line.style.cssText = `
+        margin: 5px 0 5px 10px;
+        color: #e8edf1;
+        font-size: 12px;
+      `;
+
+      routeBox.append(line);
+    }
+  }
+
+  routesHolder.append(routeBox);
+}
       })
       .catch(error => {
         console.warn("Route lookup failed:", error);
