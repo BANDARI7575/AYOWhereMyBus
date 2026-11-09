@@ -1,12 +1,4 @@
 {
   "python-envs.pythonProjects": [],
-  "python.useEnvironmentsExtension": false,
-  "emeraldwalk.runonsave": {
-    "commands": [
-      {
-        "match": "\\.(html|css|js|py)$",
-        "cmd": "bash \"${workspaceFolder}/scripts/auto_push.sh\""
-      }
-    ]
-  }
+  "python.useEnvironmentsExtension": false
 }
