@@ -1,0 +1,10 @@
+{
+  "trip_feed_status": "fresh",
+  "trip_entities": 394,
+  "stops_checked": 25,
+  "matched_predictions": 3,
+  "vehicle_count": 209,
+  "vehicle_feed_timestamp": 1794234831,
+  "alerts_status": "fresh",
+  "active_alerts": 8
+}

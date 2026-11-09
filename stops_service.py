@@ -2,14 +2,17 @@
 """Nearby MCTS bus stop discovery using GTFS data."""
 
 import csv
+import os
+from functools import lru_cache
 import math
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent
-STOPS_FILE = ROOT / "google_transit" / "stops.txt"
+STOPS_FILE = Path(os.getenv("GTFS_DIR", ROOT / "google_transit")) / "stops.txt"
 
 
+@lru_cache(maxsize=1)
 def load_stops():
     """Read bus stops from the MCTS GTFS file."""
 

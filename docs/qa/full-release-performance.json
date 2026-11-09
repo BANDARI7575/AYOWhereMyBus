@@ -1,0 +1,27 @@
+{
+  "mixed_reads": {
+    "requests": 256,
+    "concurrency": 16,
+    "all_200": true,
+    "mean_seconds": 0.157,
+    "p95_seconds": 0.3011,
+    "max_seconds": 0.3237
+  },
+  "warm_cached_journeys": {
+    "requests": 64,
+    "concurrency": 16,
+    "all_200": true,
+    "mean_seconds": 0.0195,
+    "p95_seconds": 0.0246,
+    "max_seconds": 0.1041
+  },
+  "real_local_tls_ready": {
+    "background_worker_healthy": true,
+    "moderation_configured": true,
+    "schedule_active_today": true,
+    "source_revision": "893d9401ca27",
+    "status": "ready"
+  },
+  "encrypted_maintenance_and_new_path_restore": true,
+  "scope": "Loopback-only Gunicorn with simulated private-ingress peer identities; not a public-host capacity guarantee."
+}

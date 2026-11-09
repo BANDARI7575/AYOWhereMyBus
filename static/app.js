@@ -74,7 +74,7 @@ function formatTime(seconds) {
   }
 
   return new Date(Number(seconds) * 1000)
-    .toLocaleTimeString("en-US", {
+    .toLocaleTimeString(state.language === "es" ? "es-US" : "en-US", {
       timeZone: "America/Chicago",
       hour: "numeric",
       minute: "2-digit"
@@ -91,6 +91,7 @@ function reportAgeSeconds(timestamp) {
     return null;
   }
 
+  if (Number(timestamp) * 1000 > Date.now() + 60000) return null;
   return Math.max(
     0,
     Math.floor(Date.now() / 1000 - Number(timestamp))
@@ -269,7 +270,7 @@ function createPopup(bus) {
   if (age === null) {
     note.textContent =
       "GPS report time unavailable. Location freshness cannot be verified.";
-  } else if (age > 180) {
+  } else if (age > 120) {
     note.textContent =
       "Warning: This vehicle position may be outdated.";
   } else {
@@ -308,7 +309,7 @@ function showBuses(buses, zoom = false) {
     const key = `${bus.bus_id}:${bus.route}`;
     const position = [lat, lon];
     const age = reportAgeSeconds(bus.reported_at);
-    const stale = age === null || age > 180;
+    const stale = age === null || age > 120;
 
     nextKeys.add(key);
     points.push(position);
@@ -403,6 +404,7 @@ async function refresh(zoom = false) {
     }
 
     let buses = data.buses;
+    if (data.feed_fresh === false) buses = buses.map(b => ({...b, reported_at: null}));
 
     if (
       state.mode === "nearby" &&
@@ -429,7 +431,7 @@ async function refresh(zoom = false) {
     $("refreshTime").textContent =
       "LAST REQUEST: " +
       state.lastSuccessfulUpdate.toLocaleTimeString(
-        "en-US",
+        state.language === "es" ? "es-US" : "en-US",
         {timeZone: "America/Chicago"}
       );
 
@@ -441,9 +443,8 @@ async function refresh(zoom = false) {
     );
 
     const knownAges = ages.filter(age => age !== null);
-    const unknownCount = ages.length - knownAges.length;
     const staleCount = ages.filter(
-      age => age === null || age > 180
+      age => age === null || age > 120
     ).length;
 
     const oldest = knownAges.length
@@ -468,7 +469,7 @@ async function refresh(zoom = false) {
         "● RECENT REPORTS";
 
       setStatus(
-        `${buses.length} reported buses within 3 km. Nearby stops are availabe in the Find Nearby Stops section.Live arrival predictios are not available yet.`
+        `${buses.length} reported buses within 3 km. Use Rider tools for stops and verified arrival data.`
       );
     } else {
       $("connectionBadge").textContent =
@@ -775,7 +776,7 @@ function translate() {
 
 function updateClock() {
   $("clock").textContent =
-    new Intl.DateTimeFormat("en-US", {
+    new Intl.DateTimeFormat(state.language === "es" ? "es-US" : "en-US", {
       timeZone: "America/Chicago",
       hour: "numeric",
       minute: "2-digit",
@@ -861,6 +862,14 @@ function start() {
     } else if (state.mode !== "idle") {
       cycle(false);
     }
+  });
+
+  window.addEventListener("offline", () => {
+    stopTracking();
+    showBuses([], false);
+    $("connectionBadge").textContent = "● OFFLINE";
+    $("trackingState").textContent = "● LIVE DATA UNAVAILABLE";
+    $("dataFreshness").textContent = "VEHICLE AGE: UNAVAILABLE";
   });
 
   window.addEventListener("online", () => {

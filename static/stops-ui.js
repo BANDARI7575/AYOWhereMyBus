@@ -380,6 +380,7 @@ for (const route of routes) {
 
       card.addEventListener("click", () => {
         focusStop(stop);
+        window.ayoLoadStop?.(stop.stop_id);
       });
 
       results.append(card);

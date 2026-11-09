@@ -1,0 +1,59 @@
+name: ayo-production
+services:
+  app:
+    build:
+      context: ..
+    image: ayo:${AYO_RELEASE_ID:?set approved versioned release ID}
+    env_file: ${AYO_ENV_FILE:?path to protected production env file}
+    environment:
+      AYO_ENV: production
+      BIND_HOST: 0.0.0.0
+      PROXY_HOPS: '1'
+      PORT: '8000'
+      COMMUNITY_DB: /app/instance/community.sqlite
+      SCHEDULE_DB: /app/instance/schedule.sqlite
+    restart: unless-stopped
+    volumes:
+      - state:/app/instance
+      - ${AYO_SECRET_DIR:?protected secret directory}:/run/secrets/ayo:ro
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs: [/tmp]
+  alerts:
+    image: ayo:${AYO_RELEASE_ID:?set approved versioned release ID}
+    command: [python, scripts/run_alerts.py]
+    env_file: ${AYO_ENV_FILE:?path to protected production env file}
+    environment:
+      COMMUNITY_DB: /app/instance/community.sqlite
+      SCHEDULE_DB: /app/instance/schedule.sqlite
+    depends_on: [app]
+    restart: unless-stopped
+    volumes:
+      - state:/app/instance
+      - ${AYO_SECRET_DIR:?protected secret directory}:/run/secrets/ayo:ro
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs: [/tmp]
+    healthcheck:
+      test: [CMD, python, scripts/check_worker.py]
+      interval: 30s
+      timeout: 5s
+  proxy:
+    image: ${CADDY_IMAGE:?set tested Caddy image digest}
+    environment:
+      AYO_DOMAIN: ${AYO_DOMAIN:?approved HTTPS domain}
+      TLS_EMAIL: ${TLS_EMAIL:?real TLS operator email}
+    ports: ['80:80', '443:443', '443:443/udp']
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - tls:/data
+      - proxy_config:/config
+    depends_on: [app]
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+volumes:
+  state:
+  tls:
+  proxy_config:

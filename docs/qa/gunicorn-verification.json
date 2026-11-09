@@ -1,0 +1,26 @@
+{
+  "ready_status": 200,
+  "insecure_api_status": 400,
+  "search_status": 200,
+  "search_parallel_requests": 24,
+  "search_max_seconds": 0.2995,
+  "search_mean_seconds": 0.24616249999999998,
+  "journeys": [
+    {
+      "status": 200,
+      "seconds": 2.3097
+    },
+    {
+      "status": 503,
+      "seconds": 0.0066
+    },
+    {
+      "status": 200,
+      "seconds": 2.3092
+    },
+    {
+      "status": 503,
+      "seconds": 0.0042
+    }
+  ]
+}

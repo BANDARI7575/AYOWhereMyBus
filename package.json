@@ -1,0 +1,17 @@
+{
+  "name": "ayo-rider-experience-tests",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/journey.frontend.test.cjs tests/i18n.test.cjs tests/sw.test.cjs",
+    "test:browser": "node tests/journey.browser.cjs",
+    "test:live": "node tests/journey.live.browser.cjs",
+    "test:a11y": "node tests/accessibility.browser.cjs",
+    "test:features": "node tests/features.browser.cjs",
+    "test:release": "node tests/full-release.browser.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.65.0",
+    "leaflet": "1.9.4",
+    "@axe-core/playwright": "4.14.0"
+  }
+}

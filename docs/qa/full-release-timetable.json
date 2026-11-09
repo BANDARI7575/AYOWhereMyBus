@@ -1,0 +1,25 @@
+{
+  "staged_at": "2026-11-09T16:14:04.081319+00:00",
+  "source": "https://kamino.mcts.org/gtfs/google_transit.zip",
+  "archive_sha256": "e60c49b30823e39053b9d67d8c9c104b8fde2fcd8228481410adee80486f5a1d",
+  "downloaded_files_match_active_sources": true,
+  "integrity": {
+    "counts": {
+      "stops": 3694,
+      "routes": 49,
+      "trips": 18479,
+      "stop_times": 1005312,
+      "shapes": 251700,
+      "transfers": 0,
+      "frequencies": 0
+    },
+    "orphan_stop_times": 0,
+    "orphan_stops": 0,
+    "invalid_stop_coordinates": 0,
+    "invalid_shape_coordinates": 0,
+    "orphan_trip_routes": 0,
+    "conflicting_calendar_dates": 0,
+    "invalid_times": 0,
+    "backward_times": 0
+  }
+}

@@ -1,0 +1,30 @@
+name: Release tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: pip install -r requirements.lock
+      - run: python -m unittest discover -s tests -v
+      - run: node --check static/release.js
+      - run: node --check static/journey.js
+      - run: npm ci
+      - run: npm test
+      - run: npx playwright install --with-deps chromium webkit
+      - name: Planner browser and responsive tests
+        run: |
+          python -m flask --app app run --host 127.0.0.1 --port 5099 > /tmp/ayo-test-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          python -c "import time, urllib.request; time.sleep(2); urllib.request.urlopen('http://127.0.0.1:5099/').close()"
+          npm run test:browser
+          npm run test:a11y
+          npm run test:features
+          npm run test:release

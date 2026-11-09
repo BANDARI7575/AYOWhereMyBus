@@ -1,0 +1,147 @@
+[
+  {
+    "path": "routes_service.py",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "read_buses.py",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "index.html",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "requirements.txt",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "google_transit/fare_attributes.txt",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "google_transit/agency.txt",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "google_transit/fare_rules.txt",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "google_transit/calendar_dates.txt",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "google_transit/stop_times.txt",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "google_transit/shapes.txt",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "google_transit/trips.txt",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "google_transit/stops.txt",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "google_transit/routes.txt",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "README.md",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": ".gitignore",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "buses.json",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "static/milwaukee-cinematic.svg",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "static/.DS_Store",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "static/ayo-enhancements.js",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "static/stops-ui.js",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "static/milwaukee-cinematic.png",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "static/style.css",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "static/app.js",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "scripts/auto_push.sh",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "app.py",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "bus_tracker.py",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": ".vscode/settings.json",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "main1.py",
+    "workspace_exists": true,
+    "matches": true
+  },
+  {
+    "path": "stops_service.py",
+    "workspace_exists": true,
+    "matches": true
+  }
+]

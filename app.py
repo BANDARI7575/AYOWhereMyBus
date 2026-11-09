@@ -19,6 +19,7 @@ import threading
 import time
 
 import requests
+from feed_http import fetch_feed
 from flask import Flask, jsonify, request, send_from_directory
 from google.transit import gtfs_realtime_pb2
 
@@ -59,11 +60,17 @@ def parse_vehicle_feed(raw: bytes) -> dict:
     feed = gtfs_realtime_pb2.FeedMessage()
     feed.ParseFromString(raw)
 
+    if not feed.IsInitialized():
+        raise ValueError("Invalid vehicle feed")
+
+    if feed.header.incrementality != 0:
+        raise ValueError("Differential vehicle feeds are unsupported")
+
     buses = []
 
     for entity in feed.entity:
 
-        if not entity.HasField("vehicle"):
+        if entity.is_deleted or not entity.HasField("vehicle"):
             continue
 
         vehicle = entity.vehicle
@@ -114,15 +121,17 @@ def parse_vehicle_feed(raw: bytes) -> dict:
 
             "speed_kmh": (
                 round(pos.speed * 3.6, 1)
-                if pos.HasField("speed")
+                if pos.HasField("speed") and math.isfinite(pos.speed) and pos.speed >= 0
                 else None
             ),
 
             "direction_degrees": (
                 round(pos.bearing, 1)
-                if pos.HasField("bearing")
+                if pos.HasField("bearing") and math.isfinite(pos.bearing) and 0 <= pos.bearing <= 360
                 else None
             ),
+
+            "trip_id": vehicle.trip.trip_id,
 
             "reported_at": (
                 int(vehicle.timestamp)
@@ -168,16 +177,13 @@ def live_vehicles() -> dict:
         ):
             return _cache["payload"]
 
-        response = requests.get(
-            FEED_URL,
-            timeout=12
-        )
-
-        response.raise_for_status()
-
-        parsed = parse_vehicle_feed(
-            response.content
-        )
+        if now < _cache.get('retry_after',0):
+            raise RuntimeError('Vehicle feed retry cooldown')
+        try:
+            parsed = parse_vehicle_feed(fetch_feed(FEED_URL))
+        except Exception:
+            _cache['retry_after']=time.monotonic()+10
+            raise
 
         _cache.update(
             time=time.monotonic(),
@@ -211,7 +217,10 @@ def health():
 
     return jsonify(
         status="ok",
-        service="AYO! Where's My Bus?"
+        service="AYO! Where's My Bus?",
+        planner_api_version=app.config.get('AYO_PLANNER_API_VERSION'),
+        source_revision=app.config.get('AYO_SOURCE_REVISION'),
+        started_at=app.config.get('AYO_STARTED_AT'),
     )
 
 
@@ -252,6 +261,7 @@ def buses():
             )
         ]
 
+        feed_fresh=bool(data.get("feed_timestamp")) and -60 <= time.time()-data["feed_timestamp"] <= 180
         return jsonify({
             **{
                 key: value
@@ -259,7 +269,8 @@ def buses():
                 if key != "buses"
             },
 
-            "buses": matching,
+            "feed_fresh": feed_fresh,
+            "buses": [{**b, "age_seconds": int(time.time())-b["reported_at"] if b["reported_at"] else None, "reliability": "fresh" if feed_fresh and b["reported_at"] and -60 <= time.time()-b["reported_at"] <= 120 else "stale_or_unknown"} for b in matching],
 
             "matches": len(matching),
 
@@ -270,7 +281,7 @@ def buses():
 
         app.logger.warning(
             "MCTS feed unavailable: %s",
-            error
+            type(error).__name__
         )
 
         return jsonify(
@@ -384,10 +395,13 @@ def stop_routes(stop_id):
             status="error",
             message="Bus route data is unavailable."
         ), 503
+from release_api import install
+install(app)
+
 if __name__ == "__main__":
 
     app.run(
         host="127.0.0.1",
         port=5000,
-        debug=True
+        debug=False
     )

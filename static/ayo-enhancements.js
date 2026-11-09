@@ -32,7 +32,7 @@
     );
   }
 
-  function closeMobileMenu() {
+  function closeMobileMenu(restoreFocus = false) {
     if (!navLinks || !menuButton) return;
 
     navLinks.classList.remove("open");
@@ -43,6 +43,7 @@
     );
 
     menuButton.textContent = "☰";
+    if (restoreFocus) menuButton.focus();
   }
 
   function setupNavigation() {
@@ -65,18 +66,19 @@
       );
 
       menuButton.textContent = isOpen ? "✕" : "☰";
+      if (isOpen) navLinks.querySelector("a")?.focus();
     });
 
     navLinks.querySelectorAll("a").forEach(link => {
       link.addEventListener(
         "click",
-        closeMobileMenu
+        () => closeMobileMenu()
       );
     });
 
     document.addEventListener("keydown", event => {
       if (event.key === "Escape") {
-        closeMobileMenu();
+        if (navLinks.classList.contains("open")) closeMobileMenu(true);
       }
     });
   }
@@ -100,7 +102,7 @@
     "&current=temperature_2m,weather_code,wind_speed_10m" +
     "&temperature_unit=fahrenheit" +
     "&wind_speed_unit=mph" +
-    "&timezone=America%2FChicago";
+    "&timezone=America%2FChicago&timeformat=unixtime";
 
   const weatherIcon = document.getElementById(
     "weatherIcon"
@@ -308,6 +310,9 @@
 
       const data = await response.json();
 
+      // Parse epoch time, not a timezone-less local string. Reject stale/future weather.
+      const observed=Number(data.current?.time);
+      if (!Number.isFinite(observed) || Date.now()/1000-observed>7200 || observed-Date.now()/1000>900) throw new Error('Weather timestamp is stale or invalid');
       updateWeatherDisplay(data);
 
     } catch (error) {

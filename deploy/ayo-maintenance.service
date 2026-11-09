@@ -1,0 +1,12 @@
+[Unit]
+Description=AYO protected backup and approved retention
+[Service]
+Type=oneshot
+User=ayo
+WorkingDirectory=/srv/ayo/current
+EnvironmentFile=/etc/ayo/production.env
+ExecStart=/srv/ayo/venv/bin/python scripts/maintenance.py --backup-dir /srv/ayo/backups --apply-approved-retention
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/srv/ayo/state /srv/ayo/backups

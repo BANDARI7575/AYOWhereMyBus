@@ -1,0 +1,11 @@
+{
+  "checked_at": "2026-11-09T17:15:09.304413+00:00",
+  "vehicles": 185,
+  "vehicle_feed_age_seconds": 13,
+  "trip_feed_status": "fresh",
+  "trip_entities": 367,
+  "sampled_stop_lookups": 30,
+  "unique_matched_stop_predictions": 35,
+  "alerts_status": "fresh",
+  "active_alerts": 8
+}

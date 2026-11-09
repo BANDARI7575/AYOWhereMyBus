@@ -13,21 +13,11 @@
 
   <title>AYO! Where's My Bus? | Milwaukee Transit</title>
 
-  <!-- Fonts -->
-  <link rel="preconnect"
-        href="https://fonts.googleapis.com">
-
-  <link rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin>
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@400;500;600;700&display=swap"
-    rel="stylesheet">
+  <link rel="stylesheet" href="/static/vendor/fonts/fonts.css">
 
   <!-- Leaflet Maps -->
   <link rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        href="/static/vendor/leaflet/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin="">
 
@@ -35,6 +25,11 @@
   <link rel="stylesheet"
         href="/static/style.css">
 
+<link rel="manifest" href="/static/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="AYO!">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0d1118">
 </head>
 
 <body>
@@ -349,7 +344,7 @@
           ☆ Save this route
         </button>
 
-        <div id="favorites"
+        <div id="favorites" role="group"
              class="favorite-chips"
              aria-label="Favorite routes">
         </div>
@@ -438,7 +433,7 @@
               type="text"
               id="fromLocation"
               placeholder="Starting location"
-              disabled>
+              >
           </div>
 
           <div class="journey-field">
@@ -450,20 +445,19 @@
               type="text"
               id="toLocation"
               placeholder="Destination"
-              disabled>
+              >
           </div>
 
         </div>
 
         <button class="gold-button"
                 type="button"
-                disabled>
-          JOURNEY PLANNER COMING SOON
-        </button>
+                >
+          USE THE MCTS JOURNEY PLANNER
+        </a>
 
         <p class="tiny-note">
-          Route planning will become available after
-          official stop and timetable data are integrated.
+          Enable JavaScript to use the AYO stop-to-stop planner.
         </p>
 
       </div>
@@ -516,8 +510,7 @@
         </div>
 
         <p class="tiny-note">
-          Community reports are planned.
-          No reports are being accepted yet.
+          Enable JavaScript for moderated, anonymous stop reports.
         </p>
 
       </div>
@@ -532,7 +525,7 @@
     <section id="features" class="feature-section">
 
       <p class="eyebrow">
-        04 / THE FUTURE OF AYO
+        04 / YOUR RIDER TOOLKIT
       </p>
 
       <h2 data-i18n-html="featureHeading">
@@ -543,7 +536,7 @@
 
         <article class="feature-card">
           <span class="feature-icon">⌖</span>
-          <span class="tag">IN DEVELOPMENT</span>
+          <span class="tag">AVAILABLE</span>
 
           <h3>Nearby Stops</h3>
           <p>
@@ -554,66 +547,61 @@
 
         <article class="feature-card">
           <span class="feature-icon">⇄</span>
-          <span class="tag">PLANNED</span>
+          <span class="tag">AVAILABLE WITH LIMITS</span>
 
           <h3>Smart Journey Planner</h3>
           <p>
             From-to routing, transfers,
-            and walking directions.
+            and estimated walking connections.
           </p>
         </article>
 
         <article class="feature-card">
           <span class="feature-icon">◎</span>
-          <span class="tag">PLANNED</span>
+          <span class="tag">AVAILABLE WITH LIMITS</span>
 
           <h3>AYO Voice</h3>
           <p>
-            Multilingual voice assistance
+            English and Spanish departure readout
             powered by verified transit data.
           </p>
         </article>
 
         <article class="feature-card">
           <span class="feature-icon">◷</span>
-          <span class="tag">PLANNED</span>
+          <span class="tag">AVAILABLE WITH LIMITS</span>
 
           <h3>Arrival Alerts</h3>
           <p>
-            Notifications for approaching buses
-            and relevant service changes.
+            Foreground and background alerts from verified predictions. Delivery depends on your device.
           </p>
         </article>
 
         <article class="feature-card">
           <span class="feature-icon">★</span>
-          <span class="tag">PARTIALLY AVAILABLE</span>
+          <span class="tag">SAVED ON THIS DEVICE</span>
 
           <h3>My Stops</h3>
           <p>
             Save frequent stops and routes.
-            Favorite routes are available now.
+            Favorites stay in this browser.
           </p>
         </article>
 
         <article class="feature-card">
           <span class="feature-icon">↗</span>
-          <span class="tag">RESEARCH</span>
+          <span class="tag">DATA FRESHNESS</span>
 
           <h3>Reliability Intelligence</h3>
           <p>
-            Explore delays, service disruptions,
-            and historical transit performance.
+            Check GPS report age and official service alerts. Historical performance is not available.
           </p>
         </article>
 
       </div>
 
       <p class="roadmap-note">
-        Also planned: accessible travel support,
-        bus crowding reports, route shapes,
-        accurate arrival information, offline
-        functionality, and an installable PWA.
+        Install AYO from your browser. The offline shell requires an internet connection for transit data. Walking connections are estimates; accessibility and occupancy are not verified.
       </p>
 
     </section>
@@ -713,7 +701,9 @@
       </p>
     </div>
 
-  </footer>
+  <p data-support-contact></p>
+<p><a href="/static/privacy.html">Privacy &amp; data / Privacidad y datos</a></p>
+</footer>
 
 
   <!-- ========================================
@@ -736,12 +726,13 @@
   ========================================= -->
 
   <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    src="/static/vendor/leaflet/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin="">
   </script>
 
-  <script src="/static/app.js" defer></script>
+  <script src="/static/i18n.js" defer></script>
+<script src="/static/app.js" defer></script>
   <script src="/static/stops-ui.js" defer></script>
 
   <script
@@ -749,5 +740,8 @@
     defer>
   </script>
 
+<script src="/static/release.js" defer></script>
+<script src="/static/journey.js" defer></script>
+<script src="/static/platform.js" defer></script>
 </body>
 </html>

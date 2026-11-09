@@ -1333,3 +1333,72 @@ body.day-mode .footer {
     transform: none;
   }
 }
+.rider-tools { padding:20px; margin:20px 0; }
+.rider-tools input,.journey-panel input,.winter-panel input,.winter-panel textarea {display:block;box-sizing:border-box;width:100%;max-width:600px;background:var(--panel-2);color:var(--text);padding:12px;border:1px solid var(--muted);border-radius:6px;margin:8px 0 16px;}
+.rider-tools button,.journey-panel button,.winter-panel button {margin:6px;min-height:44px;white-space:normal;}
+.rider-tools p,.rider-tools span {overflow-wrap:anywhere;}
+:focus-visible {outline:3px solid #e7b775;outline-offset:4px;}
+.skip-link {position:fixed;top:-100px;left:10px;z-index:9999;background:#fff;color:#111;padding:14px;}.skip-link:focus {top:10px;}
+
+/* Journey planner: keep suggestions and instructions in normal flow on mobile. */
+.journey-experience { overflow-wrap: anywhere; }
+.journey-kicker { color: var(--gold-2); font: 600 27px var(--serif); }
+.journey-search-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:24px; margin:24px 0 12px; }
+.journey-location { min-width:0; }
+.journey-location label { display:block; font-weight:600; }
+.journey-location input { max-width:none; margin-bottom:8px; font-size:16px; }
+.journey-location .journey-locate { margin-left:0; }
+.journey-location-info { font-size:13px; color:var(--muted); margin:8px 0; }
+.journey-suggestions { list-style:none; padding:0; margin:0; max-height:260px; overflow-y:auto; border:1px solid var(--line); border-radius:7px; background:var(--panel-2); }
+.journey-suggestions[hidden] { display:none; }
+.journey-suggestions li { margin:0; }
+.journey-suggestions button { display:block; box-sizing:border-box; width:100%; margin:0; padding:12px; text-align:left; border:0; border-bottom:1px solid var(--line); border-radius:0; background:transparent; color:var(--text); font:inherit; }
+.journey-suggestions button[aria-selected="true"], .journey-suggestions button:hover { background:var(--panel); outline:2px solid var(--gold); outline-offset:-2px; }
+.journey-suggestions small { display:block; margin-top:4px; color:var(--muted); }
+.journey-status { min-height:1.6em; }
+.journey-results:empty { display:none; }
+.journey-results { border-top:1px solid var(--line); margin-top:28px; padding-top:20px; }
+.journey-results h3 { font:600 clamp(22px,3vw,30px) var(--serif); }
+.journey-summary { color:var(--gold-2); font-weight:600; }
+.journey-steps { padding-left:24px; }
+.journey-steps li { padding:12px 0 16px 8px; border-bottom:1px solid var(--line); }
+.journey-steps h4 { margin:8px 0; font-size:18px; }
+.journey-transfer { color:var(--gold-2); }
+.journey-experience a { text-decoration:underline; text-underline-offset:3px; }
+@media(max-width:650px) {
+  .journey-search-grid { grid-template-columns:minmax(0,1fr); gap:20px; }
+  .journey-experience { padding:20px 16px; }
+  .journey-experience .gold-button { box-sizing:border-box; width:100%; margin:6px 0; }
+  .journey-results button { max-width:100%; }
+}
+@media(max-width:380px) {
+  .nav { padding-inline:12px; gap:6px; }
+  .brand { gap:5px; }
+  .logo-weather { width:14px; }
+}
+#journey { scroll-margin-top:100px; }
+.journey-warning,.journey-freshness:not(:empty) {padding:12px;border:1px solid var(--gold);border-radius:6px;color:var(--text);background:var(--panel-2);}
+/* Audit fixes: readable light surfaces and attribution without changing the hero. */
+.leaflet-control-attribution a {color:#00506d !important;text-decoration:underline;}
+body.day-mode .nav {--gold-2:#d4b88e;--text:#e8edf1;--muted:#bbc6ce;--panel-2:#263340;}
+body.day-mode .pill {color:#334552;}
+body.day-mode .map-footer,body.day-mode .map-count {color:#31576b;}
+body.day-mode .tag {color:#52616d;}
+body.day-mode .panel a:not(.gold-button) {color:#6e481f;}
+body.day-mode .feature-card h3,
+body.day-mode .journey-panel label,
+body.day-mode .winter-panel label,
+body.day-mode .winter-panel h3 {color:#18222b;}
+body.day-mode .feature-card p,
+body.day-mode .journey-panel p,
+body.day-mode .winter-panel p {color:#4b5864;}
+body.day-mode .feature-card .tag {color:#52616d;}
+@media(max-width:650px){.brand-name{max-width:90px;min-width:0}.brand-subtitle{white-space:normal;overflow-wrap:anywhere}}
+#winter-watch select {display:block;max-width:100%;margin:8px 0;padding:10px;background:var(--panel-2);color:var(--text);border:1px solid var(--muted);border-radius:6px;}
+@media(max-width:380px){
+ .nav{padding-inline:8px;gap:4px}.nav-actions{gap:4px}
+ .nav .mini-button,.nav .mobile-menu-button{min-width:34px;width:34px}
+ .weather-widget{padding:4px;gap:4px}
+}
+.journey-walking-choice {display:flex;gap:12px;align-items:flex-start;margin:18px 0;font-size:14px;}
+.journey-panel .journey-walking-choice input {width:22px;height:22px;flex:none;margin:0;accent-color:var(--gold);}

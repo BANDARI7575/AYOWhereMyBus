@@ -1,0 +1,120 @@
+{
+  "checked_at": "2026-11-09T15:08:22.995Z",
+  "base": "http://127.0.0.1:5050",
+  "results": [
+    {
+      "engine": "chromium",
+      "viewport": 1440,
+      "revision": "ce7c02e46e4f",
+      "origin": "WISCONSIN & CASS",
+      "destination": "JUNEAU & DR. MLK DRIVE",
+      "routes": [
+        "33"
+      ],
+      "scheduled_departure": 1794237420,
+      "scheduled_arrival": 1794237840,
+      "duration_seconds": 420,
+      "search_responses": [
+        200,
+        200,
+        200,
+        200
+      ]
+    },
+    {
+      "engine": "chromium",
+      "viewport": 390,
+      "revision": "ce7c02e46e4f",
+      "origin": "WISCONSIN & CASS",
+      "destination": "JUNEAU & DR. MLK DRIVE",
+      "routes": [
+        "33"
+      ],
+      "scheduled_departure": 1794237420,
+      "scheduled_arrival": 1794237840,
+      "duration_seconds": 420,
+      "search_responses": [
+        200,
+        200,
+        200,
+        200
+      ]
+    },
+    {
+      "engine": "chromium",
+      "viewport": 320,
+      "revision": "ce7c02e46e4f",
+      "origin": "WISCONSIN & CASS",
+      "destination": "JUNEAU & DR. MLK DRIVE",
+      "routes": [
+        "33"
+      ],
+      "scheduled_departure": 1794237420,
+      "scheduled_arrival": 1794237840,
+      "duration_seconds": 420,
+      "search_responses": [
+        200,
+        200,
+        200,
+        200
+      ]
+    },
+    {
+      "engine": "webkit",
+      "viewport": 1440,
+      "revision": "ce7c02e46e4f",
+      "origin": "WISCONSIN & CASS",
+      "destination": "JUNEAU & DR. MLK DRIVE",
+      "routes": [
+        "33"
+      ],
+      "scheduled_departure": 1794237420,
+      "scheduled_arrival": 1794237840,
+      "duration_seconds": 420,
+      "search_responses": [
+        200,
+        200,
+        200,
+        200
+      ]
+    },
+    {
+      "engine": "webkit",
+      "viewport": 390,
+      "revision": "ce7c02e46e4f",
+      "origin": "WISCONSIN & CASS",
+      "destination": "JUNEAU & DR. MLK DRIVE",
+      "routes": [
+        "33"
+      ],
+      "scheduled_departure": 1794237420,
+      "scheduled_arrival": 1794237840,
+      "duration_seconds": 420,
+      "search_responses": [
+        200,
+        200,
+        200,
+        200
+      ]
+    },
+    {
+      "engine": "webkit",
+      "viewport": 320,
+      "revision": "ce7c02e46e4f",
+      "origin": "WISCONSIN & CASS",
+      "destination": "JUNEAU & DR. MLK DRIVE",
+      "routes": [
+        "33"
+      ],
+      "scheduled_departure": 1794237420,
+      "scheduled_arrival": 1794237840,
+      "duration_seconds": 420,
+      "search_responses": [
+        200,
+        200,
+        200,
+        200
+      ]
+    }
+  ]
+}

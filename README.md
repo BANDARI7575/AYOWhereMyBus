@@ -1,3 +1,13 @@
+# Integrated release candidate
+
+Current public-launch decision: **BLOCKED pending operational gates**. Read the [final launch-readiness audit](docs/LAUNCH_READINESS.md) and [production/recovery runbook](docs/PRODUCTION_RUNBOOK.md) for tested fixes, PASS/WARNING/BLOCKED status and remaining requirements.
+
+Local development with automatic Python reloads: `.venv/bin/python scripts/dev_server.py --port 5050`, then open http://127.0.0.1:5050/. See the [stop-search fix and real-browser verification](docs/STOP_SEARCH_FIX.md).
+
+The [journey planner rider-experience report](docs/JOURNEY_PLANNER.md) covers named search, location selection, readable journeys, maps, test results and remaining launch blockers.
+
+Work is on `release/integrated-transit`. Start with [deployment instructions](docs/DEPLOYMENT.md), [release results and limitations](docs/RELEASE.md), and [baseline audit](docs/AUDIT.md). The original project story follows for historical context; its roadmap predates this release.
+
 # 🚌 AYOWhereMyBus
 
 ### A Milwaukee Bus Tracking Project
