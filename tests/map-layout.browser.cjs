@@ -7,7 +7,7 @@ const base=process.env.AYO_TEST_URL||'http://127.0.0.1:5050';
  const results=[];
  for(const [engine,type] of [['chromium',chromium],['webkit',webkit]]){
   const browser=await type.launch({headless:true,...(engine==='chromium'&&process.env.AYO_CHROME_PATH?{executablePath:process.env.AYO_CHROME_PATH}:{})});
-  try{for(const width of [1440,390,320]){
+  try{for(const width of [1440,768,390,320]){
    const page=await browser.newPage({viewport:{width,height:900},serviceWorkers:'block',reducedMotion:'reduce'});
    const errors=[];page.on('console',m=>{if(m.type()==='error'&&/integrity|stylesheet/i.test(m.text()))errors.push(m.text());});
    await page.route('**/*',route=>{

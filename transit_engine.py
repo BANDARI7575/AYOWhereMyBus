@@ -125,10 +125,15 @@ class Schedule:
             rows = [r for r in rows if all(word in r['stop_name'].casefold() for word in words)]
             rows.sort(key=lambda r: (not r['stop_name'].casefold().startswith(query.casefold()),
                                      r['stop_name'], r['stop_id']))
-        return [{'stop_id': r['stop_id'], 'name': r['stop_name'],
-                 'latitude': float(r['stop_lat']), 'longitude': float(r['stop_lon']),
-                 'description': r.get('stop_desc', ''),
-                 'distance_meters': r.get('distance_meters')} for r in rows[:10]]
+        with self.connect() as c:
+            return [{'stop_id': r['stop_id'], 'name': r['stop_name'],
+                     'latitude': float(r['stop_lat']), 'longitude': float(r['stop_lon']),
+                     'description': r.get('stop_desc', ''),
+                     'scheduled_directions': self.stop_directions(c,r['stop_id']),
+                     'distance_meters': r.get('distance_meters')} for r in rows[:10]]
+
+    def stop_directions(self,c,stop_id):
+        return [dict(r) for r in c.execute("SELECT DISTINCT COALESCE(NULLIF(r.route_short_name,''),t.route_id) AS route_number,t.trip_headsign AS headsign,t.direction_id FROM stop_times st JOIN trips t USING(trip_id) JOIN routes r ON r.route_id=t.route_id WHERE st.stop_id=? ORDER BY route_number,headsign LIMIT 6",(stop_id,))]
 
     def itinerary(self, origin, destination, now=None, allow_walks=True):
         """Present the existing scheduled search with verified names and trip geometry."""
@@ -154,11 +159,36 @@ class Schedule:
                         'SELECT shape_pt_lat,shape_pt_lon FROM shapes WHERE shape_id=? '
                         'ORDER BY CAST(shape_pt_sequence AS INTEGER)', (leg['shape_id'],))]
                     leg['geometry_scope'] = 'full_scheduled_trip'
+                    if leg.get('from_sequence') is not None:
+                        endpoint_rows=c.execute('SELECT * FROM stop_times WHERE trip_id=? AND CAST(stop_sequence AS INTEGER) IN (?,?) ORDER BY CAST(stop_sequence AS INTEGER)',(leg['trip_id'],leg['from_sequence'],leg['to_sequence'])).fetchall()
+                        points=c.execute('SELECT * FROM shapes WHERE shape_id=? ORDER BY CAST(shape_pt_sequence AS INTEGER)',(leg['shape_id'],)).fetchall()
+                        try:
+                            lo,hi=[float(r['shape_dist_traveled']) for r in endpoint_rows]
+                            distances=[float(r['shape_dist_traveled']) for r in points]
+                            if hi>lo and distances==sorted(distances):
+                                import bisect
+                                start=max(0,bisect.bisect_right(distances,lo)-1)
+                                end=min(len(points),bisect.bisect_left(distances,hi)+1)
+                                if end-start>=2:
+                                    leg['geometry']=[[float(r['shape_pt_lat']),float(r['shape_pt_lon'])] for r in points[start:end]]
+                                    leg['geometry_scope']='scheduled_ride_segment'
+                        except (ValueError,TypeError,KeyError,IndexError):
+                            pass  # Keep explicitly labeled full-trip source geometry.
                 else:
                     leg['estimated'] = True
                     leg['geometry'] = []  # No pedestrian routing source: never invent a path.
                 leg['duration_seconds'] = leg['arrival'] - leg['departure']
             origin_info, destination_info = stop_info(origin), stop_info(destination)
+            def nearby_platforms(selected):
+                options=[]
+                for row in c.execute('SELECT * FROM stops'):
+                    if row['stop_id']==selected['stop_id'] or dict(row).get('location_type','') not in ('','0'):continue
+                    distance=distance_km(selected['latitude'],selected['longitude'],float(row['stop_lat']),float(row['stop_lon']))*1000
+                    if distance<=200:
+                        options.append({**stop_info(row['stop_id']),'distance_meters':round(distance),'scheduled_directions':self.stop_directions(c,row['stop_id'])})
+                return sorted(options,key=lambda r:r['distance_meters'])[:4]
+            nearby_destinations=nearby_platforms(destination_info) if result.get('nearby_trip') or not result['legs'] else []
+            nearby_origins=nearby_platforms(origin_info) if not result['legs'] else []
         legs = result['legs']
         departure = legs[0]['departure'] if legs else None
         rides = sum(leg['type'] == 'bus' for leg in legs)
@@ -172,67 +202,119 @@ class Schedule:
             previous_bus = leg
         return {**result, 'status': 'ok' if legs else 'no_route', 'timezone': str(TZ),
                 'requested_at': int(now.timestamp()), 'departure': departure,
-                'valid_until': min(departure, int(now.timestamp())+300) if legs else None,
+                'valid_until': (min(departure,int(now.timestamp())+300) if rides else int(now.timestamp())+300) if legs else None,
                 'minimum_transfer_seconds': MIN_TRANSFER_SECONDS,'estimated_walks_allowed':allow_walks,
                 'duration_seconds': result['arrival'] - departure if legs else None,
                 'initial_wait_seconds': departure - int(now.timestamp()) if legs else None,
                 'transfers': max(0, rides - 1),
                 'walking_estimated': any(leg['type'] == 'walk' for leg in legs),
-                'origin': origin_info, 'destination': destination_info}
+                'origin': origin_info, 'destination': destination_info, 'nearby_destination_stops':nearby_destinations,'nearby_origin_stops':nearby_origins}
     def plan(self, origin, destination, now=None, allow_walks=True):
-        """Bounded earliest-arrival search: up to two rides and 400m transfers."""
+        """Bounded two-ride search with distinct incoming-trip labels and quality scoring.
+
+        Generalized arrival adds five minutes per transfer and half of estimated
+        walking time. These are AYO preferences, never scheduled or predicted time.
+        """
         now=now or datetime.now(TZ)
         deadline=time.monotonic()+8
         with self.connect() as c:
             stops={r['stop_id']:dict(r) for r in c.execute('SELECT * FROM stops')}
             if origin not in stops or destination not in stops: raise ValueError('Choose valid stop IDs')
-            best={origin:(now.timestamp(),[])}; frontier={origin}
+            @lru_cache(maxsize=32768)
+            def meters(a,b):
+                return distance_km(float(stops[a]['stop_lat']),float(stops[a]['stop_lon']),float(stops[b]['stop_lat']),float(stops[b]['stop_lon']))*1000
+            direct=meters(origin,destination)
+            class Legs(list):
+                pass
+            def extend(legs,leg):
+                path=Legs([*legs,leg]);rides=getattr(legs,'rides',0)
+                path.rides=rides+(leg['type']=='bus')
+                path.penalty=getattr(legs,'penalty',0)+(300 if leg['type']=='bus' and rides else 0)+((leg['arrival']-leg['departure'])*0.5 if leg['type']=='walk' else 0)+max(0,meters(leg['to'],destination)-meters(leg['from'],destination))*0.3
+                path.distance=getattr(legs,'distance',0)+leg.get('distance_meters',leg.get('meters',0))
+                path.signature=(leg['trip_id'],leg['to'],'bus') if leg['type']=='bus' else (*legs.signature[:2],'walk') if rides else ('walk',)
+                return path
+            def score(label):
+                return label[0]+getattr(label[1],'penalty',0)
+            def signature(legs):
+                return getattr(legs,'signature',('walk',))
+            def insert(store,sid,label):
+                items=store.setdefault(sid,[])
+                if len(items)==4 and score(label)>=score(items[-1]):return
+                sig=signature(label[1])
+                matching=next((l for l in items if signature(l[1])==sig),None)
+                if matching and score(matching)<=score(label):return
+                if matching:items.remove(matching)
+                items.append(label);items.sort(key=score)
+                del items[4:]  # Documented bounded search, not a global optimum.
+            @lru_cache(maxsize=4096)
+            def neighbors(sid):
+                return [(tid,meters(sid,tid)) for tid in stops if tid!=sid and abs(float(stops[sid]['stop_lat'])-float(stops[tid]['stop_lat']))<=.004 and abs(float(stops[sid]['stop_lon'])-float(stops[tid]['stop_lon']))<=.006 and meters(sid,tid)<=400]
+            def walk_from(store,sid,label,final=False):
+                at,legs=label
+                if legs and legs[-1]['type']=='walk':return
+                choices=[(destination,meters(sid,destination))] if final and sid!=destination and meters(sid,destination)<=400 else [] if final else neighbors(sid)
+                for tid,d in choices:
+                    duration=max(120,math.ceil(d/1.1))
+                    insert(store,tid,(int(at)+duration,extend(legs,{'type':'walk','from':sid,'to':tid,'meters':round(d),'departure':int(at),'arrival':int(at)+duration})))
+            frontier={origin:[(now.timestamp(),[])]}
+            if allow_walks:walk_from(frontier,origin,frontier[origin][0])
+            candidates=list(frontier.get(destination,[]))
+            @lru_cache(maxsize=4096)
+            def stop_departures(sid):
+                return self.departures(sid,now,8*3600)
+            @lru_cache(maxsize=2048)
+            def trip_rows(trip):
+                return [dict(r) for r in c.execute('SELECT * FROM stop_times WHERE trip_id=? ORDER BY CAST(stop_sequence AS INTEGER)',(trip,))]
+            excluded_detour=False
             for ride in range(2):
-                # Keep each round tied to its previous labels: a later improvement
-                # must not accidentally permit a third ride in the same round.
-                previous = dict(best)
-                next_frontier=set()
-                for sid in frontier:
-                    if time.monotonic()>deadline: raise ValueError("Journey search exceeded limits. Try closer stops or the official MCTS planner.")
-                    start,legs=previous[sid]
-                    if legs: start+=MIN_TRANSFER_SECONDS
-                    for dep in self.departures(sid,datetime.fromtimestamp(start,TZ),7200)[:100]:
-                        previous_bus = next((leg for leg in reversed(legs) if leg['type']=='bus'), None)
-                        if previous_bus:
-                            rules = c.execute('SELECT * FROM transfers WHERE from_stop_id=? AND to_stop_id=?', (previous_bus['to'],sid)).fetchall()
-                            applicable=[]
-                            for rule in rules:
-                                rule=dict(rule)
-                                selectors={'from_route_id':previous_bus['route'],'to_route_id':dep['route_id'], 'from_trip_id':previous_bus['trip_id'],'to_trip_id':dep['trip_id']}
-                                if all(not rule.get(key) or rule[key]==value for key,value in selectors.items()): applicable.append(rule)
-                            # Conservative: never offer forbidden or unsupported linked-trip rules.
-                            if any(r['transfer_type'] in ('3','4','5') for r in applicable): continue
-                            minimum=max([MIN_TRANSFER_SECONDS]+[int(r.get('min_transfer_time') or 0) for r in applicable])
-                            if dep['scheduled_epoch']-previous_bus['arrival'] < minimum: continue
-                        rows=c.execute('SELECT * FROM stop_times WHERE trip_id=? AND CAST(stop_sequence AS INTEGER)>? ORDER BY CAST(stop_sequence AS INTEGER)',(dep['trip_id'],int(dep['stop_sequence'])) )
-                        midnight=datetime.strptime(dep['service_date'],'%Y%m%d').replace(tzinfo=TZ)
-                        for row in rows:
-                            if 'drop_off_type' in row.keys() and row['drop_off_type'] not in ('','0'): continue
-                            at=service_epoch(midnight.date(),row['arrival_time']); target=row['stop_id']
-                            if at < dep['scheduled_epoch']: continue
-                            if target not in best or at<best[target][0]:
-                                best[target]=(at,legs+[{'type':'bus','route':dep['route_id'],'trip_id':dep['trip_id'],'shape_id':dep['shape_id'],'headsign':dep['trip_headsign'],'from':sid,'to':target,'departure':dep['scheduled_epoch'],'arrival':int(at)}]); next_frontier.add(target)
-                # Transfer walking estimates are straight-line, not accessible street routing.
-                if not allow_walks:
-                    frontier=next_frontier
-                    continue
-                walk_sources = [(sid, best[sid]) for sid in next_frontier]
-                for sid, (at, legs) in walk_sources:
-                    if time.monotonic() > deadline:
-                        raise ValueError('Journey search exceeded limits. Try closer stops or the official MCTS planner.')
-                    a=stops[sid]
-                    for tid,b in stops.items():
-                        if abs(float(a['stop_lat'])-float(b['stop_lat']))>.004 or abs(float(a['stop_lon'])-float(b['stop_lon']))>.006: continue
-                        meters=distance_km(float(a['stop_lat']),float(a['stop_lon']),float(b['stop_lat']),float(b['stop_lon']))*1000
-                        if tid!=sid and meters<=400:
-                            arrival=at+max(120,meters/1.1)
-                            if tid not in best or arrival<best[tid][0]:
-                                best[tid]=(arrival,legs+[{'type':'walk','from':sid,'to':tid,'meters':round(meters),'departure':int(at),'arrival':int(arrival)}]); next_frontier.add(tid)
-                frontier=next_frontier
-            result=best.get(destination)
-            return {'data_type':'scheduled','legs':result[1] if result else [],'arrival':int(result[0]) if result else None,'limitations':'Up to one transfer; walking is straight-line, not a verified pedestrian or accessible path. Not exhaustive. Allow extra transfer time.'}
+                next_round={}
+                for sid,labels in frontier.items():
+                    for at,legs in labels:
+                        if time.monotonic()>deadline:raise ValueError('Journey search exceeded limits. Try closer stops or the official MCTS planner.')
+                        previous_bus=next((l for l in reversed(legs) if l['type']=='bus'),None)
+                        start=at+(MIN_TRANSFER_SECONDS if previous_bus else 0)
+                        # Keep a per-stop bounded departure horizon. Labels from distinct
+                        # incoming trips must not collapse before transfer selectors apply.
+                        for dep in [d for d in stop_departures(sid) if start<=d['scheduled_epoch']<=start+7200][:100]:
+                            if time.monotonic()>deadline:raise ValueError('Journey search exceeded limits. Try closer stops or the official MCTS planner.')
+                            if previous_bus:
+                                if dep['trip_id']==previous_bus['trip_id']:continue
+                                rules=c.execute('SELECT * FROM transfers WHERE from_stop_id=? AND to_stop_id=?',(previous_bus['to'],sid)).fetchall()
+                                selectors={'from_route_id':previous_bus['route'],'to_route_id':dep['route_id'],'from_trip_id':previous_bus['trip_id'],'to_trip_id':dep['trip_id']}
+                                applicable=[dict(r) for r in rules if all(not dict(r).get(k) or dict(r)[k]==v for k,v in selectors.items())]
+                                if any(r['transfer_type'] in ('3','4','5') for r in applicable):continue
+                                minimum=max([MIN_TRANSFER_SECONDS]+[int(r.get('min_transfer_time') or 0) for r in applicable])
+                                if dep['scheduled_epoch']-previous_bus['arrival']<minimum:continue
+                            rows=[r for r in trip_rows(dep['trip_id']) if int(r['stop_sequence'])>int(dep['stop_sequence'])]
+                            day=datetime.strptime(dep['service_date'],'%Y%m%d').date()
+                            prior=sid;distance=0;retraced=False
+                            reverse_same_route=bool(previous_bus and previous_bus['route']==dep['route_id'] and previous_bus.get('direction_id')!=dep['direction_id'] and previous_bus.get('distance_meters',0)>800)
+                            visited={l['from'] for l in legs}|{l['to'] for l in legs}
+                            for row in rows:
+                                target=row['stop_id'];distance+=meters(prior,target);prior=target
+                                if reverse_same_route and meters(target,previous_bus['from'])<=150:retraced=True
+                                if retraced:
+                                    excluded_detour=True
+                                    continue
+                                if 'drop_off_type' in row.keys() and row['drop_off_type'] not in ('','0'):continue
+                                arrival=service_epoch(day,row['arrival_time'])
+                                if arrival<dep['scheduled_epoch'] or target==origin or target in visited:continue
+                                if direct<=800 and distance+getattr(legs,'distance',0)>max(1200,direct*4):
+                                    excluded_detour=True
+                                    continue
+                                bus={'type':'bus','route':dep['route_id'],'trip_id':dep['trip_id'],'shape_id':dep['shape_id'],'headsign':dep['trip_headsign'],'direction_id':dep['direction_id'],'from':sid,'to':target,'departure':dep['scheduled_epoch'],'arrival':int(arrival),'distance_meters':round(distance),'from_sequence':int(dep['stop_sequence']),'to_sequence':int(row['stop_sequence'])}
+                                insert(next_round,target,(arrival,extend(legs,bus)))
+                if allow_walks:
+                    for sid,labels in list(next_round.items()):
+                        for label in list(labels):walk_from(next_round,sid,label,final=ride==1)
+                candidates.extend(next_round.get(destination,[]))
+                frontier=next_round
+            # A few blocks must not become a cross-town out-and-back. Retain the
+            # explicit no-reasonable-route outcome and nearby platform suggestions.
+            reasonable=[l for l in candidates if not (direct<=800 and sum(x.get('distance_meters',x.get('meters',0)) for x in l[1])>max(1200,direct*4))]
+            result=min(reasonable,key=score) if reasonable else None
+            return {'data_type':'estimated_walk' if result and all(l['type']=='walk' for l in result[1]) else 'scheduled','legs':result[1] if result else [],'arrival':int(result[0]) if result else None,
+                    'straight_line_distance_meters':round(direct),'nearby_trip':direct<=800,
+                    'search_outcome':'reasonable_connection' if result else 'unreasonable_detour_excluded' if candidates or excluded_detour else 'no_connection',
+                    'selection_policy':'arrival_plus_transfer_walking_and_backtracking_penalties',
+                    'limitations':'Up to one transfer; four incoming-trip labels per stop, 100 departures per boarding search and an eight-hour departure horizon. Same-route reverse transfers retracing the boarding area are excluded. Walking is straight-line, not a verified pedestrian or accessible path. Not exhaustive. Allow extra transfer time.'}

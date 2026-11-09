@@ -8,7 +8,8 @@
     "test:a11y": "node tests/accessibility.browser.cjs",
     "test:features": "node tests/features.browser.cjs",
     "test:release": "node tests/full-release.browser.cjs",
-    "test:map": "node tests/map-layout.browser.cjs"
+    "test:map": "node tests/map-layout.browser.cjs",
+    "test:routing": "node tests/routing-quality.browser.cjs"
   },
   "devDependencies": {
     "playwright": "1.65.0",

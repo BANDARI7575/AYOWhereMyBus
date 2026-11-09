@@ -219,5 +219,8 @@
   "Live vehicle data is unavailable right now.": "Los datos de vehículos en vivo no están disponibles ahora.",
   "Map tiles and weather contact third-party providers and can reveal your IP address. The map library and fonts are self-hosted. External directions links pass selected stop coordinates to another provider. Browser speech and notification support depend on your device.": "Los mapas y el clima contactan a terceros y pueden revelar tu IP. La biblioteca de mapas y las fuentes se alojan en AYO. Los enlaces de indicaciones envían las coordenadas de paradas a otro proveedor. La voz y las notificaciones dependen del dispositivo.",
   "Background alert worker is unavailable. Try again later.": "Los avisos en segundo plano no están disponibles. Inténtalo más tarde.",
-  "Choose whether to include estimated walking connections": "Elige si quieres incluir conexiones a pie estimadas"
+  "Choose whether to include estimated walking connections": "Elige si quieres incluir conexiones a pie estimadas",
+  "MCTS vehicle feed is stale or unavailable. Positions are not current.": "Los datos de vehículos de MCTS están desactualizados o no disponibles. Las posiciones no son actuales.",
+  "Location access is not supported. Search by stop name in Rider tools.": "La ubicación no está disponible. Busca por nombre en las herramientas para pasajeros.",
+  "Location unavailable or permission denied. Search by stop name in Rider tools.": "Ubicación no disponible o permiso denegado. Busca por nombre en las herramientas para pasajeros."
 }

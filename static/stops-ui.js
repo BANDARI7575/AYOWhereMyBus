@@ -516,7 +516,7 @@ for (const route of routes) {
   function findNearbyStops() {
     if (!navigator.geolocation) {
       setStopsStatus(
-        "Location access is not supported."
+        "Location access is not supported. Search by stop name in Rider tools."
       );
       return;
     }
@@ -561,6 +561,10 @@ for (const route of routes) {
           }
 
           displayStops(data.stops);
+          if(Number.isFinite(position.coords.accuracy)&&position.coords.accuracy>200){
+            const es=document.documentElement.lang==='es';
+            setStopsStatus(es?`Precisión de ubicación: unos ${Math.round(position.coords.accuracy)} m. Confirma las paradas manualmente.`:`Location accuracy: about ${Math.round(position.coords.accuracy)} m. Confirm stops manually.`);
+          }
 
           showStopsOnMap(
             data.stops,
@@ -585,7 +589,7 @@ for (const route of routes) {
         button.textContent = "⌖ FIND NEARBY STOPS";
 
         setStopsStatus(
-          "Location unavailable or permission denied."
+          "Location unavailable or permission denied. Search by stop name in Rider tools."
         );
 
         console.warn(

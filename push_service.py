@@ -94,7 +94,7 @@ def install_push(app,db,get_schedule):
 
 def reliable_prediction(dep,now):
     return (not dep.get('canceled') and dep.get('data_type')=='realtime' and dep.get('prediction_at') is not None
-            and -60<=now-dep.get('prediction_reported_at',0)<=180 and 0<dep['prediction_at']-now<=300 and (dep.get('uncertainty_seconds') is None or dep['uncertainty_seconds']<=120))
+            and -60<=now-dep.get('prediction_reported_at',0)<=180 and 0<dep['prediction_at']-now<=300 and (dep.get('uncertainty_seconds') is None or 0<=dep['uncertainty_seconds']<=120))
 
 def send(subscription,payload):
     import requests

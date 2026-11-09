@@ -99,6 +99,10 @@ async function run() {
       await page.waitForFunction(()=>document.querySelector('#journeyStatus').textContent.includes('unavailable')); checks++;
       mode='slow'; await page.locator('#planJourney').click(); await delay(100); await page.locator('#planTo').fill('Wisconsin'); await delay(900);
       assert.equal(await page.locator('#journeyResults').innerText(),''); checks++;
+      mode='ok';
+      await page.evaluate(()=>Object.defineProperty(navigator.geolocation,'getCurrentPosition',{configurable:true,value:ok=>ok({coords:{latitude:43,longitude:-88,accuracy:800}})}));
+      await page.locator('.journey-location').last().getByRole('button',{name:'Use My Location',exact:true}).click();
+      await page.waitForFunction(()=>document.querySelector('#planTo-info').textContent.includes('Location accuracy is about 800 m'));checks++;
       await page.evaluate(()=>Object.defineProperty(navigator.geolocation,'getCurrentPosition',{configurable:true,value:(ok,error)=>error({code:1})}));
       await page.locator('.journey-location').last().getByRole('button',{name:'Use My Location',exact:true}).click();
       await page.waitForFunction(()=>document.querySelector('#planTo-info').textContent.includes('Could not access'),null,{timeout:5000}).catch(async e=>{throw Error('Denied location state: '+await page.locator('#planTo-info').innerText()+' errors: '+JSON.stringify(errors));}); checks++;

@@ -3,6 +3,8 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      AYO_TEST_URL: http://127.0.0.1:5099
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -12,6 +14,8 @@ jobs:
         with:
           node-version: '22'
       - run: pip install -r requirements.lock
+      - name: Prepare official bundled timetable index
+        run: python -c "from transit_engine import Schedule; Schedule().build()"
       - run: python -m unittest discover -s tests -v
       - run: node --check static/release.js
       - run: node --check static/journey.js

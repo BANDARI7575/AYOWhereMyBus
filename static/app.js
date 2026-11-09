@@ -456,12 +456,12 @@ async function refresh(zoom = false) {
         ? "VEHICLE AGE: UNKNOWN"
         : `OLDEST KNOWN REPORT: ${Math.floor(oldest / 60)} MIN`;
 
-    if (staleCount > 0) {
+    if (data.feed_fresh === false || staleCount > 0) {
       $("connectionBadge").textContent =
         "● SOME DATA STALE";
 
       setStatus(
-        `${staleCount} vehicle positions are old or have unknown timestamps. Use caution.`,
+        data.feed_fresh === false ? "MCTS vehicle feed is stale or unavailable. Positions are not current." : `${staleCount} vehicle positions are old or have unknown timestamps. Use caution.`,
         true
       );
     } else if (state.mode === "nearby") {

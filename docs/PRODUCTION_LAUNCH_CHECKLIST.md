@@ -37,3 +37,10 @@ Release decision: **NO PUBLIC BETA. All critical gates require evidence and owne
 - [ ] Real named-stop journey, transfers, live tracking, alerts, weather, nearby stops, favorites and creator section checked on approved host.
 - [ ] Unapproved report demonstrably invisible; moderation reviewer and backup/recovery on call.
 - [ ] Explicit public deployment approval recorded, rollback owner present, then controlled publication with monitoring.
+
+## Routing audit follow-up
+
+- [x] Reproduced actual Cass 2783 → Jackson 66 reverse-direction detour at the committed baseline.
+- [x] Regressions cover short detours, longer retracing reversals, distinct transfer labels, direct-service preference, minimum transfer time, initial/transfer/final walking and source-distance geometry clipping.
+- [x] Stop IDs remain exact; nearby directional platforms require explicit selection and a new search.
+- [ ] Host capacity acceptance must include cold walking-enabled journeys and realistic concurrent rider searches; bounded local search is not an SLA.
