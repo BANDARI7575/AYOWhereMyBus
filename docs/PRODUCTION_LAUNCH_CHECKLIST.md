@@ -44,3 +44,12 @@ Release decision: **NO PUBLIC BETA. All critical gates require evidence and owne
 - [x] Regressions cover short detours, longer retracing reversals, distinct transfer labels, direct-service preference, minimum transfer time, initial/transfer/final walking and source-distance geometry clipping.
 - [x] Stop IDs remain exact; nearby directional platforms require explicit selection and a new search.
 - [ ] Host capacity acceptance must include cold walking-enabled journeys and realistic concurrent rider searches; bounded local search is not an SLA.
+
+## Full six-feature release gates
+
+- [ ] Live AI voice account/model/key and billing approved; trusted account/session authentication integrated; provider spend limits and server-controlled session supervision validated. Keep paid voice disabled until then.
+- [ ] Actual EN/ES multi-turn voice, interruption, mute, stop, denied microphone and cleanup tested with the real provider on Safari/iPhone/Android; mock responses do not satisfy this gate.
+- [ ] Six workspaces accepted on physical touch devices, landscape, real 200%/400% browser zoom and VoiceOver/TalkBack. Headless touch emulation is not physical acceptance.
+- [ ] Native notification/foreground throttling and closed-browser/locked-device Web Push verified on the approved HTTPS host using real qualifying predictions.
+- [ ] Operator approves provider terms/attribution, moderation staffing, support address, privacy/audio processing, GTFS maintenance, durable storage, monitoring, off-host restore and rollback.
+- [ ] New source/artifact reviewed; explicit approval before committing, pushing, merging, purchasing or public deployment. No public beta exception.

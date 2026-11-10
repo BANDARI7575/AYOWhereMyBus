@@ -1406,3 +1406,40 @@ body.day-mode .feature-card .tag {color:#52616d;}
 }
 .journey-walking-choice {display:flex;gap:12px;align-items:flex-start;margin:18px 0;font-size:14px;}
 .journey-panel .journey-walking-choice input {width:22px;height:22px;flex:none;margin:0;accent-color:var(--gold);}
+
+/* Feature workspaces share the existing AYO palette and one contained map. */
+.feature-open {border:0;background:transparent;color:inherit;font:inherit;text-align:inherit;padding:0;min-height:44px;}
+.ayo-workspace {box-sizing:border-box;width:min(1320px,96vw);max-width:96vw;max-height:94dvh;padding:20px;border:1px solid var(--gold);border-radius:14px;background:var(--bg);color:var(--text);overflow:auto;}
+.ayo-workspace::backdrop {background:rgba(3,8,14,.86);}
+.workspace-header {display:flex;position:sticky;top:-20px;z-index:4;background:var(--bg);gap:16px;align-items:center;justify-content:space-between;padding:10px 0;}
+.workspace-header h2 {font:clamp(20px,3vw,32px) var(--serif);margin:0;}
+.workspace-nav {display:flex;flex-wrap:wrap;gap:6px;margin:12px 0;}
+.workspace-nav button[aria-current=page] {border-color:var(--gold);color:var(--gold);}
+.workspace-grid {display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:20px;}
+.workspace-content,.workspace-map {min-width:0;}
+.workspace-map {position:sticky;top:80px;align-self:start;}
+.workspace-map #map {height:420px;max-width:100%;}
+.workspace-content label {display:block;margin:10px 0;font-size:14px;}
+.workspace-content input,.workspace-content select {display:block;box-sizing:border-box;width:100%;max-width:100%;min-height:44px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:10px;}
+.workspace-content button {min-height:44px;max-width:100%;white-space:normal;overflow-wrap:anywhere;margin:4px;}
+.workspace-row,.workspace-detail {border:1px solid var(--line);border-radius:8px;padding:12px;margin:10px 0;overflow-wrap:anywhere;}
+.workspace-content p,.workspace-status {overflow-wrap:anywhere;}
+.workspace-data {white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto;font-size:13px;background:var(--panel);padding:12px;}
+.workspace-content .journey-panel {padding:12px;}
+.workspace-content audio {max-width:100%;}
+@media(max-width:850px){.workspace-grid{grid-template-columns:1fr;}.workspace-map{position:relative;top:auto;}.workspace-map #map{height:300px;}.ayo-workspace{padding:12px;width:96vw;}.workspace-header{top:-12px;}.workspace-nav button{font-size:12px;}}
+@media(prefers-reduced-motion:reduce){.logo-weather{animation:none!important;transition:none!important;}}
+.logo-weather {display:inline-flex;align-items:center;justify-content:center;width:22px;min-width:22px;font:18px/1 var(--sans);}
+.logo-weather::before,.logo-weather::after {content:none!important;}
+.logo-weather[data-weather=sun] {filter:drop-shadow(0 0 4px #d4b37e);}
+.logo-weather[data-weather=snow],.logo-weather[data-weather=rain] {animation:weather-breathe 4s ease-in-out infinite;}
+@keyframes weather-breathe {50%{opacity:.65;transform:translateY(1px);}}
+@media(prefers-reduced-motion:reduce){.logo-weather{animation:none!important;}}
+.journey-experience select {max-width:100%;min-height:44px;background:var(--panel);color:var(--text);border:1px solid var(--line);padding:8px;}
+#weatherObserved {font:9px var(--mono);max-width:60px;white-space:nowrap;color:var(--muted);}
+.weather-paused .logo-weather {animation-play-state:paused!important;}
+@media(max-width:1100px){#weatherObserved{display:none;}}
+.ayo-arrival-notice {position:fixed;bottom:90px;right:12px;z-index:9999;box-sizing:border-box;max-width:min(360px,calc(100vw - 24px));background:var(--panel);color:var(--text);border:1px solid var(--gold);border-radius:10px;padding:14px;overflow-wrap:anywhere;}
+.ayo-arrival-notice[hidden] {display:none;}
+.workspace-nav button,.workspace-header button {min-height:44px;}
+.leaflet-touch .leaflet-bar a {width:44px;height:44px;line-height:44px;}

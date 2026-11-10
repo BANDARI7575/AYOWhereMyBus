@@ -135,14 +135,14 @@ class Schedule:
     def stop_directions(self,c,stop_id):
         return [dict(r) for r in c.execute("SELECT DISTINCT COALESCE(NULLIF(r.route_short_name,''),t.route_id) AS route_number,t.trip_headsign AS headsign,t.direction_id FROM stop_times st JOIN trips t USING(trip_id) JOIN routes r ON r.route_id=t.route_id WHERE st.stop_id=? ORDER BY route_number,headsign LIMIT 6",(stop_id,))]
 
-    def itinerary(self, origin, destination, now=None, allow_walks=True):
+    def itinerary(self, origin, destination, now=None, allow_walks=True, choice=0):
         """Present the existing scheduled search with verified names and trip geometry."""
         if not origin or not destination or len(origin) > 128 or len(destination) > 128:
             raise ValueError('Choose an origin and destination from the suggestions')
         if origin == destination:
             raise ValueError('Choose different origin and destination stops')
         now = now or datetime.now(TZ)
-        result = self.plan(origin, destination, now, allow_walks=allow_walks)
+        result = self.plan(origin, destination, now, allow_walks=allow_walks,choice=choice)
         with self.connect() as c:
             def stop_info(stop_id):
                 r = c.execute('SELECT * FROM stops WHERE stop_id=?', (stop_id,)).fetchone()
@@ -209,7 +209,7 @@ class Schedule:
                 'transfers': max(0, rides - 1),
                 'walking_estimated': any(leg['type'] == 'walk' for leg in legs),
                 'origin': origin_info, 'destination': destination_info, 'nearby_destination_stops':nearby_destinations,'nearby_origin_stops':nearby_origins}
-    def plan(self, origin, destination, now=None, allow_walks=True):
+    def plan(self, origin, destination, now=None, allow_walks=True,choice=0):
         """Bounded two-ride search with distinct incoming-trip labels and quality scoring.
 
         Generalized arrival adds five minutes per transfer and half of estimated
@@ -302,7 +302,7 @@ class Schedule:
                                 if direct<=800 and distance+getattr(legs,'distance',0)>max(1200,direct*4):
                                     excluded_detour=True
                                     continue
-                                bus={'type':'bus','route':dep['route_id'],'trip_id':dep['trip_id'],'shape_id':dep['shape_id'],'headsign':dep['trip_headsign'],'direction_id':dep['direction_id'],'from':sid,'to':target,'departure':dep['scheduled_epoch'],'arrival':int(arrival),'distance_meters':round(distance),'from_sequence':int(dep['stop_sequence']),'to_sequence':int(row['stop_sequence'])}
+                                bus={'type':'bus','service_date':dep['service_date'],'route':dep['route_id'],'trip_id':dep['trip_id'],'shape_id':dep['shape_id'],'headsign':dep['trip_headsign'],'direction_id':dep['direction_id'],'from':sid,'to':target,'departure':dep['scheduled_epoch'],'arrival':int(arrival),'distance_meters':round(distance),'from_sequence':int(dep['stop_sequence']),'to_sequence':int(row['stop_sequence'])}
                                 insert(next_round,target,(arrival,extend(legs,bus)))
                 if allow_walks:
                     for sid,labels in list(next_round.items()):
@@ -312,9 +312,16 @@ class Schedule:
             # A few blocks must not become a cross-town out-and-back. Retain the
             # explicit no-reasonable-route outcome and nearby platform suggestions.
             reasonable=[l for l in candidates if not (direct<=800 and sum(x.get('distance_meters',x.get('meters',0)) for x in l[1])>max(1200,direct*4))]
-            result=min(reasonable,key=score) if reasonable else None
+            options=[];seen=set()
+            for candidate in sorted(reasonable,key=score):
+                key=tuple((l['type'],l.get('trip_id'),l['from'],l['to'],l['departure']) for l in candidate[1])
+                if key not in seen:options.append(candidate);seen.add(key)
+                if len(options)==3:break
+            if type(choice)!=int or choice<0 or choice>=max(1,len(options)):raise ValueError('Journey option no longer available; search again')
+            result=options[choice] if options else None
             return {'data_type':'estimated_walk' if result and all(l['type']=='walk' for l in result[1]) else 'scheduled','legs':result[1] if result else [],'arrival':int(result[0]) if result else None,
                     'straight_line_distance_meters':round(direct),'nearby_trip':direct<=800,
                     'search_outcome':'reasonable_connection' if result else 'unreasonable_detour_excluded' if candidates or excluded_detour else 'no_connection',
+                    'choices_available':len(options),'selected_choice':choice,
                     'selection_policy':'arrival_plus_transfer_walking_and_backtracking_penalties',
                     'limitations':'Up to one transfer; four incoming-trip labels per stop, 100 departures per boarding search and an eight-hour departure horizon. Same-route reverse transfers retracing the boarding area are excluded. Walking is straight-line, not a verified pedestrian or accessible path. Not exhaustive. Allow extra transfer time.'}

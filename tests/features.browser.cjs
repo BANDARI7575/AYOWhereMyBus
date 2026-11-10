@@ -1,3 +1,4 @@
+require('./control-audit.cjs');
 /* Browser feature contracts use isolated API fixtures; no real reports are posted. */
 const {chromium}=require('playwright');const assert=require('node:assert/strict');
 const base=process.env.AYO_TEST_URL||'http://127.0.0.1:5050';
@@ -34,7 +35,7 @@ const base=process.env.AYO_TEST_URL||'http://127.0.0.1:5050';
   await page.locator('#winterStop').fill('1');await page.locator('#winterText').fill('Synthetic test report.');
   await page.getByRole('button',{name:'Submit for moderation',exact:true}).click();await page.waitForFunction(()=>document.querySelector('#winterStatus').textContent.includes('Queued'));assert.match(await page.locator('#winterStatus').innerText(),/Queued/);
   await page.evaluate(()=>navigator.serviceWorker.ready);await page.reload({waitUntil:'domcontentloaded'});await page.locator('#planFrom').waitFor();
-  const cached=await page.evaluate(async()=>{const c=await caches.open('ayo-shell-v7');return(await c.keys()).map(r=>new URL(r.url).pathname);});
+  const cached=await page.evaluate(async()=>{const c=await caches.open('ayo-shell-v23');return(await c.keys()).map(r=>new URL(r.url).pathname);});
   assert.ok(cached.includes('/static/journey.js'));assert.ok(!cached.some(p=>p.startsWith('/api/')));
   await context.setOffline(true);await page.waitForFunction(()=>!navigator.onLine);await page.reload({waitUntil:'domcontentloaded'});await page.locator('#planFrom').waitFor();
   assert.match(await page.locator('#riderTools').innerText(),/Offline:/);

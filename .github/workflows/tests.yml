@@ -32,4 +32,8 @@ jobs:
           npm run test:a11y
           npm run test:features
           npm run test:release
+          npm run test:workspaces
+          npm run test:workspace-failures
+          npm run test:weather
+          npm run test:controls
           AYO_TEST_URL=http://127.0.0.1:5099 npm run test:map

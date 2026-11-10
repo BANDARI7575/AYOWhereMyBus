@@ -1,3 +1,4 @@
+require('./control-audit.cjs');
 /* Integrated regression contracts for both languages; test-only transit/weather fixtures. */
 const {chromium,webkit}=require('playwright');const assert=require('node:assert/strict');
 const base=process.env.AYO_TEST_URL||'http://127.0.0.1:5050';

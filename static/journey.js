@@ -31,6 +31,13 @@
     const a = leg.from_stop, b = leg.to_stop;
     return `https://www.google.com/maps/dir/?api=1&origin=${a.latitude},${a.longitude}&destination=${b.latitude},${b.longitude}&travelmode=walking`;
   }
+  function chicagoDeparture(value) {
+    if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value))throw Error('Choose a valid Milwaukee departure time');
+    const parts=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+    const candidates=[5,6].map(h=>new Date(Date.parse(value+'Z')+h*3600000)).filter(d=>parts.format(d).replace(' ','T')===value);
+    if(candidates.length!==1)throw Error('This time is invalid or ambiguous during the clock change. Choose another time.');
+    return candidates[0].toISOString();
+  }
   function mount(document, win) {
     const panel = document.querySelector('#journey .journey-panel');
     if (!panel) return;
@@ -43,7 +50,7 @@
       if (parent) parent.append(n);
       return n;
     };
-    let version = 0, request = null, mapLayer = null, itinerary = null;
+    let version = 0, request = null, mapLayer = null, itinerary = null, choice=0, mapSuppressed=false;
     panel.replaceChildren();
     panel.classList.add('journey-experience');
     add('p', t('Where are you headed?', '¿Adónde vas?'), panel, 'journey-kicker');
@@ -51,6 +58,9 @@
       'Busca paradas o cruces de MCTS y elige una sugerencia. Usa tu ubicación para encontrar paradas cercanas. No se buscan direcciones ni lugares de interés.'), panel);
     const form = add('form', '', panel);
     const fields = add('div', '', form, 'journey-search-grid');
+    const modeLabel=add('label',t('Travel time','Hora de viaje'),form);const mode=add('select','',form);mode.id='journeyTimeMode';modeLabel.htmlFor=mode.id;for(const [value,label]of [['now',t('Leave Now','Salir ahora')],['depart',t('Depart At (Milwaukee time)','Salir a las (hora de Milwaukee)')]]){const o=add('option',label,mode);o.value=value;}
+    const whenLabel=add('label',t('Departure date and time','Fecha y hora de salida'),form);const when=add('input','',whenLabel);when.type='datetime-local';when.id='journeyDepartAt';whenLabel.hidden=true;mode.onchange=()=>{whenLabel.hidden=mode.value!=='depart';invalidate();};when.onchange=invalidate;
+    add('p',t('Arrive By and address geocoding are not supported here. Use the official planner for those options.','Llegar antes de y geocodificación no están disponibles aquí. Usa el planificador oficial.'),form,'tiny-note');
     const walkingLabel=add('label','',form,'journey-walking-choice');const walking=add('input','',walkingLabel);walking.type='checkbox';walking.id='allowEstimatedWalking';walking.checked=false;add('span',t('Include estimated walking connections. I will check the actual path; sidewalks, crossings and accessibility are not verified.','Incluir conexiones a pie estimadas. Comprobaré el camino real; no se verifican aceras, cruces ni accesibilidad.'),walkingLabel);walking.addEventListener('change',invalidate);
     const status = add('p', '', form, 'journey-status');
     status.id = 'journeyStatus'; status.setAttribute('role', 'status');
@@ -72,7 +82,8 @@
     win.setInterval(updateExpiry, 15000);
     document.addEventListener('visibilitychange', updateExpiry);
     function clearMap() { if (mapLayer) mapLayer.remove(); mapLayer = null; }
-    function invalidate() {
+    function invalidate(reset=true) {
+      if(reset)choice=0;
       version++; if (request) request.abort(); request = null;
       clearMap(); itinerary = null; results.replaceChildren(); status.textContent = ''; submit.disabled = false;
       freshness.textContent = '';
@@ -108,7 +119,7 @@
         info.textContent = stop.distance_meters == null ? t('Stop selected.', 'Parada seleccionada.') :
           t(`Stop selected, approximately ${stop.distance_meters} m from your location in a straight line. Your journey starts or ends at this stop; access walking time is not included.`,
             `Parada seleccionada, a unos ${stop.distance_meters} m en línea recta. El viaje empieza o termina en esta parada; no incluye el tiempo para llegar a pie.`);
-        input.focus();
+        input.focus();win.dispatchEvent(new CustomEvent('ayo:planner-location-selected',{detail:{field:id,stop}}));
       }
       function show(stops) {
         candidates = stops; active = -1; list.replaceChildren();
@@ -146,7 +157,7 @@
         }
       }
       input.addEventListener('input', () => {
-        cancel(); chosen = null; close(); invalidate();
+        cancel(); chosen = null; close(); invalidate();win.dispatchEvent(new CustomEvent('ayo:planner-location-selected',{detail:{field:id,stop:null}}));
         if (input.value.trim().length < 2) { info.textContent = t('Type at least two letters.', 'Escribe al menos dos letras.'); return; }
         info.textContent = t('Searching stops…', 'Buscando paradas…'); const token = serial;
         timer = setTimeout(() => search('/api/journey-locations?q=' + encodeURIComponent(input.value.trim()), token, false), 250);
@@ -189,7 +200,10 @@
     }
     const from = locationField('planFrom', 'From', 'Origen');
     const to = locationField('planTo', 'To', 'Destino');
+    const swap=add('button',t('Swap From and To','Intercambiar origen y destino'),form,'favorite-chip');swap.type='button';swap.onclick=()=>{const a=from.selected(),b=to.selected();if(!a||!b){status.textContent=t('Choose both stops before swapping.','Elige ambas paradas antes de intercambiar.');return;}from.select(b);to.select(a);};
+    win.addEventListener('ayo:planner-context',e=>{if(e.detail.from&&from.selected()?.stop_id!==e.detail.from.stop_id)from.select(e.detail.from);if(e.detail.to&&to.selected()?.stop_id!==e.detail.to.stop_id)to.select(e.detail.to);if(e.detail.freshSearch){invalidate();form.requestSubmit();}});
     function drawMap(data) {
+      if(mapSuppressed)return false;
       clearMap();
       if (!win.state?.map || !win.L) return false;
       const L = win.L, map = win.state.map; mapLayer = L.featureGroup().addTo(map);
@@ -204,6 +218,7 @@
       if (mapLayer.getLayers().length) map.fitBounds(mapLayer.getBounds(), {padding: [30, 30], maxZoom: 15});
       return true;
     }
+    win.addEventListener('ayo:feature-opened',e=>{mapSuppressed=e.detail.feature!=='planner';if(mapSuppressed)clearMap();else if(itinerary?.legs.length)win.requestAnimationFrame(()=>{if(itinerary?.legs.length)drawMap(itinerary);});});
     function render(data) {
       results.replaceChildren();
       if(data.nearby_trip){
@@ -222,14 +237,19 @@
         add('p', t('No scheduled connection was found within this search’s limits. This does not mean there is no service. Try another nearby stop or the official MCTS planner.',
           'No se encontró una conexión programada dentro de los límites de búsqueda. Esto no significa que no haya servicio. Prueba otra parada o el planificador oficial.'), results); return;
       }
+      win.dispatchEvent(new CustomEvent('ayo:journey-selected',{detail:data}));
+      const save=add('button',t('Save Journey','Guardar viaje'),results,'favorite-chip');save.type='button';save.onclick=()=>{try{win.AyoWorkspaces.saveJourney(data.origin,data.destination);status.textContent=t('Journey pair saved on this device.','Trayecto guardado en este dispositivo.');}catch(e){status.textContent=e.message;}};
+      const firstBus=data.legs.find(l=>l.type==='bus');
+      if(firstBus){const alert=add('button',t('Set Departure Alert','Crear aviso de salida'),results,'favorite-chip');alert.type='button';alert.onclick=()=>{const bus=data.legs.find(l=>l.type==='bus');return win.AyoWorkspaces.open('alerts',{stop:bus?.from_stop||data.origin,departure:bus?{trip_id:bus.trip_id,service_date:bus.service_date,route_id:bus.route}:null});};}
+      if(data.choices_available>1){const other=add('button',t('Other journey option','Otra opción de viaje'),results,'favorite-chip');other.type='button';other.onclick=()=>{choice=(data.selected_choice+1)%data.choices_available;form.requestSubmit();};}
       add('h3', `${data.origin.name} → ${data.destination.name}`, results);
       const walkingOnly = data.legs.every(leg=>leg.type==='walk');
       const transfers = walkingOnly ? t('Estimated walk only', 'Solo caminata estimada') : data.transfers ? `${data.transfers} ${data.transfers === 1 ? t('transfer', 'transbordo') : t('transfers', 'transbordos')}` : t('Direct journey', 'Viaje directo');
       add('p', `${duration(data.duration_seconds)} · ${transfers}${data.walking_estimated ? t(' · includes estimated walking time', ' · incluye caminata estimada') : ''}`, results, 'journey-summary');
       add('p', `${walkingOnly?t('Estimated start','Inicio estimado'):t('Scheduled departure', 'Salida programada')}: ${timeLabel(data.departure, es)} · ${walkingOnly?t('Estimated arrival','Llegada estimada'):t('Arrival', 'Llegada')}: ${timeLabel(data.arrival, es)}`, results);
       if(walkingOnly)add('p',t('This is an estimated connection between the selected stops, not a verified pedestrian route or scheduled bus service.','Esta conexión entre las paradas es estimada; no es una ruta peatonal verificada ni servicio de autobús programado.'),results,'tiny-note');
-      else add('p', t(`At search time: about ${duration(data.initial_wait_seconds)} until departure from the selected origin stop. Travel duration includes transfers; getting to the first stop is not included.`,
-        `Al buscar: unos ${duration(data.initial_wait_seconds)} hasta la salida desde la parada elegida. La duración incluye transbordos; no incluye llegar a la primera parada.`), results, 'tiny-note');
+      else add('p', t(`${data.requested_departure_at?'From requested time':'At search time'}: about ${duration(data.initial_wait_seconds)} until departure from the selected origin stop. Travel duration includes transfers; getting to the first stop is not included.`,
+        `${data.requested_departure_at?'Desde la hora solicitada':'Al buscar'}: unos ${duration(data.initial_wait_seconds)} hasta la salida desde la parada elegida. La duración incluye transbordos; no incluye llegar a la primera parada.`), results, 'tiny-note');
       const steps = add('ol', '', results, 'journey-steps'); let rides = 0;
       for (const [index, leg] of data.legs.entries()) {
         const li = add('li', '', steps);
@@ -242,6 +262,7 @@
               add('p', t('Tight scheduled connection. Allow extra time; delays or a slower walk could cause a missed bus.',
                 'Conexión programada ajustada. Reserva más tiempo; un retraso o una caminata lenta podría hacerte perder el autobús.'), li, 'journey-warning');
           }
+          const track=add('button',t(`Track Route ${leg.route_number}`,`Seguir ruta ${leg.route_number}`),li,'favorite-chip');track.type='button';track.onclick=()=>win.AyoWorkspaces.open('tracking',{route:leg.route});
           add('h4', t(`Take Route ${leg.route_number} toward ${leg.headsign || leg.to_stop.name}`,
             `Toma la ruta ${leg.route_number} hacia ${leg.headsign || leg.to_stop.name}`), li);
           add('p', `${t('Board at', 'Sube en')} ${leg.from_stop.name} · ${timeLabel(leg.departure, es)}`, li);
@@ -261,20 +282,23 @@
         'Mapa: los puntos GTFS se limitan al tramo si las distancias de origen lo permiten; si no, se muestra el viaje completo. Los marcadores indican los extremos. No se dibujan rutas peatonales.'), results, 'tiny-note');
       const view = add('button', t('Show journey on live map', 'Ver viaje en el mapa'), results, 'favorite-chip'); view.type = 'button';
       view.addEventListener('click', () => {
+        mapSuppressed=false;
         if (drawMap(data)) document.getElementById('map').scrollIntoView({block: 'center', behavior: win.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
         else mapStatus.textContent = t('The map is unavailable. Your scheduled journey instructions are still shown above.', 'El mapa no está disponible. Las instrucciones programadas siguen arriba.');
       });
-      if (!drawMap(data)) mapStatus.textContent = t('The map is unavailable. Follow the scheduled instructions above; retry the map when connected.', 'El mapa no está disponible. Consulta las instrucciones y vuelve a intentarlo con conexión.');
+      if (!mapSuppressed&&!drawMap(data)) mapStatus.textContent = t('The map is unavailable. Follow the scheduled instructions above; retry the map when connected.', 'El mapa no está disponible. Consulta las instrucciones y vuelve a intentarlo con conexión.');
     }
     form.addEventListener('submit', async event => {
       event.preventDefault();
       const a = from.selected(), b = to.selected();
       if (!a || !b) { status.textContent = t('Choose both locations from the suggestions before searching.', 'Elige ambos lugares de las sugerencias antes de buscar.'); (!a ? from : to).input.focus(); return; }
       if (a.stop_id === b.stop_id) { status.textContent = t('Choose different origin and destination stops.', 'Elige paradas distintas de origen y destino.'); return; }
-      invalidate(); const token = version; request = new AbortController(); submit.disabled = true;
+      if(!win.AyoWorkspaces?.activeFeature||win.AyoWorkspaces.activeFeature==='planner')mapSuppressed=false;
+      invalidate(false); const token = version; request = new AbortController(); submit.disabled = true;
       status.textContent = t('Finding scheduled connections…', 'Buscando conexiones programadas…'); results.setAttribute('aria-busy', 'true');
       try {
-        const data = await get(`/api/journeys?from=${encodeURIComponent(a.stop_id)}&to=${encodeURIComponent(b.stop_id)}&walking=${walking.checked?'1':'0'}`, request.signal);
+        const departure=mode.value==='depart'?chicagoDeparture(when.value):'';
+        const data = await get(`/api/journeys?from=${encodeURIComponent(a.stop_id)}&to=${encodeURIComponent(b.stop_id)}&walking=${walking.checked?'1':'0'}&choice=${choice}${departure?'&depart_at='+encodeURIComponent(departure):''}`, request.signal);
         if (token !== version) return;
         itinerary = data; render(itinerary); updateExpiry(); status.textContent = data.legs.length ? (data.legs.every(l=>l.type==='walk')?t('Estimated walking connection only. Check the actual path before traveling.','Solo conexión a pie estimada. Comprueba el camino real antes de viajar.'):t('Scheduled journey found. Check service alerts before traveling.', 'Viaje programado encontrado. Consulta los avisos antes de viajar.')) : t('No journey found within the search limits.', 'No se encontró un viaje dentro de los límites.');
       } catch (error) {
@@ -285,7 +309,7 @@
       }
     });
   }
-  const exported = {mount, timeLabel, duration, walkingLink, searchFailure, itineraryExpired};
+  const exported = {mount, timeLabel, duration, walkingLink, searchFailure, itineraryExpired,chicagoDeparture};
   if (typeof module !== 'undefined' && module.exports) module.exports = exported;
   if (root.document) root.document.addEventListener('DOMContentLoaded', () => mount(root.document, root));
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -36,3 +36,10 @@ test('itineraries expire at departure or five-minute revalidation deadline', () 
   assert.equal(itineraryExpired({departure:1000,requested_at:100,valid_until:400},400),true);
   assert.equal(itineraryExpired({departure:200,requested_at:100},201),true);
 });
+
+test('explicit Milwaukee departure resolves DST safely without guessing an ambiguous clock',()=>{
+ const {chicagoDeparture}=require('../static/journey.js');
+ assert.equal(chicagoDeparture('2026-11-10T12:00'),'2026-11-10T18:00:00.000Z');
+ assert.throws(()=>chicagoDeparture('2026-11-01T01:30'),/ambiguous/);
+ assert.throws(()=>chicagoDeparture('2026-03-08T02:30'),/ambiguous/);
+});

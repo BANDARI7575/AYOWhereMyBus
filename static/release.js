@@ -17,6 +17,7 @@ const matches=node('div','',tools);const detail=node('div','',tools);
 const status=node('p','',tools);status.id='riderStatus';status.setAttribute('role','status');
 const saved=node('div','',tools);
 function favoriteStops(){try{const ids=JSON.parse(localStorage.getItem('ayo-stops')||'[]');return Array.isArray(ids)?ids.filter(x=>typeof x==='string'&&/^\d{1,12}$/.test(x)):[];}catch{return [];}}
+window.addEventListener('ayo:favorites-changed',()=>favorites());
 function favorites(){saved.replaceChildren();const ids=favoriteStops();for(const id of ids)button(saved,`★ Stop ${id}`,`★ Parada ${id}`,()=>loadStop(id));}
 button(tools,'Search stops','Buscar paradas',async()=>{const d=await api('/api/stops/search?q='+encodeURIComponent(query.value));matches.replaceChildren();for(const s of d.stops)button(matches,`${s.stop_id} · ${s.stop_name}`,`${s.stop_id} · ${s.stop_name}`,()=>loadStop(s.stop_id));if(!d.stops.length)node('p',t('No stops found','No se encontraron paradas'),matches);});
 async function loadStop(id){detail.replaceChildren();node('h4',t('Stop ','Parada ')+id,detail);button(detail,'Save / remove favorite','Guardar / quitar favorito',()=>{let ids=favoriteStops();ids=ids.includes(id)?ids.filter(x=>x!==id):[...ids,id];localStorage.setItem('ayo-stops',JSON.stringify(ids));favorites();});

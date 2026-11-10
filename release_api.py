@@ -106,7 +106,7 @@ def install(app):
             c.execute('INSERT INTO limits VALUES(?,?,?,1) ON CONFLICT(identity,bucket,kind) DO UPDATE SET count=count+1',(identity,bucket,kind))
             count=c.execute('SELECT count FROM limits WHERE identity=? AND bucket=? AND kind=?',(identity,bucket,kind)).fetchone()[0]
         if count>(12 if kind=='write' else 120): return jsonify(message='Too many requests. Try again shortly.'),429,{'Retry-After':'60'}
-        limited_kind = 'journey' if request.path=='/api/journeys' else 'report' if request.path=='/api/winter/reports' and request.method=='POST' else 'vote' if request.path.endswith('/vote') and request.method=='POST' else 'flag' if request.path.endswith('/flag') and request.method=='POST' else 'push' if request.path=='/api/push/subscribe' and request.method=='POST' else None
+        limited_kind = 'journey' if (request.path=='/api/journeys' or request.path=='/api/agent/tools' and (request.get_json(silent=True) or {}).get('name')=='plan_journey') else 'report' if request.path=='/api/winter/reports' and request.method=='POST' else 'vote' if request.path.endswith('/vote') and request.method=='POST' else 'flag' if request.path.endswith('/flag') and request.method=='POST' else 'push' if request.path=='/api/push/subscribe' and request.method=='POST' else None
         if limited_kind:
             span=60 if limited_kind=='journey' else 3600
             slot=int(time.time()//span); maximum={'journey':8,'report':3,'vote':30,'flag':4,'push':6}[limited_kind]
@@ -121,7 +121,7 @@ def install(app):
         response.headers['Permissions-Policy']='geolocation=(self), microphone=(self), camera=()'
         response.headers['X-Frame-Options']='DENY'
         response.headers['X-AYO-Revision'] = app.config['AYO_SOURCE_REVISION']
-        response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; connect-src 'self' https://api.open-meteo.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+        response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; connect-src 'self' https://api.open-meteo.com; media-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
         if request.is_secure: response.headers['Strict-Transport-Security']='max-age=31536000'
         if request.path.startswith('/api/'): response.headers['Cache-Control']='no-store'
         return response
@@ -168,15 +168,31 @@ def install(app):
         walking=request.args.get('walking','0')
         if walking not in ('0','1'):raise ValueError('Choose whether to include estimated walking connections')
         if not origin or not destination or len(origin)>128 or len(destination)>128:raise ValueError('Choose an origin and destination from the suggestions')
+        try:choice=int(request.args.get('choice','0'))
+        except ValueError:raise ValueError('Invalid journey choice')
+        if not 0<=choice<=2:raise ValueError('Invalid journey choice')
+        depart_at=request.args.get('depart_at','')
+        departure=None
+        if depart_at:
+            try:departure=datetime.fromisoformat(depart_at)
+            except ValueError:raise ValueError('Invalid departure time')
+            if departure.tzinfo is None or not 0<=departure.timestamp()-time.time()<=31*86400:raise ValueError('Choose a timezone-aware departure within the next 31 days')
         stamp=Path(schedule.database).stat()
-        key=(schedule.database,stamp.st_ino,stamp.st_mtime_ns,origin,destination,walking)
+        key=(schedule.database,stamp.st_ino,stamp.st_mtime_ns,origin,destination,walking,depart_at,choice)
         with _journey_cache_lock:
             cached=_journey_cache.get(key)
             if cached and time.monotonic()-cached[0]<20 and (cached[1].get('valid_until') is None or cached[1]['valid_until']>time.time()):
                 return jsonify(copy.deepcopy(cached[1]))
         if not _journey_slots.acquire(blocking=False): return jsonify(message='Journey planner is busy. Try again shortly.'),503,{'Retry-After':'3'}
         try:
-            result=schedule.itinerary(origin,destination,allow_walks=walking=='1')
+            options={'allow_walks':walking=='1'}
+            if choice:options['choice']=choice
+            if departure:options['now']=departure
+            result=schedule.itinerary(origin,destination,**options)
+            if departure:
+                result['requested_departure_at']=int(departure.timestamp())
+                result['requested_at']=int(time.time())
+                if result.get('legs'):result['valid_until']=min(result['departure'],int(time.time())+300)
             with _journey_cache_lock:
                 if len(_journey_cache)>=32:_journey_cache.pop(next(iter(_journey_cache)))
                 _journey_cache[key]=(time.monotonic(),copy.deepcopy(result))
@@ -252,6 +268,8 @@ def install(app):
         if not authorized_moderator(): return jsonify(message='Unauthorized'),401
         with db() as c: rows=c.execute("SELECT * FROM reports WHERE state='pending' AND expires>? ORDER BY created LIMIT 100",(time.time(),)).fetchall()
         return jsonify(reports=[dict(r) for r in rows])
+    from feature_service import install_features
+    install_features(app,lambda:schedule,realtime,db,_journey_slots)
     from push_service import install_push
     install_push(app,db,lambda:schedule)
     from moderation_service import install_admin

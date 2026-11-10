@@ -68,5 +68,5 @@ class Realtime:
                 if not e.HasField('alert') or e.is_deleted: continue
                 a=e.alert
                 if a.active_period and not any((not p.HasField('start') or p.start<=now) and (not p.HasField('end') or now<p.end) for p in a.active_period): continue
-                output.append({'id':e.id,'header':[{'language':t.language,'text':t.text} for t in a.header_text.translation], 'description':[{'language':t.language,'text':t.text} for t in a.description_text.translation], 'affected':[{'route_id':s.route_id,'stop_id':s.stop_id} for s in a.informed_entity]})
-        return {'status':status,'alerts':output,'source':'MCTS GTFS-Realtime'}
+                output.append({'active_periods':[{'start':p.start if p.HasField('start') else None,'end':p.end if p.HasField('end') else None} for p in a.active_period],'id':e.id,'header':[{'language':t.language,'text':t.text} for t in a.header_text.translation], 'description':[{'language':t.language,'text':t.text} for t in a.description_text.translation], 'affected':[{'route_id':s.route_id,'stop_id':s.stop_id} for s in a.informed_entity]})
+        return {'status':status,'alerts':output,'feed_timestamp':int(f.header.timestamp) if f else None,'retrieved_at':int(now),'source':'MCTS GTFS-Realtime'}

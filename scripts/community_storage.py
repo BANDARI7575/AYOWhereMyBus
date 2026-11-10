@@ -44,5 +44,6 @@ if a.purge_expired:
             c.execute('DELETE FROM push_deliveries WHERE watch_id NOT IN (SELECT id FROM push_watches)')
             c.execute('DELETE FROM reports WHERE expires<?',(cutoff,))
             c.execute('DELETE FROM votes WHERE report_id NOT IN (SELECT id FROM reports)')
+            if c.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='voice_admission'").fetchone():c.execute('DELETE FROM voice_admission WHERE day<?',(int(time.time()//86400)-2,))
             c.execute('DELETE FROM moderation_audit WHERE at<?',(int(time.time())-30*86400,))
     print(('Purged' if a.apply else 'Dry run: would purge')+' expired reports:',count,'; expired watches:',watches)

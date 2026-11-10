@@ -9,7 +9,12 @@
     "test:features": "node tests/features.browser.cjs",
     "test:release": "node tests/full-release.browser.cjs",
     "test:map": "node tests/map-layout.browser.cjs",
-    "test:routing": "node tests/routing-quality.browser.cjs"
+    "test:routing": "node tests/routing-quality.browser.cjs",
+    "test:workspaces": "node tests/workspaces.browser.cjs",
+    "test:workspace-failures": "node tests/workspace-failures.browser.cjs",
+    "test:weather": "node tests/weather.browser.cjs",
+    "test:workspaces-live": "node tests/workspaces.live.browser.cjs",
+    "test:controls": "node tests/controls.browser.cjs"
   },
   "devDependencies": {
     "playwright": "1.65.0",

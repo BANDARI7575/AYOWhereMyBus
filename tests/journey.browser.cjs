@@ -1,3 +1,4 @@
+require('./control-audit.cjs');
 /* Deterministic browser QA: synthetic GTFS fixture responses stay in the test browser. */
 const {chromium} = require('playwright');
 const assert = require('node:assert/strict');
@@ -58,7 +59,7 @@ async function run() {
       await choose('planFrom','Wisconsin'); await choose('planTo','Airport');
       await page.locator('#planJourney').click();
       await page.locator('#journeyResults h3').waitFor();
-      assert.deepEqual(latestQuery,{from:'1',to:'3',walking:'0'});
+      assert.deepEqual(latestQuery,{from:'1',to:'3',walking:'0',choice:'0'});
       const text = await page.locator('#journeyResults').innerText();
       for (const term of ['Wisconsin & 6th','Airport','25 min','1 transfer','Take Route 30','Board at','Get off at','Transfer at','12:10','12:35']) assert.ok(text.includes(term),term);
       assert.ok(await page.evaluate(()=>window.state.map && Object.values(window.state.map._layers).some(x=>x instanceof L.Polyline)));

@@ -44,8 +44,10 @@ function safelyLoad(key, fallback) {
 function safelySave(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
+    return true;
   } catch {
     console.warn("Browser storage unavailable.");
+    return false;
   }
 }
 
@@ -168,7 +170,7 @@ function initializeMap() {
     "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     {
       maxZoom: 19,
-      attribution: "&copy; OpenStreetMap contributors"
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>'
     }
   ).addTo(state.map);
 
@@ -559,7 +561,7 @@ function searchRoute(value) {
 
   stopTracking();
 
-  state.route = route;
+  state.route = route;window.dispatchEvent(new CustomEvent('ayo:route-selected',{detail:{route}}));
   state.mode = "route";
   state.position = null;
 
@@ -607,6 +609,7 @@ function toggleFavorite() {
     return;
   }
 
+  const previousFavorites=[...state.favorites];
   if (state.favorites.includes(state.route)) {
     state.favorites = state.favorites.filter(
       route => route !== state.route
@@ -618,7 +621,7 @@ function toggleFavorite() {
     ].slice(-8);
   }
 
-  safelySave("ayo-favorites", state.favorites);
+  if(!safelySave("ayo-favorites", state.favorites)){state.favorites=previousFavorites;setStatus("Browser storage unavailable. Favorite was not saved.",true);}
   renderFavorites();
 }
 
@@ -838,8 +841,9 @@ function start() {
       state.language =
         state.language === "en" ? "es" : "en";
 
-      safelySave("ayo-language", state.language);
-      translate();
+      if(!safelySave("ayo-language", state.language)){state.language=state.language==="en"?"es":"en";setStatus("Browser storage unavailable. Language was not changed.",true);return;}
+      window.dispatchEvent(new Event("ayo:language-change"));
+      window.location.reload();
     }
   );
 

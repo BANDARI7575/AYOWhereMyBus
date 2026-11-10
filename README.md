@@ -180,3 +180,10 @@ If something isn't working perfectly, there's a good chance I'm already trying t
 Built by Abhiraj Bandari.
 
 One bus at a time. 🚌
+The six “More than a map” cards now open integrated rider workspaces. See
+[the feature implementation and QA report](docs/FEATURE_WORKSPACES_RELEASE.md)
+for supported flows, actual verification, voice setup boundaries and remaining
+public-launch gates. Start locally with `.venv/bin/python scripts/dev_server.py`
+and open `http://127.0.0.1:5050/` (reuse an existing running instance).
+Live paid conversational AI is disabled by default; the verified text helper
+and existing transit features require no OpenAI credential.

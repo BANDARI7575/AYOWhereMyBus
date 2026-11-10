@@ -99,7 +99,7 @@
     "https://api.open-meteo.com/v1/forecast" +
     "?latitude=" + MILWAUKEE.latitude +
     "&longitude=" + MILWAUKEE.longitude +
-    "&current=temperature_2m,weather_code,wind_speed_10m" +
+    "&current=temperature_2m,weather_code,wind_speed_10m,is_day" +
     "&temperature_unit=fahrenheit" +
     "&wind_speed_unit=mph" +
     "&timezone=America%2FChicago&timeformat=unixtime";
@@ -120,7 +120,7 @@
     "logoWeather"
   );
 
-  function interpretWeather(code, windSpeed) {
+  function interpretWeather(code, windSpeed, isDay) {
 
     // WMO weather condition codes.
     if ([71, 73, 75, 77, 85, 86].includes(code)) {
@@ -131,7 +131,7 @@
       };
     }
 
-    if ([95, 96, 99].includes(code)) {
+    if ([95, 96, 97, 99].includes(code)) {
       return {
         icon: "⛈",
         condition: "Thunderstorm",
@@ -155,7 +155,7 @@
       };
     }
 
-    if (windSpeed >= 25) {
+    if (windSpeed >= 25 && [0,1,2,3].includes(code)) {
       return {
         icon: "≋",
         condition: "Windy",
@@ -164,6 +164,7 @@
     }
 
     if (code === 0) {
+      if(isDay!==0&&isDay!==1)return {icon:'◐',condition:'Clear sky (day/night unavailable)',effect:'none'};
       const hour = Number(
         new Intl.DateTimeFormat("en-US", {
           timeZone: "America/Chicago",
@@ -172,7 +173,7 @@
         }).format(new Date())
       );
 
-      const night = hour < 6 || hour >= 19;
+      const night = isDay===0 ? true : isDay===1 ? false : hour < 6 || hour >= 19;
 
       return {
         icon: night ? "☾" : "☀",
@@ -181,9 +182,10 @@
       };
     }
 
-    if ([1, 2].includes(code)) {
+    if (code===1) return {icon:isDay===0?'☾':isDay===1?'☀':'◐',condition:'Mainly clear',effect:isDay===0?'night':isDay===1?'sun':'none'};
+    if (code===2) {
       return {
-        icon: "⛅",
+        icon: isDay===0?"☁":"⛅",
         condition: "Partly cloudy",
         effect: "cloud"
       };
@@ -235,7 +237,7 @@
 
     const weather = interpretWeather(
       code,
-      windSpeed
+      windSpeed, current.is_day
     );
 
     if (weatherIcon) {
@@ -251,7 +253,7 @@
     }
 
     if (logoWeather) {
-      logoWeather.dataset.weather = weather.effect;
+      logoWeather.dataset.weather = weather.effect;logoWeather.textContent=weather.icon;
     }
 
     const widget = document.getElementById(
@@ -264,12 +266,16 @@
         `Milwaukee weather: ${temperature} degrees Fahrenheit, ${weather.condition}`
       );
 
-      widget.title =
-        `Milwaukee · ${temperature}°F · ${weather.condition}`;
+      widget.dataset.observedAt=String(current.time);
+      const updated=new Date(current.time*1000).toLocaleTimeString(document.documentElement.lang==='es'?'es-US':'en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit'});
+      widget.title = `Milwaukee · ${temperature}°F · ${weather.condition} · ${updated}`;
+      const spanish=document.documentElement.lang==='es';widget.setAttribute('aria-label',`${spanish?'Clima de Milwaukee':'Milwaukee weather'}: ${temperature}°F, ${window.AyoI18n?.translate(weather.condition)||weather.condition}. ${spanish?'Actualizado':'Updated'} ${updated}`);
+      let stamp=document.getElementById('weatherObserved');if(!stamp){stamp=document.createElement('small');stamp.id='weatherObserved';widget.append(stamp);}stamp.textContent=updated;stamp.setAttribute('aria-label',(document.documentElement.lang==='es'?'Actualizado: ':'Updated: ')+updated);
     }
   }
 
   function weatherUnavailable() {
+    const widget=document.getElementById('weatherWidget');if(widget){widget.title='Weather unavailable';widget.setAttribute('aria-label','Milwaukee weather unavailable');delete widget.dataset.observedAt;}document.getElementById('weatherObserved')?.remove();
     if (weatherIcon) {
       weatherIcon.textContent = "◐";
     }
@@ -284,7 +290,7 @@
     }
 
     if (logoWeather) {
-      logoWeather.dataset.weather = "none";
+      logoWeather.dataset.weather = "none";logoWeather.textContent="◐";
     }
   }
 
@@ -377,6 +383,7 @@
      ======================================================== */
 
   function startEnhancements() {
+    document.addEventListener('visibilitychange',()=>document.documentElement.classList.toggle('weather-paused',document.hidden));
     setupNavigation();
 
     setupCreatorReveal();
