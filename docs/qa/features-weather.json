@@ -1,0 +1,866 @@
+[
+  {
+    "engine": "chromium",
+    "width": 320,
+    "condition": "sun",
+    "icon": "☀"
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "condition": "mainly clear",
+    "icon": "☀"
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "condition": "rain",
+    "icon": "☂"
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "condition": "snow",
+    "icon": "❄"
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "condition": "storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "condition": "heavy storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "condition": "night",
+    "icon": "☾"
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "condition": "partly cloudy",
+    "icon": "⛅"
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "condition": "fog",
+    "icon": "≋"
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "condition": "unknown",
+    "icon": "◐"
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "condition": "stale",
+    "icon": "◐"
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "condition": "error",
+    "icon": "◐"
+  },
+  {
+    "engine": "chromium",
+    "width": 360,
+    "condition": "sun",
+    "icon": "☀"
+  },
+  {
+    "engine": "chromium",
+    "width": 360,
+    "condition": "mainly clear",
+    "icon": "☀"
+  },
+  {
+    "engine": "chromium",
+    "width": 360,
+    "condition": "rain",
+    "icon": "☂"
+  },
+  {
+    "engine": "chromium",
+    "width": 360,
+    "condition": "snow",
+    "icon": "❄"
+  },
+  {
+    "engine": "chromium",
+    "width": 360,
+    "condition": "storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "chromium",
+    "width": 360,
+    "condition": "heavy storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "chromium",
+    "width": 360,
+    "condition": "night",
+    "icon": "☾"
+  },
+  {
+    "engine": "chromium",
+    "width": 360,
+    "condition": "partly cloudy",
+    "icon": "⛅"
+  },
+  {
+    "engine": "chromium",
+    "width": 360,
+    "condition": "fog",
+    "icon": "≋"
+  },
+  {
+    "engine": "chromium",
+    "width": 360,
+    "condition": "unknown",
+    "icon": "◐"
+  },
+  {
+    "engine": "chromium",
+    "width": 360,
+    "condition": "stale",
+    "icon": "◐"
+  },
+  {
+    "engine": "chromium",
+    "width": 360,
+    "condition": "error",
+    "icon": "◐"
+  },
+  {
+    "engine": "chromium",
+    "width": 390,
+    "condition": "sun",
+    "icon": "☀"
+  },
+  {
+    "engine": "chromium",
+    "width": 390,
+    "condition": "mainly clear",
+    "icon": "☀"
+  },
+  {
+    "engine": "chromium",
+    "width": 390,
+    "condition": "rain",
+    "icon": "☂"
+  },
+  {
+    "engine": "chromium",
+    "width": 390,
+    "condition": "snow",
+    "icon": "❄"
+  },
+  {
+    "engine": "chromium",
+    "width": 390,
+    "condition": "storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "chromium",
+    "width": 390,
+    "condition": "heavy storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "chromium",
+    "width": 390,
+    "condition": "night",
+    "icon": "☾"
+  },
+  {
+    "engine": "chromium",
+    "width": 390,
+    "condition": "partly cloudy",
+    "icon": "⛅"
+  },
+  {
+    "engine": "chromium",
+    "width": 390,
+    "condition": "fog",
+    "icon": "≋"
+  },
+  {
+    "engine": "chromium",
+    "width": 390,
+    "condition": "unknown",
+    "icon": "◐"
+  },
+  {
+    "engine": "chromium",
+    "width": 390,
+    "condition": "stale",
+    "icon": "◐"
+  },
+  {
+    "engine": "chromium",
+    "width": 390,
+    "condition": "error",
+    "icon": "◐"
+  },
+  {
+    "engine": "chromium",
+    "width": 768,
+    "condition": "sun",
+    "icon": "☀"
+  },
+  {
+    "engine": "chromium",
+    "width": 768,
+    "condition": "mainly clear",
+    "icon": "☀"
+  },
+  {
+    "engine": "chromium",
+    "width": 768,
+    "condition": "rain",
+    "icon": "☂"
+  },
+  {
+    "engine": "chromium",
+    "width": 768,
+    "condition": "snow",
+    "icon": "❄"
+  },
+  {
+    "engine": "chromium",
+    "width": 768,
+    "condition": "storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "chromium",
+    "width": 768,
+    "condition": "heavy storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "chromium",
+    "width": 768,
+    "condition": "night",
+    "icon": "☾"
+  },
+  {
+    "engine": "chromium",
+    "width": 768,
+    "condition": "partly cloudy",
+    "icon": "⛅"
+  },
+  {
+    "engine": "chromium",
+    "width": 768,
+    "condition": "fog",
+    "icon": "≋"
+  },
+  {
+    "engine": "chromium",
+    "width": 768,
+    "condition": "unknown",
+    "icon": "◐"
+  },
+  {
+    "engine": "chromium",
+    "width": 768,
+    "condition": "stale",
+    "icon": "◐"
+  },
+  {
+    "engine": "chromium",
+    "width": 768,
+    "condition": "error",
+    "icon": "◐"
+  },
+  {
+    "engine": "chromium",
+    "width": 1024,
+    "condition": "sun",
+    "icon": "☀"
+  },
+  {
+    "engine": "chromium",
+    "width": 1024,
+    "condition": "mainly clear",
+    "icon": "☀"
+  },
+  {
+    "engine": "chromium",
+    "width": 1024,
+    "condition": "rain",
+    "icon": "☂"
+  },
+  {
+    "engine": "chromium",
+    "width": 1024,
+    "condition": "snow",
+    "icon": "❄"
+  },
+  {
+    "engine": "chromium",
+    "width": 1024,
+    "condition": "storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "chromium",
+    "width": 1024,
+    "condition": "heavy storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "chromium",
+    "width": 1024,
+    "condition": "night",
+    "icon": "☾"
+  },
+  {
+    "engine": "chromium",
+    "width": 1024,
+    "condition": "partly cloudy",
+    "icon": "⛅"
+  },
+  {
+    "engine": "chromium",
+    "width": 1024,
+    "condition": "fog",
+    "icon": "≋"
+  },
+  {
+    "engine": "chromium",
+    "width": 1024,
+    "condition": "unknown",
+    "icon": "◐"
+  },
+  {
+    "engine": "chromium",
+    "width": 1024,
+    "condition": "stale",
+    "icon": "◐"
+  },
+  {
+    "engine": "chromium",
+    "width": 1024,
+    "condition": "error",
+    "icon": "◐"
+  },
+  {
+    "engine": "chromium",
+    "width": 1440,
+    "condition": "sun",
+    "icon": "☀"
+  },
+  {
+    "engine": "chromium",
+    "width": 1440,
+    "condition": "mainly clear",
+    "icon": "☀"
+  },
+  {
+    "engine": "chromium",
+    "width": 1440,
+    "condition": "rain",
+    "icon": "☂"
+  },
+  {
+    "engine": "chromium",
+    "width": 1440,
+    "condition": "snow",
+    "icon": "❄"
+  },
+  {
+    "engine": "chromium",
+    "width": 1440,
+    "condition": "storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "chromium",
+    "width": 1440,
+    "condition": "heavy storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "chromium",
+    "width": 1440,
+    "condition": "night",
+    "icon": "☾"
+  },
+  {
+    "engine": "chromium",
+    "width": 1440,
+    "condition": "partly cloudy",
+    "icon": "⛅"
+  },
+  {
+    "engine": "chromium",
+    "width": 1440,
+    "condition": "fog",
+    "icon": "≋"
+  },
+  {
+    "engine": "chromium",
+    "width": 1440,
+    "condition": "unknown",
+    "icon": "◐"
+  },
+  {
+    "engine": "chromium",
+    "width": 1440,
+    "condition": "stale",
+    "icon": "◐"
+  },
+  {
+    "engine": "chromium",
+    "width": 1440,
+    "condition": "error",
+    "icon": "◐"
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "condition": "sun",
+    "icon": "☀"
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "condition": "mainly clear",
+    "icon": "☀"
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "condition": "rain",
+    "icon": "☂"
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "condition": "snow",
+    "icon": "❄"
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "condition": "storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "condition": "heavy storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "condition": "night",
+    "icon": "☾"
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "condition": "partly cloudy",
+    "icon": "⛅"
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "condition": "fog",
+    "icon": "≋"
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "condition": "unknown",
+    "icon": "◐"
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "condition": "stale",
+    "icon": "◐"
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "condition": "error",
+    "icon": "◐"
+  },
+  {
+    "engine": "webkit",
+    "width": 360,
+    "condition": "sun",
+    "icon": "☀"
+  },
+  {
+    "engine": "webkit",
+    "width": 360,
+    "condition": "mainly clear",
+    "icon": "☀"
+  },
+  {
+    "engine": "webkit",
+    "width": 360,
+    "condition": "rain",
+    "icon": "☂"
+  },
+  {
+    "engine": "webkit",
+    "width": 360,
+    "condition": "snow",
+    "icon": "❄"
+  },
+  {
+    "engine": "webkit",
+    "width": 360,
+    "condition": "storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "webkit",
+    "width": 360,
+    "condition": "heavy storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "webkit",
+    "width": 360,
+    "condition": "night",
+    "icon": "☾"
+  },
+  {
+    "engine": "webkit",
+    "width": 360,
+    "condition": "partly cloudy",
+    "icon": "⛅"
+  },
+  {
+    "engine": "webkit",
+    "width": 360,
+    "condition": "fog",
+    "icon": "≋"
+  },
+  {
+    "engine": "webkit",
+    "width": 360,
+    "condition": "unknown",
+    "icon": "◐"
+  },
+  {
+    "engine": "webkit",
+    "width": 360,
+    "condition": "stale",
+    "icon": "◐"
+  },
+  {
+    "engine": "webkit",
+    "width": 360,
+    "condition": "error",
+    "icon": "◐"
+  },
+  {
+    "engine": "webkit",
+    "width": 390,
+    "condition": "sun",
+    "icon": "☀"
+  },
+  {
+    "engine": "webkit",
+    "width": 390,
+    "condition": "mainly clear",
+    "icon": "☀"
+  },
+  {
+    "engine": "webkit",
+    "width": 390,
+    "condition": "rain",
+    "icon": "☂"
+  },
+  {
+    "engine": "webkit",
+    "width": 390,
+    "condition": "snow",
+    "icon": "❄"
+  },
+  {
+    "engine": "webkit",
+    "width": 390,
+    "condition": "storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "webkit",
+    "width": 390,
+    "condition": "heavy storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "webkit",
+    "width": 390,
+    "condition": "night",
+    "icon": "☾"
+  },
+  {
+    "engine": "webkit",
+    "width": 390,
+    "condition": "partly cloudy",
+    "icon": "⛅"
+  },
+  {
+    "engine": "webkit",
+    "width": 390,
+    "condition": "fog",
+    "icon": "≋"
+  },
+  {
+    "engine": "webkit",
+    "width": 390,
+    "condition": "unknown",
+    "icon": "◐"
+  },
+  {
+    "engine": "webkit",
+    "width": 390,
+    "condition": "stale",
+    "icon": "◐"
+  },
+  {
+    "engine": "webkit",
+    "width": 390,
+    "condition": "error",
+    "icon": "◐"
+  },
+  {
+    "engine": "webkit",
+    "width": 768,
+    "condition": "sun",
+    "icon": "☀"
+  },
+  {
+    "engine": "webkit",
+    "width": 768,
+    "condition": "mainly clear",
+    "icon": "☀"
+  },
+  {
+    "engine": "webkit",
+    "width": 768,
+    "condition": "rain",
+    "icon": "☂"
+  },
+  {
+    "engine": "webkit",
+    "width": 768,
+    "condition": "snow",
+    "icon": "❄"
+  },
+  {
+    "engine": "webkit",
+    "width": 768,
+    "condition": "storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "webkit",
+    "width": 768,
+    "condition": "heavy storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "webkit",
+    "width": 768,
+    "condition": "night",
+    "icon": "☾"
+  },
+  {
+    "engine": "webkit",
+    "width": 768,
+    "condition": "partly cloudy",
+    "icon": "⛅"
+  },
+  {
+    "engine": "webkit",
+    "width": 768,
+    "condition": "fog",
+    "icon": "≋"
+  },
+  {
+    "engine": "webkit",
+    "width": 768,
+    "condition": "unknown",
+    "icon": "◐"
+  },
+  {
+    "engine": "webkit",
+    "width": 768,
+    "condition": "stale",
+    "icon": "◐"
+  },
+  {
+    "engine": "webkit",
+    "width": 768,
+    "condition": "error",
+    "icon": "◐"
+  },
+  {
+    "engine": "webkit",
+    "width": 1024,
+    "condition": "sun",
+    "icon": "☀"
+  },
+  {
+    "engine": "webkit",
+    "width": 1024,
+    "condition": "mainly clear",
+    "icon": "☀"
+  },
+  {
+    "engine": "webkit",
+    "width": 1024,
+    "condition": "rain",
+    "icon": "☂"
+  },
+  {
+    "engine": "webkit",
+    "width": 1024,
+    "condition": "snow",
+    "icon": "❄"
+  },
+  {
+    "engine": "webkit",
+    "width": 1024,
+    "condition": "storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "webkit",
+    "width": 1024,
+    "condition": "heavy storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "webkit",
+    "width": 1024,
+    "condition": "night",
+    "icon": "☾"
+  },
+  {
+    "engine": "webkit",
+    "width": 1024,
+    "condition": "partly cloudy",
+    "icon": "⛅"
+  },
+  {
+    "engine": "webkit",
+    "width": 1024,
+    "condition": "fog",
+    "icon": "≋"
+  },
+  {
+    "engine": "webkit",
+    "width": 1024,
+    "condition": "unknown",
+    "icon": "◐"
+  },
+  {
+    "engine": "webkit",
+    "width": 1024,
+    "condition": "stale",
+    "icon": "◐"
+  },
+  {
+    "engine": "webkit",
+    "width": 1024,
+    "condition": "error",
+    "icon": "◐"
+  },
+  {
+    "engine": "webkit",
+    "width": 1440,
+    "condition": "sun",
+    "icon": "☀"
+  },
+  {
+    "engine": "webkit",
+    "width": 1440,
+    "condition": "mainly clear",
+    "icon": "☀"
+  },
+  {
+    "engine": "webkit",
+    "width": 1440,
+    "condition": "rain",
+    "icon": "☂"
+  },
+  {
+    "engine": "webkit",
+    "width": 1440,
+    "condition": "snow",
+    "icon": "❄"
+  },
+  {
+    "engine": "webkit",
+    "width": 1440,
+    "condition": "storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "webkit",
+    "width": 1440,
+    "condition": "heavy storm",
+    "icon": "⛈"
+  },
+  {
+    "engine": "webkit",
+    "width": 1440,
+    "condition": "night",
+    "icon": "☾"
+  },
+  {
+    "engine": "webkit",
+    "width": 1440,
+    "condition": "partly cloudy",
+    "icon": "⛅"
+  },
+  {
+    "engine": "webkit",
+    "width": 1440,
+    "condition": "fog",
+    "icon": "≋"
+  },
+  {
+    "engine": "webkit",
+    "width": 1440,
+    "condition": "unknown",
+    "icon": "◐"
+  },
+  {
+    "engine": "webkit",
+    "width": 1440,
+    "condition": "stale",
+    "icon": "◐"
+  },
+  {
+    "engine": "webkit",
+    "width": 1440,
+    "condition": "error",
+    "icon": "◐"
+  }
+]

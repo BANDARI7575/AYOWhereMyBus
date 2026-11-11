@@ -1,0 +1,643 @@
+{
+  "scope": "Observed unique English control descriptors; generated data controls sampled. Actions include blocked/fallback handling, not paid voice or native push success. External links validated as HTTPS targets, not external service certification.",
+  "total": 94,
+  "counts": {
+    "action observed": 88,
+    "navigation target checked": 6,
+    "not exercised": 0
+  },
+  "controls": [
+    {
+      "tag": "A",
+      "name": "Skip to bus tracking",
+      "href": "#main",
+      "disposition": "action observed"
+    },
+    {
+      "tag": "A",
+      "name": "AYO! Where's My Bus? Home",
+      "href": "#home",
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Switch language",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Switch appearance",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Toggle navigation",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "A",
+      "name": "TRACK MY BUS \u2197",
+      "href": "#main",
+      "disposition": "action observed"
+    },
+    {
+      "tag": "A",
+      "name": "\u2316 NEAR ME",
+      "href": "#main",
+      "disposition": "action observed"
+    },
+    {
+      "tag": "A",
+      "name": "PLAN MY TRIP \u2197",
+      "href": "#journey",
+      "disposition": "action observed"
+    },
+    {
+      "tag": "INPUT",
+      "name": "Bus route number",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "SEARCH ROUTE \u2197",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "\u2316 NEAR ME",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "\u2316 FIND NEARBY STOPS",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "\u2606 Save this route",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "INPUT",
+      "name": "Stop name or ID",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Search stops",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "A",
+      "name": "Official MCTS planner for addresses and more options",
+      "href": "https://www.ridemcts.com/trip-planner",
+      "disposition": "navigation target checked"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Install AYO",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "A",
+      "name": "Zoom in",
+      "href": "#",
+      "disposition": "action observed"
+    },
+    {
+      "tag": "A",
+      "name": "Zoom out",
+      "href": "#",
+      "disposition": "action observed"
+    },
+    {
+      "tag": "A",
+      "name": "A JavaScript library for interactive maps",
+      "href": "https://leafletjs.com",
+      "disposition": "navigation target checked"
+    },
+    {
+      "tag": "A",
+      "name": "OpenStreetMap contributors",
+      "href": "https://www.openstreetmap.org/copyright",
+      "disposition": "navigation target checked"
+    },
+    {
+      "tag": "INPUT",
+      "name": "From",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Use My Location",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "INPUT",
+      "name": "To",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "SELECT",
+      "name": "Travel time",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "INPUT",
+      "name": "Include estimated walking connections. I will check the actual path; sidewalks, crossings and accessibility are not verified.",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Find my journey",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Swap From and To",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "A",
+      "name": "Need an address search or more travel options? Open the official MCTS planner.",
+      "href": "https://www.ridemcts.com/trip-planner",
+      "disposition": "navigation target checked"
+    },
+    {
+      "tag": "INPUT",
+      "name": "Stop ID",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "TEXTAREA",
+      "name": "Conditions (10\u2013500 characters)",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Submit for moderation",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Refresh reports",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Nearby Stops",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Smart Journey Planner",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "AYO Voice",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Arrival Alerts",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "My Stops",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Reliability Intelligence",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "A",
+      "name": "Privacy & data / Privacidad y datos",
+      "href": "/static/privacy.html",
+      "disposition": "navigation target checked"
+    },
+    {
+      "tag": "A",
+      "name": "Weather: Open-Meteo",
+      "href": "https://open-meteo.com/",
+      "disposition": "navigation target checked"
+    },
+    {
+      "tag": "A",
+      "name": "\u2302 Home",
+      "href": "#home",
+      "disposition": "action observed"
+    },
+    {
+      "tag": "A",
+      "name": "\u25a3 Map",
+      "href": "#main",
+      "disposition": "action observed"
+    },
+    {
+      "tag": "A",
+      "name": "\u2605 Features",
+      "href": "#features",
+      "disposition": "action observed"
+    },
+    {
+      "tag": "A",
+      "name": "\u21c4 Trip",
+      "href": "#journey",
+      "disposition": "action observed"
+    },
+    {
+      "state": "reliability",
+      "tag": "BUTTON",
+      "name": "Back / Close",
+      "href": null,
+      "directly_exercised": false,
+      "disposition": "action observed"
+    },
+    {
+      "state": "nearby",
+      "tag": "INPUT",
+      "name": "Stop, street, ID or route (e.g. Route 19)",
+      "href": null,
+      "directly_exercised": false,
+      "disposition": "action observed"
+    },
+    {
+      "state": "nearby",
+      "tag": "SELECT",
+      "name": "Radius (miles)",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "nearby",
+      "tag": "BUTTON",
+      "name": "WISCONSIN & TEST \u00b7 1",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "nearby",
+      "tag": "BUTTON",
+      "name": "AIRPORT \u00b7 3",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "nearby",
+      "tag": "BUTTON",
+      "name": "Find Stops Near Me",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "nearby",
+      "tag": "BUTTON",
+      "name": "Map view",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "nearby",
+      "tag": "BUTTON",
+      "name": "List view",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "planner",
+      "tag": "BUTTON",
+      "name": "Save Journey",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "planner",
+      "tag": "BUTTON",
+      "name": "Set Departure Alert",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "planner",
+      "tag": "BUTTON",
+      "name": "Other journey option",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "planner",
+      "tag": "BUTTON",
+      "name": "Track Route 30",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "planner",
+      "tag": "BUTTON",
+      "name": "Show journey on live map",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "alerts",
+      "tag": "INPUT",
+      "name": "Stop name or directional ID",
+      "href": null,
+      "directly_exercised": false,
+      "disposition": "action observed"
+    },
+    {
+      "state": "alerts",
+      "tag": "SELECT",
+      "name": "Departure / route / headsign",
+      "href": null,
+      "directly_exercised": false,
+      "disposition": "action observed"
+    },
+    {
+      "state": "alerts",
+      "tag": "SELECT",
+      "name": "Minutes before arrival",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "alerts",
+      "tag": "BUTTON",
+      "name": "Create page-open alert",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "alerts",
+      "tag": "BUTTON",
+      "name": "Find directional stop",
+      "href": null,
+      "directly_exercised": false,
+      "disposition": "action observed"
+    },
+    {
+      "state": "alerts",
+      "tag": "BUTTON",
+      "name": "Load departures",
+      "href": null,
+      "directly_exercised": false,
+      "disposition": "action observed"
+    },
+    {
+      "state": "voice",
+      "tag": "BUTTON",
+      "name": "Open Live Tracking",
+      "href": null,
+      "directly_exercised": false,
+      "disposition": "action observed"
+    },
+    {
+      "state": "voice",
+      "tag": "SELECT",
+      "name": "Conversation language",
+      "href": null,
+      "directly_exercised": false,
+      "disposition": "action observed"
+    },
+    {
+      "state": "voice",
+      "tag": "INPUT",
+      "name": "Ask about a stop, Route 19, departures or alerts",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "voice",
+      "tag": "BUTTON",
+      "name": "Send",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "voice",
+      "tag": "BUTTON",
+      "name": "Start Conversation / Microphone",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "voice",
+      "tag": "BUTTON",
+      "name": "Mute / Unmute",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "voice",
+      "tag": "BUTTON",
+      "name": "Replay readout",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "voice",
+      "tag": "BUTTON",
+      "name": "Stop",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "voice",
+      "tag": "BUTTON",
+      "name": "Clear conversation",
+      "href": null,
+      "directly_exercised": false,
+      "disposition": "action observed"
+    },
+    {
+      "state": "reliability",
+      "tag": "INPUT",
+      "name": "Filter route (optional)",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "reliability",
+      "tag": "SELECT",
+      "name": "Vehicle",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "reliability",
+      "tag": "INPUT",
+      "name": "Inspect directional stop ID",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "reliability",
+      "tag": "BUTTON",
+      "name": "Inspect stop",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "reliability",
+      "tag": "BUTTON",
+      "name": "Refresh status",
+      "href": null,
+      "directly_exercised": true,
+      "disposition": "action observed"
+    },
+    {
+      "state": "reliability",
+      "tag": "BUTTON",
+      "name": "View route in Live Tracking",
+      "href": null,
+      "directly_exercised": false,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "A",
+      "name": "Home",
+      "href": "#home",
+      "disposition": "action observed"
+    },
+    {
+      "tag": "A",
+      "name": "Live Tracking",
+      "href": "#main",
+      "disposition": "action observed"
+    },
+    {
+      "tag": "A",
+      "name": "Plan Trip",
+      "href": "#journey",
+      "disposition": "action observed"
+    },
+    {
+      "tag": "A",
+      "name": "Winter Watch",
+      "href": "#winter-watch",
+      "disposition": "action observed"
+    },
+    {
+      "tag": "A",
+      "name": "Features",
+      "href": "#features",
+      "disposition": "action observed"
+    },
+    {
+      "tag": "A",
+      "name": "Creator",
+      "href": "#creator",
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "1 \u00b7 WISCONSIN & TEST",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Save / remove favorite",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Read departures \u00b7 AYO Voice",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Stop reading",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Enable arrival alert (keep page open)",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Watch next arrival in background",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Stop background alerts",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "\u2605 Stop 1",
+      "href": null,
+      "disposition": "action observed"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "Route on map",
+      "href": null,
+      "disposition": "action observed"
+    }
+  ]
+}

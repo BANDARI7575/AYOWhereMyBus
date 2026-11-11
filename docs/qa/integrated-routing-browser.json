@@ -1,0 +1,41 @@
+{
+  "checked_at": "2026-11-09T20:36:04.515Z",
+  "results": [
+    {
+      "engine": "chromium",
+      "width": 1440,
+      "exact_stop_outcome": "no_route",
+      "direct_route": "14",
+      "direct_seconds": 60,
+      "estimated_walk_seconds": 261,
+      "rendered_journey_axe_violations": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "exact_stop_outcome": "no_route",
+      "direct_route": "14",
+      "direct_seconds": 60,
+      "estimated_walk_seconds": 261,
+      "rendered_journey_axe_violations": 0
+    },
+    {
+      "engine": "webkit",
+      "width": 1440,
+      "exact_stop_outcome": "no_route",
+      "direct_route": "14",
+      "direct_seconds": 60,
+      "estimated_walk_seconds": 261,
+      "rendered_journey_axe_violations": 0
+    },
+    {
+      "engine": "webkit",
+      "width": 390,
+      "exact_stop_outcome": "no_route",
+      "direct_route": "14",
+      "direct_seconds": 60,
+      "estimated_walk_seconds": 261,
+      "rendered_journey_axe_violations": 0
+    }
+  ]
+}

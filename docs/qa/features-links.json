@@ -1,0 +1,232 @@
+[
+  {
+    "name": "Skip to bus tracking",
+    "href": "#main",
+    "result": "existing internal target"
+  },
+  {
+    "name": "AYO! Where's My Bus? Home",
+    "href": "#home",
+    "result": "existing internal target"
+  },
+  {
+    "name": "Home",
+    "href": "#home",
+    "result": "existing internal target"
+  },
+  {
+    "name": "Live Tracking",
+    "href": "#main",
+    "result": "existing internal target"
+  },
+  {
+    "name": "Plan Trip",
+    "href": "#journey",
+    "result": "existing internal target"
+  },
+  {
+    "name": "Winter Watch",
+    "href": "#winter-watch",
+    "result": "existing internal target"
+  },
+  {
+    "name": "Features",
+    "href": "#features",
+    "result": "existing internal target"
+  },
+  {
+    "name": "Creator",
+    "href": "#creator",
+    "result": "existing internal target"
+  },
+  {
+    "name": "TRACK MY BUS ↗",
+    "href": "#main",
+    "result": "existing internal target"
+  },
+  {
+    "name": "⌖ NEAR ME",
+    "href": "#main",
+    "result": "existing internal target"
+  },
+  {
+    "name": "PLAN MY TRIP ↗",
+    "href": "#journey",
+    "result": "existing internal target"
+  },
+  {
+    "name": "Official MCTS planner for addresses and more options",
+    "href": "https://www.ridemcts.com/trip-planner",
+    "result": "validated HTTPS navigation target; external page availability not asserted"
+  },
+  {
+    "name": "Zoom in",
+    "href": "#",
+    "result": "Leaflet JavaScript zoom control, exercised in workspace matrix"
+  },
+  {
+    "name": "Zoom out",
+    "href": "#",
+    "result": "Leaflet JavaScript zoom control, exercised in workspace matrix"
+  },
+  {
+    "name": "A JavaScript library for interactive maps",
+    "href": "https://leafletjs.com",
+    "result": "validated HTTPS navigation target; external page availability not asserted"
+  },
+  {
+    "name": "OpenStreetMap contributors",
+    "href": "https://www.openstreetmap.org/copyright",
+    "result": "validated HTTPS navigation target; external page availability not asserted"
+  },
+  {
+    "name": "Need an address search or more travel options? Open the official MCTS planner.",
+    "href": "https://www.ridemcts.com/trip-planner",
+    "result": "validated HTTPS navigation target; external page availability not asserted"
+  },
+  {
+    "name": "Privacy & data / Privacidad y datos",
+    "href": "/static/privacy.html",
+    "result": "same-origin HTTP 200"
+  },
+  {
+    "name": "Weather: Open-Meteo",
+    "href": "https://open-meteo.com/",
+    "result": "validated HTTPS navigation target; external page availability not asserted"
+  },
+  {
+    "name": "⌂ Home",
+    "href": "#home",
+    "result": "existing internal target"
+  },
+  {
+    "name": "▣ Map",
+    "href": "#main",
+    "result": "existing internal target"
+  },
+  {
+    "name": "★ Features",
+    "href": "#features",
+    "result": "existing internal target"
+  },
+  {
+    "name": "⇄ Trip",
+    "href": "#journey",
+    "result": "existing internal target"
+  },
+  {
+    "name": "Skip to bus tracking",
+    "href": "#main",
+    "result": "existing internal target"
+  },
+  {
+    "name": "AYO! Where's My Bus? Home",
+    "href": "#home",
+    "result": "existing internal target"
+  },
+  {
+    "name": "Home",
+    "href": "#home",
+    "result": "existing internal target"
+  },
+  {
+    "name": "Live Tracking",
+    "href": "#main",
+    "result": "existing internal target"
+  },
+  {
+    "name": "Plan Trip",
+    "href": "#journey",
+    "result": "existing internal target"
+  },
+  {
+    "name": "Winter Watch",
+    "href": "#winter-watch",
+    "result": "existing internal target"
+  },
+  {
+    "name": "Features",
+    "href": "#features",
+    "result": "existing internal target"
+  },
+  {
+    "name": "Creator",
+    "href": "#creator",
+    "result": "existing internal target"
+  },
+  {
+    "name": "TRACK MY BUS ↗",
+    "href": "#main",
+    "result": "existing internal target"
+  },
+  {
+    "name": "⌖ NEAR ME",
+    "href": "#main",
+    "result": "existing internal target"
+  },
+  {
+    "name": "PLAN MY TRIP ↗",
+    "href": "#journey",
+    "result": "existing internal target"
+  },
+  {
+    "name": "Official MCTS planner for addresses and more options",
+    "href": "https://www.ridemcts.com/trip-planner",
+    "result": "validated HTTPS navigation target; external page availability not asserted"
+  },
+  {
+    "name": "Zoom in",
+    "href": "#",
+    "result": "Leaflet JavaScript zoom control, exercised in workspace matrix"
+  },
+  {
+    "name": "Zoom out",
+    "href": "#",
+    "result": "Leaflet JavaScript zoom control, exercised in workspace matrix"
+  },
+  {
+    "name": "A JavaScript library for interactive maps",
+    "href": "https://leafletjs.com",
+    "result": "validated HTTPS navigation target; external page availability not asserted"
+  },
+  {
+    "name": "OpenStreetMap contributors",
+    "href": "https://www.openstreetmap.org/copyright",
+    "result": "validated HTTPS navigation target; external page availability not asserted"
+  },
+  {
+    "name": "Need an address search or more travel options? Open the official MCTS planner.",
+    "href": "https://www.ridemcts.com/trip-planner",
+    "result": "validated HTTPS navigation target; external page availability not asserted"
+  },
+  {
+    "name": "Privacy & data / Privacidad y datos",
+    "href": "/static/privacy.html",
+    "result": "same-origin HTTP 200"
+  },
+  {
+    "name": "Weather: Open-Meteo",
+    "href": "https://open-meteo.com/",
+    "result": "validated HTTPS navigation target; external page availability not asserted"
+  },
+  {
+    "name": "⌂ Home",
+    "href": "#home",
+    "result": "existing internal target"
+  },
+  {
+    "name": "▣ Map",
+    "href": "#main",
+    "result": "existing internal target"
+  },
+  {
+    "name": "★ Features",
+    "href": "#features",
+    "result": "existing internal target"
+  },
+  {
+    "name": "⇄ Trip",
+    "href": "#journey",
+    "result": "existing internal target"
+  }
+]
