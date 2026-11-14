@@ -2,7 +2,7 @@
 from tests.backend import test_release
 from unittest.mock import patch
 from datetime import datetime
-from backend.transit_engine import TZ
+from backend.services.transit_engine import TZ
 
 class WorkspaceTests(test_release.ApiTests):
     def test_radius_pagination_and_directional_ids(self):
@@ -68,7 +68,7 @@ class WorkspaceTests(test_release.ApiTests):
             self.assertIn('Keep metric tool fields and tool arguments unchanged',settings['instructions'])
             self.assertEqual(settings['max_output_tokens'],256)
             self.assertEqual(next(t for t in settings['tools'] if t['name']=='get_stop_departures')['parameters']['required'],['stop_id'])
-            self.assertEqual(next(t for t in settings['tools'] if t['name']=='open_feature')['parameters']['properties']['feature']['enum'],sorted(__import__('backend.feature_service',fromlist=['FEATURES']).FEATURES))
+            self.assertEqual(next(t for t in settings['tools'] if t['name']=='open_feature')['parameters']['properties']['feature']['enum'],sorted(__import__('backend.services.feature_service',fromlist=['FEATURES']).FEATURES))
 
     def test_future_departure_is_explicit_and_cache_is_separate(self):
         import time

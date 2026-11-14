@@ -8,7 +8,7 @@ from unittest.mock import patch
 import app as launcher
 from backend.app import app
 from backend.paths import PROJECT_ROOT
-from backend.transit_engine import Schedule
+from backend.services.transit_engine import Schedule
 
 
 class OrganizationTests(unittest.TestCase):

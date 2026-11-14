@@ -9,10 +9,10 @@ import threading
 import copy
 from pathlib import Path
 from backend.paths import PROJECT_ROOT
-from backend.alert_service import snapshot as alert_snapshot
+from backend.services.alert_service import snapshot as alert_snapshot
 from flask import request, jsonify
-from backend.transit_engine import Schedule, TZ, ClosingConnection
-from backend.realtime_service import Realtime
+from backend.services.transit_engine import Schedule, TZ, ClosingConnection
+from backend.services.realtime_service import Realtime
 from datetime import datetime, timezone
 
 schedule=Schedule(); realtime=Realtime()
@@ -25,7 +25,7 @@ _db_lock=threading.Lock()
 _db_initialized=set()
 
 def authorized_moderator():
-    from backend.moderation_service import moderator_identity
+    from backend.services.moderation_service import moderator_identity
     return moderator_identity() is not None
 
 def db():
@@ -72,7 +72,7 @@ def install(app):
         import re
         if not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+',os.getenv('SUPPORT_EMAIL','')):raise RuntimeError('SUPPORT_EMAIL must be the real public operator contact')
         if os.getenv('RETENTION_APPROVED')!='1':raise RuntimeError('Approve the retention policy and set RETENTION_APPROVED=1')
-        from backend.push_service import validate_configuration
+        from backend.services.push_service import validate_configuration
         validate_configuration()
         from cryptography.fernet import Fernet
         Fernet(os.environ['BACKUP_ENCRYPTION_KEY'].encode())
@@ -262,7 +262,7 @@ def install(app):
             n=c.execute('UPDATE reports SET state=? WHERE id=? AND (expires>? OR ?=\'rejected\')',(state,report_id,time.time(),state)).rowcount
             if n:
                 c.execute('DELETE FROM report_flags WHERE report_id=?',(report_id,))
-                from backend.moderation_service import moderator_identity
+                from backend.services.moderation_service import moderator_identity
                 c.execute('INSERT INTO moderation_audit(report_id,state,at,actor,reason) VALUES(?,?,?,?,?)',(report_id,state,int(time.time()),moderator_identity(),reason))
         return jsonify(updated=n)
     @app.get('/api/moderation/reports')
@@ -270,11 +270,11 @@ def install(app):
         if not authorized_moderator(): return jsonify(message='Unauthorized'),401
         with db() as c: rows=c.execute("SELECT * FROM reports WHERE state='pending' AND expires>? ORDER BY created LIMIT 100",(time.time(),)).fetchall()
         return jsonify(reports=[dict(r) for r in rows])
-    from backend.feature_service import install_features
+    from backend.services.feature_service import install_features
     install_features(app,lambda:schedule,realtime,db,_journey_slots)
-    from backend.push_service import install_push
+    from backend.services.push_service import install_push
     install_push(app,db,lambda:schedule)
-    from backend.moderation_service import install_admin
+    from backend.services.moderation_service import install_admin
     install_admin(app,db,_privacy_key)
     @app.get('/sw.js')
     def worker(): return app.send_static_file('sw.js'),200,{'Cache-Control':'no-cache','Service-Worker-Allowed':'/'}

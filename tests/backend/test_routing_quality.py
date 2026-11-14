@@ -2,7 +2,7 @@
 import unittest
 from datetime import datetime
 from tests.backend import test_release
-from backend.transit_engine import Schedule,TZ
+from backend.services.transit_engine import Schedule,TZ
 
 NOW=datetime(2026,11,10,0,0,tzinfo=TZ)
 
@@ -88,7 +88,7 @@ class OfficialStopQualityTests(unittest.TestCase):
 
 class ArrivalSafetyTests(unittest.TestCase):
     def test_invalid_uncertainty_and_old_prediction_never_notify(self):
-        from backend.push_service import reliable_prediction
+        from backend.services.push_service import reliable_prediction
         dep={'data_type':'realtime','prediction_at':1100,'prediction_reported_at':1000}
         self.assertTrue(reliable_prediction(dep,1000))
         self.assertFalse(reliable_prediction({**dep,'uncertainty_seconds':-1},1000))

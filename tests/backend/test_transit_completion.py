@@ -3,8 +3,8 @@ from datetime import datetime, date
 from types import SimpleNamespace
 import unittest
 from tests.backend import test_release
-from backend.transit_engine import TZ, service_epoch
-from backend.alert_service import snapshot, filter_route
+from backend.services.transit_engine import TZ, service_epoch
+from backend.services.alert_service import snapshot, filter_route
 
 class TransitCompletionTests(unittest.TestCase):
     def setUp(self):

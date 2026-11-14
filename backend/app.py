@@ -18,12 +18,12 @@ import threading
 import time
 
 import requests
-from backend.feed_http import fetch_feed
+from backend.services.feed_http import fetch_feed
 from flask import Flask, jsonify, request, send_from_directory
 from google.transit import gtfs_realtime_pb2
 
-from backend.stops_service import find_nearby_stops
-from backend.routes_service import routes_for_stop
+from backend.services.stops_service import find_nearby_stops
+from backend.services.routes_service import routes_for_stop
 
 
 # ==========================================================

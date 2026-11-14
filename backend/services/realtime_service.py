@@ -3,7 +3,7 @@ import os
 import time
 import threading
 import requests
-from backend.feed_http import fetch_feed
+from backend.services.feed_http import fetch_feed
 from google.transit import gtfs_realtime_pb2 as pb
 
 class Realtime:

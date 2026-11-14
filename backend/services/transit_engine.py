@@ -10,7 +10,7 @@ import sqlite3
 from pathlib import Path
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-from backend.stops_service import distance_km
+from backend.services.stops_service import distance_km
 
 TZ = ZoneInfo('America/Chicago')
 from backend.paths import PROJECT_ROOT as ROOT

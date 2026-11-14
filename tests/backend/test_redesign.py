@@ -2,7 +2,7 @@
 import time,unittest
 from unittest.mock import patch
 from google.transit import gtfs_realtime_pb2 as pb
-from backend.realtime_service import Realtime
+from backend.services.realtime_service import Realtime
 
 class AlertPresentationContract(unittest.TestCase):
     def test_upcoming_and_old_ongoing_alerts_survive_but_truly_expired_do_not(self):

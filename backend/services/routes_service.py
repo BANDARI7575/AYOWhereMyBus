@@ -1,5 +1,5 @@
 """Indexed stop-specific scheduled routes and destinations."""
-from backend.transit_engine import Schedule
+from backend.services.transit_engine import Schedule
 
 def routes_for_stop(stop_id):
     with Schedule().connect() as c:

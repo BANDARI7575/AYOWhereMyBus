@@ -135,7 +135,7 @@ def tick(db,schedule,realtime,sender=send,now=None):
                 if not claimed:continue
                 es=data['language']=='es';stamp=dep['prediction_at']
                 from datetime import datetime
-                from backend.transit_engine import TZ
+                from backend.services.transit_engine import TZ
                 at=datetime.fromtimestamp(stamp,TZ).strftime('%H:%M')
                 route=dep.get('route_number') or dep['route_id']
                 body=(f"Ruta {route} · {data.get('stop_name',sid)}: llegada estimada {at}. MCTS; no garantizada." if es else f"Route {route} · {data.get('stop_name',sid)}: predicted arrival {at}. MCTS; not guaranteed.")

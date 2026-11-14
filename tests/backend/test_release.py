@@ -6,8 +6,8 @@ from pathlib import Path
 from datetime import datetime
 from unittest.mock import patch
 from google.transit import gtfs_realtime_pb2 as pb
-from backend.transit_engine import Schedule, TZ, seconds
-from backend.realtime_service import Realtime
+from backend.services.transit_engine import Schedule, TZ, seconds
+from backend.services.realtime_service import Realtime
 
 class ScheduleTests(unittest.TestCase):
     def setUp(self):
@@ -91,7 +91,7 @@ class ApiTests(ScheduleTests):
 
 class AdditionalTests(unittest.TestCase):
     def test_dst_service_anchor(self):
-        from backend.transit_engine import service_epoch
+        from backend.services.transit_engine import service_epoch
         from datetime import date
         at=datetime.fromtimestamp(service_epoch(date(2026,11,1),'03:00:00'),TZ)
         self.assertEqual(at.hour,3)
@@ -105,7 +105,7 @@ class AdditionalTests(unittest.TestCase):
     def test_feed_failure_is_explicit(self):
         import requests
         rt=Realtime()
-        with patch('backend.realtime_service.fetch_feed',side_effect=TimeoutError):
+        with patch('backend.services.realtime_service.fetch_feed',side_effect=TimeoutError):
             self.assertEqual(rt.alerts()['status'],'unavailable');self.assertEqual(rt.alerts()['alerts'],[])
     def test_mcts_missing_date_absolute_arrival(self):
         import time

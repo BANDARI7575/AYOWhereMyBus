@@ -2,7 +2,7 @@
 from datetime import datetime
 from unittest.mock import patch
 from tests.backend import test_release
-from backend.transit_engine import TZ
+from backend.services.transit_engine import TZ
 from backend import release_api
 NOW = datetime(2026, 11, 10, 0, 0, tzinfo=TZ)
 

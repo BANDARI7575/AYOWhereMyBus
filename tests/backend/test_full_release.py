@@ -4,7 +4,7 @@ from pathlib import Path
 from unittest.mock import patch
 from tests.backend import test_release
 from backend import release_api
-from backend.push_service import validate_subscription,reliable_prediction,tick
+from backend.services.push_service import validate_subscription,reliable_prediction,tick
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives import serialization
 from cryptography.fernet import Fernet
@@ -69,7 +69,7 @@ class OperationsTests(test_release.ApiTests):
         self.assertEqual(validate_subscription(subscription())['endpoint'],'https://fcm.googleapis.com/fcm/send/isolated-test-only')
 
     def test_webpush_encrypts_and_signs_without_sending(self):
-        from backend.push_service import send,validate_configuration
+        from backend.services.push_service import send,validate_configuration
         from requests import Response
         import http_ece
         with tempfile.TemporaryDirectory() as folder:

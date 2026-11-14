@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from backend.release_api import db,schedule,realtime,DB
-from backend.push_service import tick,validate_configuration
+from backend.services.push_service import tick,validate_configuration
 validate_configuration()
 lock_path=Path(DB).parent/'alerts-worker.lock'
 lock_path.parent.mkdir(parents=True,exist_ok=True)

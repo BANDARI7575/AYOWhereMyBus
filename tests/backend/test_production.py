@@ -8,8 +8,8 @@ from google.transit import gtfs_realtime_pb2 as pb
 from tests.backend import test_journey
 from tests.backend import test_release
 from backend import release_api
-from backend.realtime_service import Realtime
-from backend.transit_engine import TZ, MIN_TRANSFER_SECONDS
+from backend.services.realtime_service import Realtime
+from backend.services.transit_engine import TZ, MIN_TRANSFER_SECONDS
 
 NOW=test_journey.NOW
 

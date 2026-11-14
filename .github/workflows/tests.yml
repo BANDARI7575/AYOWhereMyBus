@@ -15,7 +15,7 @@ jobs:
           node-version: '22'
       - run: pip install -r requirements.lock
       - name: Prepare official bundled timetable index
-        run: python -c "from backend.transit_engine import Schedule; Schedule().build()"
+        run: python -c "from backend.services.transit_engine import Schedule; Schedule().build()"
       - run: python -m unittest discover -s tests -t . -v
       - name: Check frontend syntax
         run: for ayo_script in static/*.js tests/frontend/*.cjs; do node --check "$ayo_script"; done

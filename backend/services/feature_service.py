@@ -7,9 +7,9 @@ import time
 import threading
 from datetime import datetime
 from flask import jsonify,request
-from backend.transit_engine import TZ
-from backend.alert_service import snapshot as alert_snapshot, filter_route
-from backend.stops_service import distance_km
+from backend.services.transit_engine import TZ
+from backend.services.alert_service import snapshot as alert_snapshot, filter_route
+from backend.services.stops_service import distance_km
 
 RADII={0.25,0.5,1.0,2.0,5.0}
 FEATURES={'nearby','planner','voice','alerts','favorites','reliability','tracking'}

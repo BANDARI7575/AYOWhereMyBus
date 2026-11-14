@@ -12,7 +12,7 @@ const root = path.resolve(__dirname, '../..');
 // Fail explicitly when the imported schedule doesn't cover this test's date.
 const setup = spawnSync(process.env.AYO_PYTHON || path.join(root,'.venv/bin/python'), ['-c', `
 import json
-from backend.transit_engine import Schedule
+from backend.services.transit_engine import Schedule
 s=Schedule()
 for origin in s.locations('Wisconsin'):
     for dep in s.departures(origin['stop_id']):
