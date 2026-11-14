@@ -8,8 +8,8 @@ import math
 from pathlib import Path
 
 
-from backend.paths import PROJECT_ROOT as ROOT
-STOPS_FILE = Path(os.getenv("GTFS_DIR", ROOT / "google_transit")) / "stops.txt"
+from backend.paths import GTFS_DIR
+STOPS_FILE = Path(os.getenv("GTFS_DIR", GTFS_DIR)) / "stops.txt"
 
 
 @lru_cache(maxsize=1)

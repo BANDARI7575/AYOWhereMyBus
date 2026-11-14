@@ -13,7 +13,7 @@ from zoneinfo import ZoneInfo
 from backend.services.stops_service import distance_km
 
 TZ = ZoneInfo('America/Chicago')
-from backend.paths import PROJECT_ROOT as ROOT
+from backend.paths import PROJECT_ROOT as ROOT, GTFS_DIR
 MIN_TRANSFER_SECONDS = 180  # AYO planning buffer, not an MCTS guarantee.
 
 def service_epoch(day, value):
@@ -33,7 +33,7 @@ class ClosingConnection(sqlite3.Connection):
 
 class Schedule:
     def __init__(self, source=None, database=None):
-        self.source=Path(source or os.getenv('GTFS_DIR',ROOT/'google_transit'))
+        self.source=Path(source or os.getenv('GTFS_DIR',GTFS_DIR))
         self.database=str(database or os.getenv('SCHEDULE_DB',ROOT/'instance/schedule.sqlite'))
     def connect(self, readonly=True):
         # Requests must never create an empty schedule database on a bad path.

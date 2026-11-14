@@ -45,8 +45,8 @@ data = {
 }
 
 # Step 5: Save the data to a JSON file
-with (Path(__file__).resolve().parents[2] / "buses.json").open("w") as file:
+with (Path(__file__).resolve().parents[2] / "data/buses.json").open("w") as file:
     json.dump(data, file, indent=4)
 
 print("Total buses:", len(buses))
-print("Successfully saved bus data to buses.json")
+print("Successfully saved bus data to data/buses.json")
