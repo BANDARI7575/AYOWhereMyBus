@@ -21,8 +21,8 @@ class OrganizationTests(unittest.TestCase):
 
     def test_homepage_and_renamed_assets_remain_accessible(self):
         client = app.test_client()
-        for path in ['/', '/static/weather.js', '/static/rider-tools.js',
-                     '/static/navigation.js', '/static/pwa.js', '/sw.js']:
+        for path in ['/', '/static/js/weather.js', '/static/js/rider-tools.js',
+                     '/static/js/navigation.js', '/static/js/pwa.js', '/sw.js']:
             with self.subTest(path=path):
                 response = client.get(path)
                 self.assertEqual(response.status_code, 200)
@@ -40,7 +40,7 @@ class OrganizationTests(unittest.TestCase):
         assets = json.loads(re.search(r'const SHELL=(\[.*?\]);', worker, re.S)[1])
         for asset in assets:
             with self.subTest(asset=asset):
-                local = PROJECT_ROOT / ('index.html' if asset == '/' else asset.lstrip('/'))
+                local = PROJECT_ROOT / ('templates/index.html' if asset == '/' else 'templates/privacy.html' if asset == '/static/privacy.html' else asset.lstrip('/'))
                 self.assertTrue(local.is_file(), asset)
 
     def test_repository_defaults_do_not_depend_on_working_directory(self):
@@ -66,3 +66,21 @@ class OrganizationTests(unittest.TestCase):
             self.assertEqual(schedule.source, source)
             self.assertEqual(schedule.database, str(database))
             self.assertFalse(database.exists(), 'Constructing a schedule must not create a database')
+
+    def test_legacy_asset_and_privacy_urls_remain_compatible(self):
+        client = app.test_client()
+        for old, new in [('/static/app.js', '/static/js/app.js'),
+                         ('/static/style.css', '/static/css/style.css'),
+                         ('/static/icons.svg', '/static/img/icons.svg'),
+                         ('/static/icon-192.png', '/static/img/icon-192.png')]:
+            with self.subTest(old=old):
+                with client.get(old) as previous, client.get(new) as canonical:
+                    self.assertEqual(previous.status_code, 200)
+                    self.assertEqual(previous.data, canonical.data)
+                    self.assertEqual(previous.content_type, canonical.content_type)
+        with client.get('/static/privacy.html') as response:
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b'Privacy and data', response.data)
+        for private in ['/templates/privacy.html', '/backend/app.py', '/instance/community.sqlite']:
+            with client.get(private) as response:
+                self.assertEqual(response.status_code, 404)

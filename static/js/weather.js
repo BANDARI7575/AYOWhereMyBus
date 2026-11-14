@@ -169,7 +169,7 @@
 
     if (weatherIcon) {
       const symbol=({sun:'sun',night:'moon',rain:'rain',snow:'snow',cloud:'cloud',wind:'wind',none:'cloud'})[weather.effect]||'cloud';
-      const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('class','icon');svg.setAttribute('aria-hidden','true');const use=document.createElementNS('http://www.w3.org/2000/svg','use');use.setAttribute('href','/static/icons.svg#'+symbol);svg.append(use);weatherIcon.replaceChildren(svg);
+      const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('class','icon');svg.setAttribute('aria-hidden','true');const use=document.createElementNS('http://www.w3.org/2000/svg','use');use.setAttribute('href','/static/img/icons.svg#'+symbol);svg.append(use);weatherIcon.replaceChildren(svg);
     }
 
     if (weatherTemp) {

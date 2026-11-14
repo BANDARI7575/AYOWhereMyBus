@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const units = require('../../static/units.js');
+const units = require('../../static/js/units.js');
 test('US customary conversions use the requested exact factors', () => {
   assert.equal(units.toMiles(1), 0.621371);
   assert.ok(Math.abs(units.toMph(100) - 62.1371) < 1e-10);
@@ -35,7 +35,7 @@ test('missing and invalid measurements are never shown as zero or NaN', () => {
 });
 test('loaded frontend scripts contain no hardcoded metric display labels', () => {
   const fs = require('node:fs');
-  const html = fs.readFileSync('index.html', 'utf8');
+  const html = fs.readFileSync('templates/index.html', 'utf8');
   for (const match of html.matchAll(/<script[^>]*src="(\/static\/[^\"]+)"/g)) {
     if (match[1].includes('/vendor/')) continue;
     const source = fs.readFileSync('.' + match[1], 'utf8');

@@ -88,7 +88,7 @@ def install(app):
     app.config['AYO_PLANNER_API_VERSION'] = 1
     root = PROJECT_ROOT
     revision=hashlib.sha256()
-    inputs=list(root.glob('*.py'))+list((root/'backend').rglob('*.py'))+[root/'index.html',root/'requirements.lock']+list((root/'static').rglob('*'))
+    inputs=list(root.glob('*.py'))+list((root/'backend').rglob('*.py'))+[root/'requirements.lock']+list((root/'templates').glob('*.html'))+list((root/'static').rglob('*'))
     for path in sorted(p for p in inputs if p.is_file() and '.backup.' not in p.name and p.name!='.DS_Store'):
         revision.update(str(path.relative_to(root)).encode()+b'\0'+hashlib.sha256(path.read_bytes()).digest())
     app.config['AYO_SOURCE_REVISION']=revision.hexdigest()[:12]

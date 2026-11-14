@@ -1,4 +1,4 @@
-const {test}=require('node:test');const assert=require('node:assert/strict');const ui=require('../../static/transit-ui.js');
+const {test}=require('node:test');const assert=require('node:assert/strict');const ui=require('../../static/js/transit-ui.js');
 test('arrival presentation rejects stale, conflicting and uncertain predictions',()=>{
  const d={data_type:'realtime',prediction_kind:'arrival',prediction_at:1200,prediction_reported_at:990,scheduled_epoch:1300};
  assert.deepEqual(ui.departureState(d,'fresh',1000),{kind:'arrival',epoch:1200});
@@ -23,7 +23,7 @@ test('alert IDs and affected routes deduplicate; unsafe source URLs are rejected
  assert.equal(ui.safeUrl('javascript:alert(1)'),null);assert.equal(ui.safeUrl('https://www.ridemcts.com/'),'https://www.ridemcts.com/');
 });
 test('place adapters are inactive and never receive a query without approval and consent',async()=>{
- const search=require('../../static/location-search.js');assert.equal(search.placesAvailable,false);
+ const search=require('../../static/js/location-search.js');assert.equal(search.placesAvailable,false);
  await assert.rejects(search.searchPlaces('private address'),/approved provider/);
  assert.throws(()=>search.registerProvider({id:'test',search(){}}),/approved/);
  let calls=0;search.registerProvider({id:'isolated-test',approved:true,search:async()=>{calls++;return [{name:'Place',latitude:43,longitude:-88,stop_id:'invented'},{name:'Invalid',latitude:200,longitude:0}];}});

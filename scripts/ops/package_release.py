@@ -4,10 +4,10 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',type=Path,required=True);a=p.parse_args()
 files=[]
-for name in ['backend','static','scripts','deploy','data','tests','docs']:
+for name in ['backend','templates','static','scripts','deploy','data','tests','docs']:
     files.extend(f for f in (ROOT/name).rglob('*') if f.is_file() and '__pycache__' not in f.parts and '.backup.' not in f.name and f.name not in ['.DS_Store','release-artifact.json'] and f.suffix not in ['.pyc','.sqlite','.gz'])
 files.extend(f for f in ROOT.glob('*.py') if '.backup.' not in f.name)
-files.extend(ROOT/n for n in ['index.html','requirements.txt','requirements.lock','package.json','package-lock.json','Dockerfile','.dockerignore','.env.example','README.md'])
+files.extend(ROOT/n for n in ['requirements.txt','requirements.lock','package.json','package-lock.json','Dockerfile','.dockerignore','.env.example','README.md'])
 manifest={str(f.relative_to(ROOT)):hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted(set(files))}
 release_id=hashlib.sha256(json.dumps(manifest,sort_keys=True).encode()).hexdigest()[:16]
 a.output.parent.mkdir(parents=True,exist_ok=True)

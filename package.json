@@ -23,7 +23,8 @@
     "test:scroll": "node tests/frontend/homepage-scroll.browser.cjs",
     "test:units-browser": "node tests/frontend/units.browser.cjs",
     "test:map-layout": "node tests/frontend/map-layout.browser.cjs",
-    "test:failure-recovery": "node tests/frontend/features.browser.cjs && node tests/frontend/workspace-failures.browser.cjs"
+    "test:failure-recovery": "node tests/frontend/features.browser.cjs && node tests/frontend/workspace-failures.browser.cjs",
+    "test:pwa-upgrade": "node tests/frontend/pwa-upgrade.browser.cjs"
   },
   "devDependencies": {
     "playwright": "1.65.0",

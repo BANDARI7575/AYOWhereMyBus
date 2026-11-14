@@ -1,1 +1,3 @@
 These JSON files are synthetic GTFS test fixtures produced through Schedule.itinerary with the isolated SQLite dataset in test_journey.py. They exercise after-midnight rides, transfers and estimated walking. Browser tests intercept API responses inside their own context. These fixtures are never served by the production Flask routes and must not be interpreted as real Milwaukee schedules or predictions.
+
+The `pwa-v26/` HTML and worker are exact copies from commit `6032d893d900b23cc0226930b8b91fe87b994fa7`, before asset restructuring. They are upgrade-test fixtures only, not active application assets; preserve their old URLs to verify the compatibility transition. The test needs no Git history or real rider storage.

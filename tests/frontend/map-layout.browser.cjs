@@ -12,7 +12,7 @@ const base=process.env.AYO_TEST_URL||'http://127.0.0.1:5050';
    const errors=[];page.on('console',m=>{if(m.type()==='error'&&/integrity|stylesheet/i.test(m.text()))errors.push(m.text());});
    await page.route('**/*',route=>{
     const u=new URL(route.request().url());
-    if(u.hostname.endsWith('tile.openstreetmap.org'))return route.fulfill({contentType:'image/png',body:fs.readFileSync('static/icon-192.png')});
+    if(u.hostname.endsWith('tile.openstreetmap.org'))return route.fulfill({contentType:'image/png',body:fs.readFileSync('static/img/icon-192.png')});
     if(u.origin!==base)return route.abort();
     if(u.pathname.startsWith('/api/'))return route.fulfill({json:u.pathname==='/api/buses'?{buses:[]}:u.pathname==='/api/winter/reports'?{reports:[]}:{status:'unavailable',alerts:[]}});
     return route.continue();

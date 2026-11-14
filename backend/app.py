@@ -19,7 +19,7 @@ import time
 
 import requests
 from backend.services.feed_http import fetch_feed
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, render_template
 from google.transit import gtfs_realtime_pb2
 
 from backend.services.stops_service import find_nearby_stops
@@ -30,13 +30,14 @@ from backend.services.routes_service import routes_for_stop
 # 01. APPLICATION CONFIGURATION
 # ==========================================================
 
-from backend.paths import PROJECT_ROOT as ROOT
+from backend.paths import PROJECT_ROOT as ROOT, TEMPLATES_DIR, STATIC_DIR
 
 FEED_URL = "https://realtime.ridemcts.com/gtfsrt/vehicles"
 
 app = Flask(
     __name__,
-    static_folder=str(ROOT / "static"),
+    static_folder=str(STATIC_DIR),
+    template_folder=str(TEMPLATES_DIR),
     static_url_path="/static"
 )
 
@@ -202,10 +203,25 @@ def live_vehicles() -> dict:
 def homepage():
     """Serve the AYO! website."""
 
-    return send_from_directory(
-        ROOT,
-        "index.html"
-    )
+    return render_template("index.html")
+
+
+@app.get("/static/privacy.html")
+def privacy():
+    """Preserve the published privacy URL after moving HTML into templates."""
+    return render_template("privacy.html")
+
+
+# Existing tabs and old service-worker shells may request pre-refactor URLs.
+# Keep one source copy and restrict compatibility to these known static assets.
+LEGACY_ASSETS = {'alert-store.js': 'js/alert-store.js', 'app.js': 'js/app.js', 'home-experience.js': 'js/home-experience.js', 'i18n.js': 'js/i18n.js', 'journey.js': 'js/journey.js', 'location-access.js': 'js/location-access.js', 'location-search.js': 'js/location-search.js', 'navigation.js': 'js/navigation.js', 'pwa.js': 'js/pwa.js', 'rider-tools.js': 'js/rider-tools.js', 'stops-ui.js': 'js/stops-ui.js', 'transit-ui.js': 'js/transit-ui.js', 'units.js': 'js/units.js', 'weather.js': 'js/weather.js', 'workspaces.js': 'js/workspaces.js', 'style.css': 'css/style.css', 'icon-192.png': 'img/icon-192.png', 'icon-512.png': 'img/icon-512.png', 'icons.svg': 'img/icons.svg', 'milwaukee-cinematic.png': 'img/milwaukee-cinematic.png', 'milwaukee-cinematic.svg': 'img/milwaukee-cinematic.svg'}
+
+
+def static_asset(filename):
+    return app.send_static_file(LEGACY_ASSETS.get(filename, filename))
+
+
+app.view_functions['static'] = static_asset
 
 
 # ==========================================================

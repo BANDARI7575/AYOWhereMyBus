@@ -37,8 +37,8 @@ const base=process.env.AYO_TEST_URL||'http://127.0.0.1:5001';
   await page.clock.fastForward(31000);assert.equal(await page.evaluate(()=>window.notices.length),1); // same trip not repeated
   // Legacy Winter Watch form was retired by the approved redesign; API moderation remains covered in backend tests.
   await page.evaluate(()=>navigator.serviceWorker.ready);await page.reload({waitUntil:'domcontentloaded'});await page.locator('#planFrom').waitFor({state:'attached'});
-  const cached=await page.evaluate(async()=>{const c=await caches.open('ayo-shell-v26');return(await c.keys()).map(r=>new URL(r.url).pathname);});
-  assert.ok(cached.includes('/static/journey.js'));assert.ok(!cached.some(p=>p.startsWith('/api/')));
+  const cached=await page.evaluate(async()=>{const c=await caches.open('ayo-shell-v27');return(await c.keys()).map(r=>new URL(r.url).pathname);});
+  assert.ok(cached.includes('/static/js/journey.js'));assert.ok(!cached.some(p=>p.startsWith('/api/')));
   await context.setOffline(true);await page.waitForFunction(()=>!navigator.onLine);await page.reload({waitUntil:'domcontentloaded'});await page.locator('#planFrom').waitFor({state:'attached'});
   assert.match(await page.locator('#riderTools').innerText(),/Offline:/);
   assert.deepEqual(errors,[]);

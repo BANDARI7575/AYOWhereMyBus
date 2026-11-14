@@ -12,7 +12,7 @@ function sources(folder) {
     return entry.isDirectory() ? sources(file) : /\.(?:js|html|svg)$/.test(file) ? [file] : [];
   });
 }
-const paths = ['index.html', ...sources('static')].flatMap(file =>
+const paths = ['templates/index.html', ...sources('static')].flatMap(file =>
   [...fs.readFileSync(file, 'utf8').matchAll(/<path\b[^>]*\bd="([^"]*)"/g)].map((match, index) => ({ file, index, d: match[1].replace(/\s+/g, ' ') })));
 (async () => {
   for (const [engine, type] of [['chromium', chromium], ['webkit', webkit]]) {

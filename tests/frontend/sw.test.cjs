@@ -11,9 +11,9 @@ test('successful shell fetch refreshes an old cached script before offline fallb
   self:{addEventListener:(type,fn)=>handlers[type]=fn}};
  vm.runInNewContext(fs.readFileSync('static/sw.js','utf8'),context);
  async function request(path){let response;const work=[];handlers.fetch({request:{method:'GET',url:'https://ayo.example'+path},respondWith:p=>response=p,waitUntil:p=>work.push(p)});await Promise.all(work);return response;}
- assert.equal(await(await request('/static/app.js')).text(),'current app');
+ assert.equal(await(await request('/static/js/app.js')).text(),'current app');
  assert.equal(await saved.clone().text(),'current app');
  online=false;
- assert.equal(await(await request('/static/app.js')).text(),'current app');
+ assert.equal(await(await request('/static/js/app.js')).text(),'current app');
  assert.equal(await request('/api/buses'),undefined,'API data must never enter the shell cache');
 });

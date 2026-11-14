@@ -18,7 +18,7 @@ jobs:
         run: python -c "from backend.services.transit_engine import Schedule; Schedule().build()"
       - run: python -m unittest discover -s tests -t . -v
       - name: Check frontend syntax
-        run: for ayo_script in static/*.js tests/frontend/*.cjs; do node --check "$ayo_script"; done
+        run: for ayo_script in static/*.js static/js/*.js tests/frontend/*.cjs; do node --check "$ayo_script"; done
       - run: npm ci
       - run: npm test
       - run: npx playwright install --with-deps chromium webkit
@@ -29,6 +29,7 @@ jobs:
           trap 'kill "$server_pid"' EXIT
           python -c "import time, urllib.request; time.sleep(2); urllib.request.urlopen('http://127.0.0.1:5099/').close()"
           AYO_REDESIGN_AXE=1 npm run test:release
+          npm run test:pwa-upgrade
           npm run test:failure-recovery
           npm run test:weather
           npm run test:journey-fixtures
