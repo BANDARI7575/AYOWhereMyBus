@@ -114,17 +114,8 @@
   }
 
   function formatDistance(meters) {
-    const value = Number(meters);
-
-    if (!Number.isFinite(value)) {
-      return "Unknown distance";
-    }
-
-    if (value < 1000) {
-      return `${Math.round(value)} m away`;
-    }
-
-    return `${(value / 1000).toFixed(2)} km away`;
+    const distance = window.AyoUnits.distance(meters);
+    return distance === "—" ? "Unknown distance" : `${distance} away`;
   }
 
   function createText(tag, content) {
@@ -563,7 +554,7 @@ for (const route of routes) {
           displayStops(data.stops);
           if(Number.isFinite(position.coords.accuracy)&&position.coords.accuracy>200){
             const es=document.documentElement.lang==='es';
-            setStopsStatus(es?`Precisión de ubicación: unos ${Math.round(position.coords.accuracy)} m. Confirma las paradas manualmente.`:`Location accuracy: about ${Math.round(position.coords.accuracy)} m. Confirm stops manually.`);
+            setStopsStatus(es?`Precisión de ubicación: unos ${window.AyoUnits.feet(position.coords.accuracy)}. Confirma las paradas manualmente.`:`Location accuracy: about ${window.AyoUnits.feet(position.coords.accuracy)}. Confirm stops manually.`);
           }
 
           showStopsOnMap(

@@ -15,3 +15,6 @@ playwright-report
 tests
 .github
 **/.DS_Store
+
+# Archived sources are preserved locally, excluded from the runtime image.
+archive/

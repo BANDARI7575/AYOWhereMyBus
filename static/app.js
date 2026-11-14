@@ -14,7 +14,7 @@ const CENTER = [43.0389, -87.9065];
 
 const state = {
   route: "",
-  mode: "idle",
+  mode: "all",
   position: null,
   request: null,
   timer: null,
@@ -164,7 +164,7 @@ function initializeMap() {
   state.map = L.map("map", {
     scrollWheelZoom: false,
     zoomControl: true
-  }).setView(CENTER, 11);
+  }).setView(CENTER, 12);
 
   L.tileLayer(
     "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -177,6 +177,15 @@ function initializeMap() {
   state.markers = L.layerGroup().addTo(state.map);
 }
 
+// Leaflet caches a zero-size viewport when its screen is hidden. Preserve the
+// geographic center explicitly when the real viewport becomes measurable.
+function resizeTransitMap() {
+  if (!state.map) return;
+  const center = state.map.getCenter(), zoom = state.map.getZoom();
+  state.map.invalidateSize({pan:false});
+  state.map.setView(center, zoom, {animate:false});
+}
+
 /* ==========================================================
    04. BUS ICONS
    ========================================================== */
@@ -186,8 +195,8 @@ function createBusIcon(stale = false) {
 
   return L.divIcon({
     className: "",
-    iconSize: [38, 38],
-    iconAnchor: [19, 19],
+    iconSize: [44, 44],
+    iconAnchor: [22, 22],
     popupAnchor: [0, -23],
     html: `
       <div class="bus-icon" style="opacity:${opacity}">
@@ -243,7 +252,7 @@ function createPopup(bus) {
     "Speed",
     bus.speed_kmh == null
       ? "Not reported"
-      : `${bus.speed_kmh} km/h`
+      : window.AyoUnits.speed(bus.speed_kmh, state.language)
   );
 
   popupRow(
@@ -269,7 +278,9 @@ function createPopup(bus) {
 
   const age = reportAgeSeconds(bus.reported_at);
 
-  if (age === null) {
+  if (state.feedFresh === false) {
+    note.textContent = "Vehicle feed is outdated. This is a last known position.";
+  } else if (age === null) {
     note.textContent =
       "GPS report time unavailable. Location freshness cannot be verified.";
   } else if (age > 120) {
@@ -311,7 +322,7 @@ function showBuses(buses, zoom = false) {
     const key = `${bus.bus_id}:${bus.route}`;
     const position = [lat, lon];
     const age = reportAgeSeconds(bus.reported_at);
-    const stale = age === null || age > 120;
+    const stale = state.feedFresh === false || age === null || age > 120;
 
     nextKeys.add(key);
     points.push(position);
@@ -319,8 +330,8 @@ function showBuses(buses, zoom = false) {
     if (state.markerIndex.has(key)) {
       const marker = state.markerIndex.get(key);
 
-      marker.setLatLng(position);
-      marker.setIcon(createBusIcon(stale));
+      marker._ayoBusData=bus;marker.setLatLng(position);
+      if(marker._ayoStale!==stale){marker.setIcon(createBusIcon(stale));marker._ayoStale=stale;}
 
       // Preserve the popup while refreshing its data.
       if (marker.isPopupOpen()) {
@@ -335,7 +346,7 @@ function showBuses(buses, zoom = false) {
         title: `Bus ${bus.bus_id}, Route ${bus.route}`
       });
 
-      marker.bindPopup(createPopup(bus));
+      marker._ayoBusData=bus;marker._ayoStale=stale;marker.bindPopup(createPopup(bus));
       marker.addTo(state.markers);
 
       state.markerIndex.set(key, marker);
@@ -350,6 +361,7 @@ function showBuses(buses, zoom = false) {
     }
   }
 
+  regroupVehicles();
   if (zoom && points.length > 0) {
     state.map.fitBounds(points, {
       padding: [45, 45],
@@ -376,10 +388,10 @@ async function refresh(zoom = false) {
 
   state.request = controller;
 
-  $("connectionBadge").textContent = "● CONNECTING";
+  $("connectionBadge").textContent = "Checking positions";
 
   try {
-    const url = state.mode === "route"
+    const url = (state.mode === "route" || state.mode === "journey" && state.route)
       ? `${API}?route=${encodeURIComponent(state.route)}`
       : API;
 
@@ -406,7 +418,7 @@ async function refresh(zoom = false) {
     }
 
     let buses = data.buses;
-    if (data.feed_fresh === false) buses = buses.map(b => ({...b, reported_at: null}));
+    state.feedFresh = data.feed_fresh === true;
 
     if (
       state.mode === "nearby" &&
@@ -422,6 +434,7 @@ async function refresh(zoom = false) {
         .slice(0, 30);
     }
 
+    if(state.mode==="journey")buses=buses.filter(b=>(state.journeyLegs||[]).some(l=>String(l.route)===String(b.route)&&(b.direction_id==null||l.direction_id==null||String(l.direction_id)===String(b.direction_id))));
     state.lastBuses = buses;
     state.lastSuccessfulUpdate = new Date();
 
@@ -431,14 +444,14 @@ async function refresh(zoom = false) {
       `${buses.length} buses`;
 
     $("refreshTime").textContent =
-      "LAST REQUEST: " +
+      "Checked at " +
       state.lastSuccessfulUpdate.toLocaleTimeString(
         state.language === "es" ? "es-US" : "en-US",
         {timeZone: "America/Chicago"}
       );
 
     $("trackingState").textContent =
-      "● AUTO TRACKING ACTIVE";
+      "Automatic updates every 15 seconds";
 
     const ages = buses.map(
       bus => reportAgeSeconds(bus.reported_at)
@@ -455,32 +468,32 @@ async function refresh(zoom = false) {
 
     $("dataFreshness").textContent =
       oldest === null
-        ? "VEHICLE AGE: UNKNOWN"
-        : `OLDEST KNOWN REPORT: ${Math.floor(oldest / 60)} MIN`;
+        ? "Vehicle report time unknown"
+        : `Oldest vehicle report: ${Math.floor(oldest / 60)} minutes ago`;
 
-    if (data.feed_fresh === false || staleCount > 0) {
+    if (data.feed_fresh !== true || staleCount > 0) {
       $("connectionBadge").textContent =
-        "● SOME DATA STALE";
+        "Some positions are outdated";
 
       setStatus(
-        data.feed_fresh === false ? "MCTS vehicle feed is stale or unavailable. Positions are not current." : `${staleCount} vehicle positions are old or have unknown timestamps. Use caution.`,
+        data.feed_fresh !== true ? "MCTS vehicle feed is stale or unavailable. Positions are not current." : `${staleCount} vehicle positions are old or have unknown timestamps. Use caution.`,
         true
       );
     } else if (state.mode === "nearby") {
       $("connectionBadge").textContent =
-        "● RECENT REPORTS";
+        "Recent GPS reports";
 
       setStatus(
-        `${buses.length} reported buses within 3 km. Use Rider tools for stops and verified arrival data.`
+        `${buses.length} reported buses within ${window.AyoUnits.miles(3, state.language)}. Use Rider tools for stops and verified arrival data.`
       );
     } else {
       $("connectionBadge").textContent =
-        buses.length ? "● RECENT REPORTS" : "● FEED REACHED";
+        buses.length ? "Recent GPS reports" : "Feed checked";
 
       setStatus(
         buses.length
-          ? `${buses.length} reported buses on Route ${state.route}.`
-          : `No reported buses found for Route ${state.route}.`
+          ? state.route ? `${buses.length} reported buses on Route ${state.route}.` : `${buses.length} reported buses across the network.`
+          : state.route ? `No reported buses found for Route ${state.route}.` : "No reported buses returned. Check the official planner for service."
       );
     }
 
@@ -489,11 +502,14 @@ async function refresh(zoom = false) {
       error.name !== "AbortError" &&
       version === state.version
     ) {
+      state.feedFresh=false;
+      showBuses(state.lastBuses,false);
+      $("busCount").textContent=state.lastBuses.length ? state.lastBuses.length+(state.language==="es"?" últimas posiciones conocidas":" last known positions") : (state.language==="es"?"Posiciones no disponibles":"Positions unavailable");
       $("connectionBadge").textContent =
-        "● CONNECTION LOST";
+        "Connection unavailable";
 
       $("trackingState").textContent =
-        "● DATA NOT CURRENT";
+        "Positions not current";
 
       setStatus(
         "Unable to refresh MCTS information. Existing markers may be outdated.",
@@ -505,7 +521,7 @@ async function refresh(zoom = false) {
 
       $("busCount").textContent = "—";
       $("dataFreshness").textContent =
-        "VEHICLE AGE: UNAVAILABLE";
+        "Vehicle report time unavailable";
 
       console.error("MCTS request failed:", error);
     }
@@ -551,7 +567,7 @@ async function cycle(zoom = false, version = state.version) {
   );
 }
 
-function searchRoute(value) {
+function searchRoute(value, {navigate = true} = {}) {
   const route = String(value).trim().toUpperCase();
 
   if (!route) {
@@ -561,7 +577,7 @@ function searchRoute(value) {
 
   stopTracking();
 
-  state.route = route;window.dispatchEvent(new CustomEvent('ayo:route-selected',{detail:{route}}));
+  state.journeyLegs=null;state.route = route;window.dispatchEvent(new CustomEvent('ayo:route-selected',{detail:{route}}));
   state.mode = "route";
   state.position = null;
 
@@ -570,6 +586,7 @@ function searchRoute(value) {
   setStatus(`Searching Route ${route}...`);
 
   renderFavorites();
+  if (navigate) window.AyoSite?.navigate("map");
   cycle(true);
 }
 
@@ -581,13 +598,15 @@ function renderFavorites() {
   const holder = $("favorites");
 
   holder.replaceChildren();
+  $("favoriteButton")?.setAttribute("aria-pressed",String(state.favorites.includes(state.route)));
 
   for (const route of state.favorites) {
     const button = document.createElement("button");
 
     button.type = "button";
     button.className = "favorite-chip";
-    button.textContent = `★ ${route}`;
+    button.textContent = route;
+    button.setAttribute("aria-label",(state.language === "es" ? "Ruta guardada " : "Saved route ") + route);
 
     button.addEventListener(
       "click",
@@ -597,10 +616,9 @@ function renderFavorites() {
     holder.append(button);
   }
 
-  $("favoriteButton").textContent =
-    state.route && state.favorites.includes(state.route)
-      ? "★ Remove saved route"
-      : "☆ Save this route";
+  $("favoriteButton").setAttribute("aria-label",state.favorites.includes(state.route)
+    ? (state.language === "es" ? "Quitar ruta guardada" : "Remove saved route")
+    : (state.language === "es" ? "Guardar esta ruta" : "Save this route"));
 }
 
 function toggleFavorite() {
@@ -623,154 +641,25 @@ function toggleFavorite() {
 
   if(!safelySave("ayo-favorites", state.favorites)){state.favorites=previousFavorites;setStatus("Browser storage unavailable. Favorite was not saved.",true);}
   renderFavorites();
+  window.dispatchEvent(new CustomEvent("ayo:route-favorite-toggled",{detail:{route:state.route,saved:state.favorites.includes(state.route)}}));
 }
 
 /* ==========================================================
    10. NEARBY BUSES
    ========================================================== */
 
-function nearMe() {
-  if (!navigator.geolocation) {
-    setStatus("Location is not supported by your browser.", true);
-    return;
-  }
-
-  setStatus("Requesting location permission...");
-
-  navigator.geolocation.getCurrentPosition(
-    position => {
-      stopTracking();
-
-      state.route = "";
-      state.mode = "nearby";
-
-      state.position = {
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude
-      };
-
-      $("routeInput").value = "";
-
-      renderFavorites();
-      cycle(true);
-
-      document.getElementById("main")?.scrollIntoView({
-        behavior: "smooth"
-      });
-    },
-
-    () => setStatus(
-      "Location unavailable or permission denied. Route search still works.",
-      true
-    ),
-
-    {
-      enableHighAccuracy: false,
-      timeout: 12000,
-      maximumAge: 30000
-    }
-  );
+async function nearMe() {
+ setStatus(state.language==='es'?'Solicitando ubicación…':'Requesting location permission…');
+ try {const position=await AyoLocation.request({es:state.language==='es'});stopTracking();state.route='';state.mode='nearby';state.position={latitude:position.coords.latitude,longitude:position.coords.longitude};$('routeInput').value='';renderFavorites();window.AyoSite?.navigate('map');cycle(true);}catch(error){setStatus(error.message,true);}
 }
 
 /* ==========================================================
    11. ENGLISH AND SPANISH
    ========================================================== */
 
-const translations = {
-  en: {
-    navHome: "Home",
-    navMap: "Live Tracking",
-    navFeatures: "Features",
-    navAbout: "Creator",
-
-    eyebrow: "MILWAUKEE // TRANSIT INTELLIGENCE",
-    heroTitle:
-      '<span class="hero-ayo">AYO!</span>' +
-      '<span class="hero-question">Where\'s My Bus?</span>',
-
-    heroSubtitle:
-      "The city never waits. Know your route before you step outside.",
-
-    findRide: "TRACK MY BUS ↗",
-    builtFor: "BUILT FOR THE STREETS OF MILWAUKEE",
-
-    mapHeading: 'Find your <em>ride.</em>',
-    routeLookup: "BUS ROUTE LOOKUP",
-    routeHelp: "Search a route such as 19, 21, BLU, or PUR.",
-
-    search: "SEARCH ROUTE ↗",
-    nearby: "⌖ NEAR ME",
-
-    mapTitle: "MILWAUKEE LIVE MAP",
-
-    featureHeading: 'More than <em>a map.</em>',
-
-    disclaimer:
-      "Independent transit project. Bus positions reflect the latest reported MCTS information and are not guaranteed arrivals."
-  },
-
-  es: {
-    navHome: "Inicio",
-    navMap: "Seguimiento en vivo",
-    navFeatures: "Funciones",
-    navAbout: "Creador",
-
-    eyebrow: "MILWAUKEE // INFORMACIÓN DE TRÁNSITO",
-
-    heroTitle:
-      '<span class="hero-ayo">AYO!</span>' +
-      '<span class="hero-question">¿Dónde está mi autobús?</span>',
-
-    heroSubtitle:
-      "La ciudad nunca espera. Consulta tu ruta antes de salir.",
-
-    findRide: "BUSCAR MI AUTOBÚS ↗",
-    builtFor: "CREADO PARA LAS CALLES DE MILWAUKEE",
-
-    mapHeading: 'Encuentra tu <em>autobús.</em>',
-    routeLookup: "BUSCAR RUTA",
-    routeHelp: "Busca una ruta como 19, 21, BLU o PUR.",
-
-    search: "BUSCAR RUTA ↗",
-    nearby: "⌖ CERCA DE MÍ",
-
-    mapTitle: "MAPA EN VIVO DE MILWAUKEE",
-
-    featureHeading: 'Más que <em>un mapa.</em>',
-
-    disclaimer:
-      "Proyecto independiente. Las posiciones muestran los últimos datos reportados por MCTS y no garantizan horarios de llegada."
-  }
-};
-
 function translate() {
-  const dictionary = translations[state.language];
-
   document.documentElement.lang = state.language;
-
-  document.querySelectorAll("[data-i18n]").forEach(
-    element => {
-      const key = element.dataset.i18n;
-
-      if (dictionary[key] !== undefined) {
-        element.textContent = dictionary[key];
-      }
-    }
-  );
-
-  document.querySelectorAll("[data-i18n-html]").forEach(
-    element => {
-      const key = element.dataset.i18nHtml;
-
-      if (dictionary[key] !== undefined) {
-        // Trusted translation templates defined above.
-        element.innerHTML = dictionary[key];
-      }
-    }
-  );
-
-  $("languageButton").textContent =
-    state.language === "en" ? "ES" : "EN";
+  $("languageButton").textContent = state.language === "en" ? "ES" : "EN";
 }
 
 /* ==========================================================
@@ -778,13 +667,33 @@ function translate() {
    ========================================================== */
 
 function updateClock() {
-  $("clock").textContent =
-    new Intl.DateTimeFormat(state.language === "es" ? "es-US" : "en-US", {
-      timeZone: "America/Chicago",
-      hour: "numeric",
-      minute: "2-digit",
+  const now = new Date();
+  const locale = state.language === "es" ? "es-US" : "en-US";
+  const options = {
+    timeZone: "America/Chicago",
+    hour: "numeric",
+    minute: "2-digit"
+  };
+  const clock = $("clock");
+  if (clock) clock.textContent =
+    new Intl.DateTimeFormat(locale, {
+      ...options,
       timeZoneName: "short"
-    }).format(new Date());
+    }).format(now);
+  const weatherClock = $("weatherClock");
+  if (weatherClock) {
+    weatherClock.textContent = new Intl.DateTimeFormat(locale, options).format(now);
+  }
+}
+
+let clockTimer = null;
+
+function synchronizeClock() {
+  clearTimeout(clockTimer);
+  updateClock();
+  // Align the one pending update with the next wall-clock minute.
+  // Recalculate after delayed callbacks instead of drifting from page-load time.
+  clockTimer = setTimeout(synchronizeClock, 60000 - Date.now() % 60000);
 }
 
 /* ==========================================================
@@ -809,17 +718,26 @@ function start() {
 
   translate();
   renderFavorites();
-  updateClock();
-  initializeMap();
+  if ($("clock") || $("weatherClock")) {
+    synchronizeClock();
+    window.addEventListener("focus", synchronizeClock);
+    window.addEventListener("pageshow", synchronizeClock);
+  }
 
-  setInterval(updateClock, 30000);
+  // A map failure must not stop the clock or prevent controls from binding.
+  try {
+    initializeMap();
+  } catch (error) {
+    console.warn("Map initialization failed.", error);
+    setStatus("The map could not initialize. Please reload to try again.", true);
+  }
 
   $("routeForm").addEventListener("submit", event => {
     event.preventDefault();
     searchRoute($("routeInput").value);
   });
 
-  $("nearbyButton").addEventListener("click", nearMe);
+
 
   // Homepage shortcut uses the same nearby-bus function.
   $("heroNearbyButton")?.addEventListener(
@@ -857,13 +775,17 @@ function start() {
   });
 
   document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && ($("clock") || $("weatherClock"))) synchronizeClock();
+
     if (document.hidden) {
       stopTracking();
 
       $("trackingState").textContent =
-        "● PAUSED — TAB HIDDEN";
+        "Updates paused while this tab is hidden";
 
     } else if (state.mode !== "idle") {
+      $("trackingState").textContent = "Updating vehicle positions";
+      stopTracking();
       cycle(false);
     }
   });
@@ -871,9 +793,9 @@ function start() {
   window.addEventListener("offline", () => {
     stopTracking();
     showBuses([], false);
-    $("connectionBadge").textContent = "● OFFLINE";
-    $("trackingState").textContent = "● LIVE DATA UNAVAILABLE";
-    $("dataFreshness").textContent = "VEHICLE AGE: UNAVAILABLE";
+    $("connectionBadge").textContent = "Offline";
+    $("trackingState").textContent = "Current positions unavailable";
+    $("dataFreshness").textContent = "Vehicle report time unavailable";
   });
 
   window.addEventListener("online", () => {
@@ -882,6 +804,24 @@ function start() {
       cycle(false);
     }
   });
+  if (navigator.onLine) cycle(false);
 }
 
 document.addEventListener("DOMContentLoaded", start);
+
+// Planned route state replaces prior filters while retaining the exact itinerary overlay.
+window.trackJourney=data=>{stopTracking();showBuses([],false);state.lastBuses=[];$('busCount').textContent=state.language==='es'?'Consultando vehículos':'Checking vehicles';state.journeyLegs=data.legs.filter(l=>l.type==='bus');const routes=[...new Set(state.journeyLegs.map(l=>l.route))];state.route=routes.length===1?routes[0]:'';state.mode=routes.length?'journey':'all';state.position=null;document.getElementById('routeInput').value=state.route;renderFavorites();dispatchEvent(new CustomEvent('ayo:route-selected',{detail:{route:state.route,journey:true}}));document.getElementById('mapRouteLabel').textContent=routes.length?(state.language==='es'?'Rutas del viaje: ':'Journey routes: ')+routes.join(', '):(state.language==='es'?'Todas las rutas':'All routes');cycle(false);};
+const vehicleClusters=new Map();
+function regroupVehicles(){
+ if(!state.map||!state.markers)return;
+ const groups=new Map(),cluster=state.map.getZoom()<=13&&state.markerIndex.size>40;
+ for(const [key,marker]of state.markerIndex){const point=state.map.project(marker.getLatLng(),state.map.getZoom());const cell=cluster&&!marker.isPopupOpen()?'cell:'+Math.floor(point.x/56)+':'+Math.floor(point.y/56):'bus:'+key;const group=groups.get(cell)||[];group.push(marker);groups.set(cell,group);}
+ const keep=new Set();
+ for(const [cell,markers]of groups){
+  if(markers.length===1){if(!state.markers.hasLayer(markers[0]))state.markers.addLayer(markers[0]);continue;}
+  markers.forEach(m=>state.markers.removeLayer(m));keep.add(cell);const bounds=L.latLngBounds(markers.map(m=>m.getLatLng())),icon=L.divIcon({className:'bus-cluster',html:String(markers.length),iconSize:[44,44]});
+  let node=vehicleClusters.get(cell);if(!node){node=L.marker(bounds.getCenter(),{icon,title:markers.length+' reported vehicles'}).addTo(state.markers);node.on('click',()=>{state.map.fitBounds(node._ayoBounds,{padding:[30,30],maxZoom:Math.min(18,state.map.getZoom()+2)});});vehicleClusters.set(cell,node);}else{node.setLatLng(bounds.getCenter());if(node._ayoCount!==markers.length)node.setIcon(icon);}node._ayoCount=markers.length;node._ayoBounds=bounds;if(!state.markers.hasLayer(node))state.markers.addLayer(node);
+ }
+ for(const [key,node]of vehicleClusters)if(!keep.has(key)){state.markers.removeLayer(node);vehicleClusters.delete(key);}
+}
+document.addEventListener('DOMContentLoaded',()=>{state.map?.on('zoomend',regroupVehicles);state.map?.on('popupopen',event=>{const marker=event.popup._source;if(marker?._ayoBusData)marker.setPopupContent(createPopup(marker._ayoBusData));});});

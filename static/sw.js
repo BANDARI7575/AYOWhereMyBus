@@ -1,9 +1,24 @@
-const CACHE='ayo-shell-v23';
-const SHELL=["/static/workspaces.js","/static/manifest.webmanifest","/static/manifest-es.webmanifest","/","/static/style.css","/static/i18n.js","/static/es.json","/static/platform.js","/static/app.js","/static/stops-ui.js","/static/ayo-enhancements.js","/static/release.js","/static/journey.js","/static/privacy.html","/static/icon-192.png","/static/icon-512.png","/static/milwaukee-cinematic.png","/static/vendor/leaflet/leaflet.js","/static/vendor/leaflet/leaflet.css","/static/vendor/fonts/dm-sans-latin-wght-italic.woff2","/static/vendor/fonts/dm-sans-latin-wght-normal.woff2","/static/vendor/fonts/dm-mono-latin-400-normal.woff2","/static/vendor/fonts/fonts.css","/static/vendor/fonts/playfair-display-latin-wght-normal.woff2","/static/vendor/fonts/playfair-display-latin-wght-italic.woff2","/static/vendor/fonts/dm-mono-latin-500-normal.woff2","/static/vendor/leaflet/images/layers.png","/static/vendor/leaflet/images/marker-icon.png","/static/vendor/leaflet/images/marker-icon-2x.png","/static/vendor/leaflet/images/marker-shadow.png","/static/vendor/leaflet/images/layers-2x.png"];
+const CACHE='ayo-shell-v26';
+const SHELL=["/static/location-access.js","/static/alert-store.js","/static/home-experience.js","/static/navigation.js","/static/transit-ui.js","/static/location-search.js","/static/icons.svg","/static/units.js","/static/workspaces.js","/static/manifest.webmanifest","/static/manifest-es.webmanifest","/","/static/style.css","/static/i18n.js","/static/es.json","/static/pwa.js","/static/app.js","/static/weather.js","/static/rider-tools.js","/static/journey.js","/static/privacy.html","/static/icon-192.png","/static/icon-512.png","/static/vendor/leaflet/leaflet.js","/static/vendor/leaflet/leaflet.css","/static/vendor/fonts/dm-sans-latin-wght-italic.woff2","/static/vendor/fonts/dm-sans-latin-wght-normal.woff2","/static/vendor/fonts/fonts.css","/static/vendor/leaflet/images/layers.png","/static/vendor/leaflet/images/marker-icon.png","/static/vendor/leaflet/images/marker-icon-2x.png","/static/vendor/leaflet/images/marker-shadow.png","/static/vendor/leaflet/images/layers-2x.png"];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL))));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('ayo-shell-')&&k!==CACHE).map(k=>caches.delete(k))))));
 self.addEventListener('message',e=>{if(e.data?.type==='ACTIVATE')self.skipWaiting();});
-self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==location.origin||u.pathname.startsWith('/api/'))return;e.respondWith(fetch(e.request).catch(()=>caches.match(e.request).then(r=>r||new Response('Offline. Transit data requires a connection. / Sin conexión. Los datos requieren conexión.',{status:503}))));});
+self.addEventListener('fetch',e=>{
+ const u=new URL(e.request.url);
+ if(e.request.method!=='GET'||u.origin!==location.origin||u.pathname.startsWith('/api/'))return;
+ const network=fetch(e.request);
+ // Keep the offline shell in sync with files successfully served online.
+ // Otherwise a later network failure can restore JavaScript from installation day.
+ if(SHELL.includes(u.pathname)&&!u.search){
+  e.waitUntil(network.then(response=>{
+   if(response.ok){
+    const copy=response.clone();
+    return caches.open(CACHE).then(cache=>cache.put(e.request,copy));
+   }
+  }).catch(()=>{}));
+ }
+ e.respondWith(network.catch(()=>caches.match(e.request).then(r=>r||new Response('Offline. Transit data requires a connection. / Sin conexión. Los datos requieren conexión.',{status:503}))));
+});
 self.addEventListener('push',e=>{
  let data={};try{data=e.data.json();}catch{}
  const spanish=data.language==='es';const fresh=Number.isFinite(data.expires_at)&&Date.now()/1000<data.expires_at&&data.prediction_at>Date.now()/1000;

@@ -1,5 +1,9 @@
 # Full production launch readiness
 
+> Follow-up test maintenance: [browser test migration](BROWSER_TEST_MIGRATION.md). Six historical scripts are archived; two migrated suites now target the current interface. Earlier failure counts below are historical.
+
+> Current verification: [implementation report](IMPLEMENTATION_REPORT.md) and [iPhone owner checklist](IPHONE_TESTING.md). Historical results below are retained; physical-device acceptance remains pending; historical script disposition is documented in browser test migration.
+
 **November 9, 2026 · release/integrated-transit · PUBLIC LAUNCH BLOCKED**
 
 Latest authoritative verification: [six-feature integrated implementation and QA report](FEATURE_WORKSPACES_RELEASE.md), baseline **6e404df**, including the resumed uncommitted working tree. Final targeted reruns passed: **104 backend executions, 12 Node tests, 24 workspace browser scenarios, 12 feature/PWA contracts and Chromium/WebKit failure/control groups**. Preserved receipts additionally cover 144 weather checks, legacy planner/site/map regressions, accessibility and actual-source transit handoffs. [Earlier integrated audit](INTEGRATED_AUDIT.md) remains historical evidence; its counts are not the current aggregate. No public production or physical-device acceptance is claimed.

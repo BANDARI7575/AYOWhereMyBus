@@ -1,5 +1,33 @@
 # Integrated release candidate
 
+> Follow-up test maintenance: [browser test migration](docs/BROWSER_TEST_MIGRATION.md). Six historical scripts are archived; two migrated suites now target the current interface. Earlier failure counts below are historical.
+
+Current implementation results and limitations: [implementation report](docs/IMPLEMENTATION_REPORT.md). Owner-only device setup: [iPhone HTTPS/GPS/Voice guide](docs/IPHONE_TESTING.md).
+
+## Project organization (Phase B)
+
+- `app.py`: compatible Flask/Gunicorn launcher; application code is in `backend/`.
+- `backend/release_api.py`: integrated APIs and safeguards; `backend/feature_service.py`: rider workspace/voice tools.
+- `backend/transit_engine.py`: GTFS schedules/journeys; `backend/realtime_service.py`: predictions/alerts.
+- `static/`: frontend, styling, translations and PWA assets. `navigation.js`, `weather.js`, `rider-tools.js` and `pwa.js` describe their responsibilities.
+- `tests/backend/`, `tests/frontend/`, `tests/fixtures/`: Python, Node/browser and shared fixture coverage.
+- `scripts/`: operational commands; `scripts/tools/` and `scripts/examples/`: standalone utilities and learning examples.
+- `google_transit/` and ignored `instance/`: unchanged timetable and runtime database paths.
+- `deploy/`, root `gunicorn.conf.py`/`Dockerfile`/`.env.example`: deployment configuration; no additional config wrapper is needed.
+- `archive/legacy/`: preserved obsolete copies and unsafe historical auto-push script; never execute automatically.
+- [Documentation index](docs/INDEX.md), [Phase A baseline](docs/PHASE_A_BASELINE.md), [Phase B move inventory](docs/PHASE_B_MOVES.json).
+
+Run from the repository root:
+
+```sh
+.venv/bin/python scripts/dev_server.py --port 5050
+.venv/bin/python -B -m unittest discover -s tests -t .
+npm test
+```
+
+`python app.py`, `flask --app app` and Gunicorn `app:app` remain supported. Browser scripts use `AYO_TEST_URL` for an existing QA server; dependencies must already be installed. File relocation does not fix known transit defects or enable paid Voice/GPS HTTPS. Read the phase reports for actual test status.
+
+
 Current public-launch decision: **BLOCKED pending operational gates**. Read the [final launch-readiness audit](docs/LAUNCH_READINESS.md) and [production/recovery runbook](docs/PRODUCTION_RUNBOOK.md) for tested fixes, PASS/WARNING/BLOCKED status and remaining requirements.
 
 Local development with automatic Python reloads: `.venv/bin/python scripts/dev_server.py --port 5050`, then open http://127.0.0.1:5050/. See the [stop-search fix and real-browser verification](docs/STOP_SEARCH_FIX.md).

@@ -7,7 +7,7 @@
 ```sh
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-.venv/bin/python -c 'from transit_engine import Schedule; Schedule().build()'
+.venv/bin/python -c 'from backend.transit_engine import Schedule; Schedule().build()'
 .venv/bin/python -m unittest discover -s tests -v
 .venv/bin/python scripts/dev_server.py --port 5050
 ```

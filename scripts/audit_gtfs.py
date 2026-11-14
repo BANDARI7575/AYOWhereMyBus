@@ -4,7 +4,7 @@ import sys
 import math
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from transit_engine import Schedule,seconds
+from backend.transit_engine import Schedule,seconds
 s=Schedule();r={}
 with s.connect() as c:
     r['counts']={t:c.execute('SELECT COUNT(*) FROM '+t).fetchone()[0] for t in ['stops','routes','trips','stop_times','shapes','transfers','frequencies']}

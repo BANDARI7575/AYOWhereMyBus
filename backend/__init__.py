@@ -1,0 +1,1 @@
+"""AYO application package."""

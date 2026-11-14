@@ -6,8 +6,8 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 os.chdir(ROOT)
 os.environ['AYO_ENV']='production'
-from app import app
-from release_api import schedule,db
+from backend.app import app
+from backend.release_api import schedule,db
 with schedule.connect() as c:
     if c.execute('PRAGMA quick_check').fetchone()[0]!='ok': raise RuntimeError('Schedule integrity check failed')
     tables={r[0] for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
