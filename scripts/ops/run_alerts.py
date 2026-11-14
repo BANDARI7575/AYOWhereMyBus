@@ -5,7 +5,7 @@ import os
 import sys
 import time
 from pathlib import Path
-sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
 from backend.release_api import db,schedule,realtime,DB
 from backend.services.push_service import tick,validate_configuration
 validate_configuration()

@@ -3,7 +3,7 @@ import argparse,hashlib,json,os,ssl,subprocess,sys,tempfile,urllib.request,zipfi
 import certifi
 from datetime import datetime,timezone
 from pathlib import Path
-sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
 from backend.services.transit_engine import Schedule,TZ
 ALLOWED={'agency.txt','stops.txt','routes.txt','trips.txt','stop_times.txt','calendar.txt','calendar_dates.txt','shapes.txt','transfers.txt','frequencies.txt','feed_info.txt','translations.txt','attributions.txt'}
 def unpack(source,destination):
@@ -45,8 +45,8 @@ def main():
     data=work/'gtfs';data.mkdir();unpack(source,data)
     index=work/'schedule.sqlite';engine=Schedule(data,index);engine.build()
     env={**os.environ,'GTFS_DIR':str(data.resolve()),'SCHEDULE_DB':str(index.resolve())}
-    root=Path(__file__).resolve().parents[1]
-    subprocess.run([sys.executable,str(root/'scripts/audit_gtfs.py'),str(work/'integrity.json')],env=env,check=True)
+    root=Path(__file__).resolve().parents[2]
+    subprocess.run([sys.executable,str(root/'scripts/gtfs/audit_gtfs.py'),str(work/'integrity.json')],env=env,check=True)
     if not engine.services(datetime.now(TZ).date()):raise ValueError('Candidate does not cover today; not eligible for activation')
     manifest={'staged_at':datetime.now(timezone.utc).isoformat(),'source':'operator-provided archive' if a.zip else 'https://kamino.mcts.org/gtfs/google_transit.zip','archive_sha256':hashlib.sha256(source.read_bytes()).hexdigest(),'files':{f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted(data.glob('*.txt'))}}
     (work/'provenance.json').write_text(json.dumps(manifest,indent=2));work.rename(a.output)

@@ -96,7 +96,7 @@ class OperationsTests(test_release.ApiTests):
             c.execute("INSERT INTO reports(id,stop_id,text,state,created,expires) VALUES(200,'1','Expired isolated fixture','rejected',?,?)",(int(time.time())-10*86400,int(time.time())-8*86400))
             c.execute("INSERT INTO report_flags VALUES(200,'isolated','spam',?)",(int(time.time())-8*86400,))
         env={**os.environ,'COMMUNITY_DB':release_api.DB,'AYO_ENV':'development'}
-        command=[sys.executable,'scripts/community_storage.py','--purge-expired']
+        command=[sys.executable,'scripts/ops/community_storage.py','--purge-expired']
         result=__import__('subprocess').run(command,env=env,capture_output=True,text=True);self.assertEqual(result.returncode,0,result.stderr)
         with release_api.db() as c:self.assertEqual(c.execute('SELECT COUNT(*) FROM reports WHERE id=200').fetchone()[0],1)
         result=__import__('subprocess').run(command+['--apply'],env=env,capture_output=True,text=True);self.assertEqual(result.returncode,0,result.stderr)
@@ -115,7 +115,7 @@ class OperationsTests(test_release.ApiTests):
             response=self.client.get('/api/journeys?from=1&to=3')
             self.assertEqual(planner.call_count,2);self.assertEqual(response.json['origin']['name'],'Changed verified fixture')
     def test_gtfs_staging_rejects_zip_traversal(self):
-        from scripts.stage_gtfs import unpack
+        from scripts.gtfs.stage_gtfs import unpack
         import zipfile
         with tempfile.TemporaryDirectory() as folder:
             source=Path(folder)/'bad.zip';output=Path(folder)/'out';output.mkdir()
@@ -128,11 +128,11 @@ class OperationsTests(test_release.ApiTests):
         with tempfile.TemporaryDirectory() as folder:
             target=Path(folder)/'backup.sqlite.enc';restore=Path(folder)/'restore.sqlite';wrong=Path(folder)/'wrong.sqlite'
             env={**os.environ,'AYO_ENV':'development','COMMUNITY_DB':release_api.DB,'BACKUP_ENCRYPTION_KEY':Fernet.generate_key().decode()}
-            result=subprocess.run([sys.executable,'scripts/community_storage.py','--backup',str(target),'--encrypt-backup'],env=env,capture_output=True,text=True);self.assertEqual(result.returncode,0,result.stderr)
+            result=subprocess.run([sys.executable,'scripts/ops/community_storage.py','--backup',str(target),'--encrypt-backup'],env=env,capture_output=True,text=True);self.assertEqual(result.returncode,0,result.stderr)
             self.assertNotEqual(target.read_bytes()[:16],b'SQLite format 3\x00')
-            result=subprocess.run([sys.executable,'scripts/restore_backup.py','--source',str(target),'--destination',str(restore)],env=env,capture_output=True,text=True);self.assertEqual(result.returncode,0,result.stderr)
+            result=subprocess.run([sys.executable,'scripts/ops/restore_backup.py','--source',str(target),'--destination',str(restore)],env=env,capture_output=True,text=True);self.assertEqual(result.returncode,0,result.stderr)
             c=sqlite3.connect(restore)
             try:self.assertEqual(c.execute('PRAGMA integrity_check').fetchone()[0],'ok')
             finally:c.close()
-            result=subprocess.run([sys.executable,'scripts/restore_backup.py','--source',str(target),'--destination',str(wrong)],env={**env,'BACKUP_ENCRYPTION_KEY':Fernet.generate_key().decode()},capture_output=True,text=True)
+            result=subprocess.run([sys.executable,'scripts/ops/restore_backup.py','--source',str(target),'--destination',str(wrong)],env={**env,'BACKUP_ENCRYPTION_KEY':Fernet.generate_key().decode()},capture_output=True,text=True)
             self.assertNotEqual(result.returncode,0);self.assertFalse(wrong.exists())

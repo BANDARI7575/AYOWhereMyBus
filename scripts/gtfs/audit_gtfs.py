@@ -3,7 +3,7 @@ import json
 import sys
 import math
 from pathlib import Path
-sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
 from backend.services.transit_engine import Schedule,seconds
 s=Schedule();r={}
 with s.connect() as c:

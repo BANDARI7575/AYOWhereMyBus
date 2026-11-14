@@ -12,7 +12,7 @@ if [[ ! "$AYO_RELEASE_ID" =~ ^[a-f0-9]{16}$ ]]; then echo 'Invalid reviewed rele
 compose=(docker compose -f "$(dirname "$0")/compose.yaml")
 "${compose[@]}" config --quiet
 stamp=$(date -u +%Y%m%dT%H%M%SZ)
-"${compose[@]}" exec -T app python scripts/community_storage.py --backup "$AYO_BACKUP_DIR/pre-rollback-$stamp.sqlite.enc" --encrypt-backup
+"${compose[@]}" exec -T app python scripts/ops/community_storage.py --backup "$AYO_BACKUP_DIR/pre-rollback-$stamp.sqlite.enc" --encrypt-backup
 "${compose[@]}" up -d --no-build --pull never --wait
 "${compose[@]}" exec -T app python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/ready').close()"
 echo 'Previous services started. State was preserved; verify moderation and journeys before reopening traffic.'

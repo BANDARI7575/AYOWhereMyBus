@@ -22,7 +22,7 @@ services:
     tmpfs: [/tmp]
   alerts:
     image: ayo:${AYO_RELEASE_ID:?set approved versioned release ID}
-    command: [python, scripts/run_alerts.py]
+    command: [python, scripts/ops/run_alerts.py]
     env_file: ${AYO_ENV_FILE:?path to protected production env file}
     environment:
       COMMUNITY_DB: /app/instance/community.sqlite
@@ -37,7 +37,7 @@ services:
     read_only: true
     tmpfs: [/tmp]
     healthcheck:
-      test: [CMD, python, scripts/check_worker.py]
+      test: [CMD, python, scripts/ops/check_worker.py]
       interval: 30s
       timeout: 5s
   proxy:

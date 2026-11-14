@@ -14,7 +14,7 @@ compose=(docker compose -f "$(dirname "$0")/compose.yaml")
 "${compose[@]}" config --quiet
 if [[ "${2:-}" != "--first-install" ]]; then
   stamp=$(date -u +%Y%m%dT%H%M%SZ)
-  "${compose[@]}" exec -T app python scripts/community_storage.py --backup "$AYO_BACKUP_DIR/pre-release-$stamp.sqlite.enc" --encrypt-backup
+  "${compose[@]}" exec -T app python scripts/ops/community_storage.py --backup "$AYO_BACKUP_DIR/pre-release-$stamp.sqlite.enc" --encrypt-backup
 fi
 "${compose[@]}" up -d --build --wait
 "${compose[@]}" exec -T app python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/ready').close()"

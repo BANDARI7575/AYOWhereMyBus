@@ -5,7 +5,7 @@ import sqlite3
 import sys
 import time
 from pathlib import Path
-sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
 from backend.release_api import db
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--backup',type=Path)

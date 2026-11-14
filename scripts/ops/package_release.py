@@ -1,7 +1,7 @@
 """Create a local versioned source artifact. Never pushes, commits or deploys."""
 import argparse,hashlib,io,json,tarfile
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1]
+ROOT=Path(__file__).resolve().parents[2]
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',type=Path,required=True);a=p.parse_args()
 files=[]
 for name in ['backend','static','scripts','deploy','data','tests','docs']:

@@ -3,12 +3,12 @@ import argparse,os,subprocess,sys
 from datetime import datetime,timezone
 from pathlib import Path
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('--backup-dir',type=Path,required=True);p.add_argument('--apply-approved-retention',action='store_true');a=p.parse_args()
-root=Path(__file__).resolve().parents[1]
+root=Path(__file__).resolve().parents[2]
 name=datetime.now(timezone.utc).strftime('community-%Y%m%dT%H%M%S%fZ.sqlite.enc')
-subprocess.run([sys.executable,str(root/'scripts/community_storage.py'),'--backup',str(a.backup_dir/name),'--encrypt-backup'],check=True)
+subprocess.run([sys.executable,str(root/'scripts/ops/community_storage.py'),'--backup',str(a.backup_dir/name),'--encrypt-backup'],check=True)
 if a.apply_approved_retention:
  if os.getenv('RETENTION_APPROVED')!='1':raise SystemExit('Backup complete. Retention needs RETENTION_APPROVED=1 from the operator.')
- subprocess.run([sys.executable,str(root/'scripts/community_storage.py'),'--purge-expired','--apply'],check=True)
+ subprocess.run([sys.executable,str(root/'scripts/ops/community_storage.py'),'--purge-expired','--apply'],check=True)
 
 # Only prune this tool's old encrypted backups, never arbitrary files or the newest two.
 if a.apply_approved_retention:

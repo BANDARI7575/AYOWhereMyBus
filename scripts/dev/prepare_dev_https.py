@@ -13,7 +13,7 @@ from cryptography.x509.oid import NameOID, ExtendedKeyUsageOID
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--ip', required=True, help='Private LAN IPv4 address of this Mac')
-    parser.add_argument('--output', type=Path, default=Path(__file__).resolve().parents[1]/'instance/dev-tls')
+    parser.add_argument('--output', type=Path, default=Path(__file__).resolve().parents[2]/'instance/dev-tls')
     args = parser.parse_args()
     address = ipaddress.ip_address(args.ip)
     if not address.is_private or address.is_unspecified or address.is_multicast:

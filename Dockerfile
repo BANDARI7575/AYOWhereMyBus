@@ -9,4 +9,4 @@ ENV BIND_HOST=0.0.0.0
 EXPOSE 8000
 VOLUME ["/app/instance"]
 HEALTHCHECK --interval=30s --timeout=5s CMD python -c "import os,urllib.request; urllib.request.urlopen('http://127.0.0.1:'+os.getenv('PORT','8000')+'/api/ready',timeout=3).close()"
-CMD ["python", "scripts/start_production.py"]
+CMD ["python", "scripts/ops/start_production.py"]
