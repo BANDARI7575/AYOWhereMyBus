@@ -1,65 +1,93 @@
-> Superseded for production details by [PRODUCTION_RUNBOOK.md](PRODUCTION_RUNBOOK.md) and [LAUNCH_READINESS.md](LAUNCH_READINESS.md). The legacy command examples below are retained as historical setup context. Use the pinned lockfile and current production launcher.
+# Deployment
 
-# Run and operate AYO
+The repository supports a single application node using Flask, Gunicorn and local
+persistent SQLite storage. This document describes the existing deployment
+profile; restructuring does not authorize a deployment, provider purchase or
+infrastructure change.
 
-## Local release
+## Prepare a reviewed source version
 
-```sh
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-.venv/bin/python -c 'from backend.transit_engine import Schedule; Schedule().build()'
-.venv/bin/python -m unittest discover -s tests -v
-.venv/bin/python scripts/dev_server.py --port 5050
-```
+Install pinned runtime dependencies from `requirements.lock` on the approved host.
+The root `app.py` still exports the Flask application as `app:app`.
 
-Open http://127.0.0.1:5050. This loopback-only development launcher reloads Python changes with the interactive debugger disabled. Production uses Gunicorn below. The environment example is documentation; Flask does not auto-load it. Export variables with your deployment secret manager. Set MODERATOR_TOKEN to a long random secret before accepting moderation work. Do not commit real secrets. Use the request routes below; never place moderator credentials in frontend JavaScript.
-
-## Production target (requires owner approval to deploy)
-
-Use a Python host or the provided Dockerfile, persistent writable `/app/instance`, HTTPS and a reverse proxy with one trusted ingress. Server command after building the index:
+Create and verify a new local source package:
 
 ```sh
-gunicorn --bind 0.0.0.0:8000 --workers 1 --threads 4 --timeout 45 app:app
+python scripts/ops/package_release.py --output /protected/NEW-source.tar.gz
+python scripts/ops/verify_release.py /protected/NEW-source.tar.gz --sha256 RECEIPT_HASH
 ```
 
-One worker keeps upstream polling cache shared; SQLite request budgets persist across restarts. Do not run independent replicas against separate community databases. Back up community.sqlite; the schedule index can be rebuilt. Configure ingress IP-based rate limiting, request limits and timeouts. The application deliberately does not trust arbitrary forwarded IP headers. All request.remote_addr values may be the proxy address unless the hosting ingress is configured appropriately; otherwise budgets are shared across riders. Terminate TLS at the ingress for PWA/location/notification support; confirm secure cookies and origin checks on that host.
+These commands do not publish or deploy. Keep the checksum receipt separately and
+retain the previous approved artifact. Packages include templates, application
+assets, backend services and bundled data; they exclude secrets, runtime databases,
+virtual environments and the historical source archive.
 
-Refresh official GTFS in a staging directory; validate source, build/test its index offline, then switch deployments during a maintenance window. Never overwrite an index being served. The bundled exception range ends March 6, 2027; actual service coverage must be checked independently. Restart to clear CSV/calendar caches after switching schedules. Check `/api/status`, `/api/health`, upstream timestamps, errors, storage, response latency and approved-report queue daily. `/api/health` is process liveness; `/api/status` checks local schedule coverage, not upstream readiness.
+## Data and configuration
 
-Confirm provider terms and attribution, map tile usage limits and weather terms for your expected traffic. URLs actually decoded in this session:
+The bundled CSV source is `data/google_transit/`. Prepare or select a matching
+schedule index before starting production. Do not rebuild an active index during
+a code relocation. For a separate candidate use explicit absolute `GTFS_DIR` and
+`SCHEDULE_DB` values; stage and audit with `scripts/gtfs/stage_gtfs.py` and
+`scripts/gtfs/audit_gtfs.py`. Review coverage per service date and retain the old
+matching CSV/index pair.
 
-- https://realtime.ridemcts.com/gtfsrt/vehicles
-- https://realtime.ridemcts.com/gtfsrt/trips
-- https://realtime.ridemcts.com/gtfsrt/alerts
+The existing default databases remain `instance/schedule.sqlite` and
+`instance/community.sqlite`. Existing Compose state volumes and explicit database
+environment paths are unchanged. Protect writable state, encryption keys and
+backup destinations; do not put secrets in Git or image layers.
 
-GTFS semantics: https://gtfs.org/documentation/realtime/reference/ and https://gtfs.org/documentation/schedule/reference/ . Recheck service-day/event alignment whenever schedule versions change.
+`.env.example` documents settings, not a dotenv loader. The full production
+requirements, including named moderators, support contact, retention approval,
+push encryption, backup encryption, allowed hosts and trusted proxy settings,
+are in [the operations runbook](RUNBOOK.md).
 
-## API summary
+An operator environment explicitly using the former bundled path `google_transit`
+must use `data/google_transit` for this source version. External cron/systemd jobs
+must also reference the relocated scripts. No installed job is changed by this
+checkout operation.
 
-| Endpoint | Behavior |
-| --- | --- |
-| GET /api/buses?route=30 | GPS positions, timestamps, feed_fresh, age_seconds, reliability |
-| GET /api/stops/nearby?lat=43.04&lon=-87.91 | Nearest official stops; straight-line distance |
-| GET /api/stops/search?q=Wisconsin | Up to 50 name/ID matches |
-| GET /api/stops/ID/routes | Scheduled routes, directions and destinations |
-| GET /api/stops/ID/departures | Next two hours of scheduled departures, matched prediction if available |
-| GET /api/routes/ROUTE/shape | All bundled shapes for route |
-| GET /api/journeys?from=ID&to=ID | Named scheduled itinerary, trip geometry, transfer count and duration |
-| GET /api/journey-locations?q=Wisconsin | Official boarding-stop name suggestions |
-| GET /api/journey-locations?lat=43.04&lon=-87.91 | Nearby boarding-stop suggestions within 1.5 km; straight-line distances |
-| GET /api/service-alerts | Fresh active official alerts, explicit unavailable status |
-| GET /api/winter/reports | Approved, unexpired reports |
-| POST /api/winter/reports | JSON stop_id and text; 202 pending |
-| POST /api/winter/reports/ID/vote | JSON value: 1 or -1; anonymous browser vote |
-| GET /api/moderation/reports | Pending queue; Authorization: Bearer TOKEN required |
-| POST /api/moderation/reports/ID | JSON state: approved or rejected; same authentication |
+## Process and container entry points
 
-All write bodies must be JSON objects. Current budgets per peer IP/minute: 120 reads, 12 writes. These are operational defaults, not a robust bot defense. Reports are text-only, 10–500 characters, no links or angle brackets. No media upload API exists. Reviewers should reject personal information, abuse and off-topic reports. Only approve still-valid reports; original expiry does not extend with approval or voting.
+```sh
+python scripts/ops/start_production.py
+```
 
-Before launch: manual browser/device/accessibility and full Spanish review, real notification/audio/PWA tests, production dependency lock and container test, load/abuse tests, TLS/ingress verification, backups/retention policy, moderator coverage, approved GTFS refresh job and monitoring. For background notifications, add push delivery infrastructure; the current fallback is explicit page-open notification only.
+This validates existing storage/configuration and starts Gunicorn using
+`gunicorn.conf.py` and `app:app`. It does not rebuild a schedule on restart.
+The existing profile remains one gthread worker, four threads, and the configured
+loopback/private-network bind. No concurrency, port or TLS setting changes are
+part of restructuring.
 
-Approval is still required before pushing to GitHub or public deployment. Do not use the legacy auto_push.sh script.
+`Dockerfile` retains its pinned Python image, non-root user and persistent
+`/app/instance` volume. Its command now points to the nested production launcher.
+`deploy/compose.yaml` retains app, alert sender, Caddy, private networking, state
+volumes, read-only filesystems and secret mounts. Alert commands/healthchecks use
+`scripts/ops/`. Review `docker compose -f deploy/compose.yaml config --quiet` on
+the approved host with protected settings before any separately approved startup.
+Local checks do not certify Docker/Linux execution.
 
-Journey UI testing and current production limits: [JOURNEY_PLANNER.md](JOURNEY_PLANNER.md).
+`deploy/ayo-maintenance.service` points to `scripts/ops/maintenance.py`; its user,
+working directory, environment and storage restrictions stay unchanged. Installing
+or restarting system services requires operator action.
 
-If new UI code returns a missing planner API, check `/api/health` for planner_api_version/source_revision/started_at and restart a stale local process. See [stop-search diagnosis](STOP_SEARCH_FIX.md) and `npm run test:live` for unmocked end-to-end checks.
+## Release, verification and rollback
+
+`bash deploy/release.sh` and `bash deploy/rollback.sh` remain dry runs without
+their explicit apply flags. Apply requires separate deployment approval and the
+reviewed artifact, environment, state and schema compatibility. Do not execute
+apply merely to check paths.
+
+Before opening traffic, verify HTTPS/ingress, `/api/health`, `/api/ready`, active
+GTFS coverage, sender heartbeat, actual named-stop journeys, map/source freshness,
+moderation isolation, backups/restore and device acceptance. Readiness alone does
+not establish current upstream data. Follow [the runbook](RUNBOOK.md) for encrypted
+backup, new-path restore, incidents and rollback. Preserve current rider state.
+
+## Browser compatibility during asset migration
+
+Canonical assets use `/static/js/`, `/static/css/` and `/static/img/`. Fixed legacy
+URLs remain aliases to the same files; `/static/privacy.html` remains available
+through Flask's template route. The worker stays at `/sw.js` with scope `/`, and
+both manifest locations, IDs and start URLs remain stable. The shell cache advances
+from v26 to v27 using the existing user-controlled update flow. APIs are not cached
+as live data, and favorites/storage keys are unchanged.

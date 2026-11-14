@@ -10,7 +10,7 @@ approval. Do not bypass a certificate warning or distribute a private key.
 
 ## Already prepared locally
 
-`scripts/prepare_dev_https.py --ip 192.168.1.33` prepared a private CA and a
+`scripts/dev/prepare_dev_https.py --ip 192.168.1.33` prepared a private CA and a
 14-day server certificate in ignored `instance/dev-tls/`, with private file
 permissions. This uses the existing cryptography dependency, not a new package.
 CA trust expires in 30 days. Never commit or transfer `*.key` files. Certificate
@@ -19,7 +19,7 @@ creation neither installs trust nor opens a server port.
 If the Mac's LAN IP changes or certificates expire, create a NEW directory:
 
 ```sh
-.venv/bin/python scripts/prepare_dev_https.py --ip YOUR_PRIVATE_IP --output instance/dev-tls-next
+.venv/bin/python scripts/dev/prepare_dev_https.py --ip YOUR_PRIVATE_IP --output instance/dev-tls-next
 ```
 
 Existing keys are never overwritten. Do not reuse this development CA for
@@ -39,7 +39,7 @@ production. Do not forward the router port or run an external tunnel.
 5. Stop the existing development server on port 5001 in its terminal, then start:
 
 ```sh
-.venv/bin/python scripts/dev_server.py --port 5001 --host 192.168.1.33 --https
+.venv/bin/python scripts/dev/dev_server.py --port 5001 --host 192.168.1.33 --https
 ```
 
 6. Open **https://192.168.1.33:5001/** in Safari. There must be no certificate
@@ -68,7 +68,7 @@ HTTPS installations do not automatically share storage. Do not erase old site
 storage or uninstall an old PWA to troubleshoot. Keep it until any wanted data
 has been transferred deliberately. No automatic origin migration is performed.
 
-For desktop-only HTTP use `.venv/bin/python scripts/dev_server.py --port 5001`.
+For desktop-only HTTP use `.venv/bin/python scripts/dev/dev_server.py --port 5001`.
 When private device testing ends, stop that LAN listener and remove the optional
 CA trust/profile from the device if no longer wanted. Retain private backup data.
 
@@ -117,5 +117,5 @@ exports from other people or publish the file; saved labels may be personal.
 The current HTTP process may be owned by the coding session rather than a VS Code
 terminal. Before switching its port to HTTPS, inspect
 `lsof -nP -iTCP:5001 -sTCP:LISTEN`, verify the listed Python command is this
-project's `scripts/dev_server.py --port 5001`, and stop only that PID (or ask the
+project's `scripts/dev/dev_server.py --port 5001`, and stop only that PID (or ask the
 coding session to stop it). Then run the HTTPS command above.

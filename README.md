@@ -1,217 +1,144 @@
-# Integrated release candidate
+# AYO! Where’s My Bus?
 
-> Follow-up test maintenance: [browser test migration](docs/BROWSER_TEST_MIGRATION.md). Six historical scripts are archived; two migrated suites now target the current interface. Earlier failure counts below are historical.
+AYO helps Milwaukee riders find official stops, track reported MCTS bus positions,
+plan scheduled journeys and review service alerts. It includes saved stops and
+routes, English and Spanish controls, weather, a transit question helper and an
+installable offline shell.
 
-Current implementation results and limitations: [implementation report](docs/IMPLEMENTATION_REPORT.md). Owner-only device setup: [iPhone HTTPS/GPS/Voice guide](docs/IPHONE_TESTING.md).
+Vehicle GPS positions are not arrival predictions. The interface labels scheduled
+times, qualified realtime predictions, estimated walking and unavailable data
+separately. Offline pages cannot establish current transit conditions.
 
-## Project organization (Phase B)
+## Requirements
 
-- `app.py`: compatible Flask/Gunicorn launcher; application code is in `backend/`.
-- `backend/release_api.py`: integrated APIs and safeguards; `backend/feature_service.py`: rider workspace/voice tools.
-- `backend/transit_engine.py`: GTFS schedules/journeys; `backend/realtime_service.py`: predictions/alerts.
-- `static/`: frontend, styling, translations and PWA assets. `navigation.js`, `weather.js`, `rider-tools.js` and `pwa.js` describe their responsibilities.
-- `tests/backend/`, `tests/frontend/`, `tests/fixtures/`: Python, Node/browser and shared fixture coverage.
-- `scripts/`: operational commands; `scripts/tools/` and `scripts/examples/`: standalone utilities and learning examples.
-- `google_transit/` and ignored `instance/`: unchanged timetable and runtime database paths.
-- `deploy/`, root `gunicorn.conf.py`/`Dockerfile`/`.env.example`: deployment configuration; no additional config wrapper is needed.
-- `archive/legacy/`: preserved obsolete copies and unsafe historical auto-push script; never execute automatically.
-- [Documentation index](docs/INDEX.md), [Phase A baseline](docs/PHASE_A_BASELINE.md), [Phase B move inventory](docs/PHASE_B_MOVES.json).
+- Python 3.12 or newer with a virtual environment.
+- The official bundled GTFS files and a prepared SQLite schedule index.
+- Node.js and npm for automated frontend tests; no frontend build is needed to run
+  Flask. Browser tests use the pinned Playwright development dependencies.
 
-Run from the repository root:
+## Setup
+
+For a new development checkout:
 
 ```sh
-.venv/bin/python scripts/dev_server.py --port 5050
-.venv/bin/python -B -m unittest discover -s tests -t .
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.lock
+npm ci
+```
+
+The lockfile is the reproducible runtime dependency set. `requirements.txt` records
+the main dependency ranges. Do not replace the lockfile with an unpinned install
+for production.
+
+Only when preparing a new schedule index, or an approved separate candidate:
+
+```sh
+.venv/bin/python -c 'from backend.services.transit_engine import Schedule; Schedule().build()'
+```
+
+An existing matching `instance/schedule.sqlite` does not need rebuilding after
+repository restructuring. Preserve it and `instance/community.sqlite`.
+
+## Local development
+
+```sh
+.venv/bin/python scripts/dev/dev_server.py --port 5001
+```
+
+Open http://127.0.0.1:5001. This server binds to loopback by default and disables
+the interactive debugger and automatic reloader. Restart it after Python changes.
+`/api/health` reports its startup time and source revision. The compatibility
+command `python app.py` still serves loopback port 5000; use one intended server,
+not multiple stale processes on different ports.
+
+Environment variables are supplied by the shell or host configuration; the app
+does not automatically load `.env.example`. That file includes production-only
+settings and placeholder secrets, so do not blindly source it for development.
+
+| Setting | Default or purpose |
+| --- | --- |
+| `GTFS_DIR` | Repository-root `data/google_transit/`; override for an approved source directory. |
+| `SCHEDULE_DB` | Repository-root `instance/schedule.sqlite`; prepared matching index. |
+| `COMMUNITY_DB` | Repository-root `instance/community.sqlite`; private persistent state. |
+| `TRIP_UPDATES_URL`, `ALERTS_URL` | Official GTFS-Realtime sources; override only with reviewed sources. |
+| `AYO_ENV` | Production enables strict startup/security requirements. |
+| `ALLOWED_HOSTS`, `PROXY_HOPS`, `PORT`, `BIND_HOST` | Host and trusted-ingress configuration. |
+| Moderator, privacy, push and backup settings | See the complete operator configuration in [the runbook](docs/RUNBOOK.md). |
+
+Default paths do not depend on the working directory. Use absolute paths for
+operator-managed overrides. Existing environments explicitly naming the previous
+bundled `google_transit` directory need `data/google_transit` before running this
+checkout. Runtime database paths and schemas have not changed.
+
+For iPhone GPS and microphone testing, follow [the HTTPS/device guide](docs/IPHONE_TESTING.md).
+A phone accessing a Mac's LAN address needs trusted HTTPS. Certificate trust,
+physical-device permissions and native audio acceptance are manual owner steps.
+The text transit helper works independently of paid AI. Optional browser speech
+requires browser support and permission; paid AI remains disabled until all
+account, authentication, spending and acceptance requirements are approved.
+
+## Tests
+
+```sh
+.venv/bin/python -B -m unittest discover -s tests -t . -v
 npm test
 ```
 
-`python app.py`, `flask --app app` and Gunicorn `app:app` remain supported. Browser scripts use `AYO_TEST_URL` for an existing QA server; dependencies must already be installed. File relocation does not fix known transit defects or enable paid Voice/GPS HTTPS. Read the phase reports for actual test status.
-
-
-Current public-launch decision: **BLOCKED pending operational gates**. Read the [final launch-readiness audit](docs/LAUNCH_READINESS.md) and [production/recovery runbook](docs/PRODUCTION_RUNBOOK.md) for tested fixes, PASS/WARNING/BLOCKED status and remaining requirements.
-
-Local development with automatic Python reloads: `.venv/bin/python scripts/dev_server.py --port 5050`, then open http://127.0.0.1:5050/. See the [stop-search fix and real-browser verification](docs/STOP_SEARCH_FIX.md).
-
-The [journey planner rider-experience report](docs/JOURNEY_PLANNER.md) covers named search, location selection, readable journeys, maps, test results and remaining launch blockers.
-
-Work is on `release/integrated-transit`. Start with [deployment instructions](docs/DEPLOYMENT.md), [release results and limitations](docs/RELEASE.md), and [baseline audit](docs/AUDIT.md). The original project story follows for historical context; its roadmap predates this release.
-
-# 🚌 AYOWhereMyBus
-
-### A Milwaukee Bus Tracking Project
-
-Hey, I'm Abhiraj Bandari.
-
-I'm a Computer and Information Science master's student at Concordia University Wisconsin, and I'm currently learning more about Python, Data Engineering, and web development.
-
-I already have experience with web development and app development, which helped me a lot while building this website. Now I'm trying to combine those skills with what I'm learning in Data Engineering and AI/ML.
-
-I started building AYOWhereMyBus because of one simple problem.
-
-Milwaukee winters are crazy. Sometimes you're standing at a bus stop in freezing weather, waiting for a bus, and you have no idea where it is.
-
-I thought, why not build something that helps people see where their bus is?
-
-That's how AYOWhereMyBus started.
-
-I'm building this project from scratch, learning things as I go, making mistakes, fixing them, and trying to improve the website step by step.
-
-## What I've Built So Far
-
-Right now, the website can:
-
-- Show reported Milwaukee buses on a live map.
-- Search buses by route number.
-- Display a bus's ID, speed, direction, and location.
-- Refresh bus locations automatically every 15 seconds.
-- Find nearby buses using the user's location.
-- Save favorite bus routes.
-- Switch between light and dark mode.
-- Switch between English and Spanish for parts of the website.
-- Work on desktop and mobile screen sizes.
-
-I also added a few flying bats to the homepage.
-
-Why bats? I just thought they looked cool. 🦇
-
-## Technologies I'm Using
-
-- Python
-- Flask
-- HTML
-- CSS
-- JavaScript
-- Leaflet.js
-- OpenStreetMap
-- GTFS-Realtime
-- Git and GitHub
-
-I'm using Python and Flask for the backend, and HTML, CSS, and JavaScript for the website.
-
-The bus locations come from Milwaukee's MCTS real-time vehicle feed.
-
-## How the Project Works
-
-This is the basic flow:
-
-MCTS Real-Time Data
-        ↓
-Python
-        ↓
-Flask API
-        ↓
-JavaScript
-        ↓
-Live Bus Map
-
-Python gets the bus information, Flask makes it available to the website, and JavaScript displays the buses on the map.
-
-It sounds simple when I explain it like this, but getting everything to work together took some effort. 😂
-
-## How to Run This Project
-
-First, clone the repository:
-
-    git clone https://github.com/BANDARI7575/AYOWhereMyBus.git
-
-Open the project folder:
-
-    cd AYOWhereMyBus
-
-Create a virtual environment:
-
-    python3 -m venv .venv
-
-Activate it on Mac or Linux:
-
-    source .venv/bin/activate
-
-Install the required libraries:
-
-    python -m pip install -r requirements.txt
-
-Start the website:
-
-    python app.py
-
-Open this address in your browser:
-
-http://127.0.0.1:5000/
-
-You need an internet connection for the live bus information and map.
-
-## What I'm Working on Next
-
-This project is far from finished.
-
-There are a lot of things I still want to build:
-
-- Show nearby bus stops.
-- Show when the next bus is expected to arrive.
-- Help users plan trips from one location to another.
-- Add Milwaukee snow and winter alerts.
-- Let people report problems at bus stops.
-- Send notifications when a bus is approaching.
-- Add an AI voice assistant.
-- Analyze bus delays using Data Engineering and Machine Learning.
-- Make the website installable on phones.
-
-I'm planning to add these features one by one instead of trying to build everything at once.
-
-## Why I'm Building This
-
-My career goal is to work in AI/ML Data Engineering.
-
-I don't want to learn only by watching tutorials. I want to build real projects where I can understand how APIs, databases, data pipelines, backend systems, and websites work together.
-
-This project gives me a chance to practice those skills while building something that might actually help people in Milwaukee.
-
-## Things I've Learned
-
-A few things this project has already taught me:
-
-- How to work with real-time API data.
-- How Python can communicate with a website.
-- How to build a Flask backend.
-- How to work with JSON.
-- How to show GPS locations on a map.
-- How to organize HTML, CSS, JavaScript, and Python files.
-- How to debug code when something doesn't work.
-- How to use Git and GitHub.
-
-And probably the biggest lesson:
-
-Sometimes one extra bracket can break the whole website. 😭
-
-## About Me
-
-**Abhiraj Bandari**
-
-Master's in Computer and Information Science  
-Concordia University Wisconsin  
-Milwaukee, Wisconsin
-
-Interested in Data Engineering, AI/ML, Python, and building websites.
-
-## Note
-
-This is my personal learning project, not an official MCTS website.
-
-The bus locations are based on the latest reported transit data, so they may not always be exact or up to date.
-
-I'm still learning and improving the project.
-
-If something isn't working perfectly, there's a good chance I'm already trying to fix it. 😂
-
----
-
-Built by Abhiraj Bandari.
-
-One bus at a time. 🚌
-The six “More than a map” cards now open integrated rider workspaces. See
-[the feature implementation and QA report](docs/FEATURE_WORKSPACES_RELEASE.md)
-for supported flows, actual verification, voice setup boundaries and remaining
-public-launch gates. Start locally with `.venv/bin/python scripts/dev_server.py`
-and open `http://127.0.0.1:5050/` (reuse an existing running instance).
-Live paid conversational AI is disabled by default; the verified text helper
-and existing transit features require no OpenAI credential.
+With an existing local test server and installed browser engines:
+
+```sh
+AYO_TEST_URL=http://127.0.0.1:5001 npm run test:release
+AYO_TEST_URL=http://127.0.0.1:5001 npm run test:failure-recovery
+AYO_TEST_URL=http://127.0.0.1:5001 npm run test:pwa-upgrade
+```
+
+Set `AYO_CHROME_PATH` to an installed Chrome executable when required, and
+`PLAYWRIGHT_BROWSERS_PATH` if using an existing nondefault browser cache.
+The SVG, weather, units, scroll, map-layout and fixture planner commands are in
+`package.json`. `test:live`, `test:routing` and `test:workspaces-live` need real
+schedule coverage and honor API rate limits; run them against isolated community
+storage. Browser mocks do not establish physical iPhone, native audio or public
+hosting acceptance.
+
+## Repository layout
+
+```text
+app.py                         Compatible Flask/Gunicorn launcher
+backend/app.py                 Flask application and vehicle endpoints
+backend/release_api.py         API registration and application safeguards
+backend/paths.py               Repository-root defaults
+backend/services/              Schedule, realtime, stops, alerts and rider services
+data/google_transit/           Official bundled timetable files
+data/buses.json                Historical export, not live tracking input
+templates/                     Homepage and privacy HTML
+static/js/                     Application JavaScript
+static/css/                    Application styles
+static/img/                    Icons and retained artwork
+static/vendor/                 Leaflet, fonts and licenses
+static/sw.js                   Service worker, served publicly at /sw.js
+scripts/ops/                   Operations, storage, monitoring and packaging
+scripts/gtfs/                  GTFS staging and audit
+scripts/dev/                   Local server and private TLS preparation
+scripts/tools/, scripts/examples/      Optional console utilities and learning examples
+tests/backend/, frontend/      Python, Node and browser tests
+tests/fixtures/                Isolated test inputs, including old PWA shell
+instance/                      Ignored databases and private local TLS state
+deploy/                        Existing deployment templates and guarded scripts
+docs/archive/, archive/legacy/ Preserved historical documentation and source
+```
+
+## Deployment and maintenance
+
+The production entry point remains `app:app`, with the existing single-node
+Gunicorn and persistent SQLite profile. Docker, Compose and systemd templates
+retain their security, networking and storage settings; only relocated command
+paths change. No deployment is performed by this refactor.
+
+Read [deployment](docs/DEPLOYMENT.md), [architecture](docs/ARCHITECTURE.md) and
+[operations](docs/RUNBOOK.md) before using an approved host. Production needs
+trusted HTTPS, real operator configuration, backups, monitoring, moderation and
+physical-device acceptance. The development server is not the public deployment.
+
+The [restructuring report](docs/RESTRUCTURING_REPORT.md) records verification and
+moves. [Deletion candidates](docs/DELETION_CANDIDATES.md) are review-only: no files
+were removed. Do not execute the retained historical automatic-push script.
