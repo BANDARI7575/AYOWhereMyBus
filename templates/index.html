@@ -84,15 +84,97 @@
       <div id="installationTools"></div>
       <p>Created by Abhiraj Bandari.</p>
     </section>
-    <section id="founder" class="panel founder-section" data-screen="founder" aria-labelledby="founderTitle" hidden>
-      <div class="founder-intro"><div class="founder-avatar" aria-hidden="true">AB</div><div><p class="eyebrow">About the Founder</p><h1 id="founderTitle">Abhiraj Bandari</h1><p>Data Engineer · Founder and creator of AYO! Where’s My Bus?</p><p class="founder-location">Milwaukee, Wisconsin</p></div></div>
-      <p>I built AYO! to help Milwaukee riders find buses and avoid unnecessary waiting, especially during winter. My prior website and app development experience helped turn this everyday problem into a practical transit tool.</p>
-      <p>Education: Concordia University Wisconsin.</p>
-      <h2>How it works</h2><p class="data-pipeline">MCTS GTFS / GTFS-Realtime → Python ingestion and SQLite schedules → Flask APIs → accessible web application</p>
-      <p>The interface uses JavaScript and Leaflet with OpenStreetMap tiles. Vehicle locations are reported GPS positions; schedules and reliable matched predictions remain clearly distinguished.</p>
-      <h2>Professional skills</h2><ul class="skill-list"><li>Python</li><li>SQL</li><li>Apache Spark</li><li>AWS</li><li>ETL/ELT</li><li>Data Pipelines</li><li>Data Warehousing</li></ul><p class="tiny-note">Skills listed are professional skills, not a list of tools deployed in this app.</p>
-      <p>Independent project · Not affiliated with MCTS · Data: MCTS, OpenStreetMap.</p>
-    </section>
+    <section id="founder" class="founder" data-screen="founder" hidden aria-labelledby="founder-name">
+  <div class="card">
+    <p class="eyebrow">About the founder</p>
+
+    <div class="head">
+
+      <div class="avatar" aria-hidden="true">AB</div>
+      <div>
+        <h2 id="founder-name">Abhiraj Bandari</h2>
+        <p class="role">Data Engineer · Creator of AYO! Where's My Bus?</p>
+        <div class="tags">
+          <span class="tag">Milwaukee, Wisconsin</span>
+          <span class="tag">4+ years in data engineering</span>
+        </div>
+      </div>
+    </div>
+
+    <p>
+      I'm a data engineer with 4+ years of experience building ETL/ELT pipelines
+      in Python and SQL, now focusing on the data infrastructure behind AI and
+      machine learning applications. Previously, I was a Senior Data Engineer at
+      A Work Connect (Jan 2021 – Aug 2025).
+    </p>
+    <p>
+      I built AYO! because Milwaukee riders shouldn't have to wait in freezing
+      winter weather without knowing when the bus is coming.
+    </p>
+
+    <h3>The engineering behind AYO!</h3>
+    <div class="pipeline" role="img"
+         aria-label="MCTS GTFS and GTFS-Realtime, to Python processing, to Flask APIs, to Leaflet web app">
+      <span class="step">MCTS GTFS / GTFS-Realtime</span><span class="arrow">→</span>
+      <span class="step">Python processing</span><span class="arrow">→</span>
+      <span class="step">Flask APIs</span><span class="arrow">→</span>
+      <span class="step">Leaflet web app</span>
+    </div>
+    <p>
+      AYO! offers live bus locations, nearby stops, route information, and trip
+      planning. Reported GPS positions are kept separate from schedules and
+      estimated arrivals, so riders can tell what is live and what is calculated.
+    </p>
+
+
+    <h3>Skills</h3>
+    <div class="skills">
+      <div class="skill-group">
+        <h4>Built into AYO!</h4>
+        <div class="chips">
+          <span class="chip">Python</span><span class="chip">Flask</span>
+          <span class="chip">SQLite</span><span class="chip">GTFS / GTFS-Realtime</span>
+          <span class="chip">JavaScript</span><span class="chip">Leaflet</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h4>Professional experience</h4>
+        <div class="chips">
+          <span class="chip">SQL</span><span class="chip">ETL/ELT</span>
+          <span class="chip">Data Pipelines</span><span class="chip">Data Warehousing</span>
+          <span class="chip">Apache Spark</span><span class="chip">PySpark</span>
+          <span class="chip">AWS</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h4>Currently building toward</h4>
+        <div class="chips">
+          <span class="chip dim">ML data pipelines</span>
+          <span class="chip dim">Feature engineering</span>
+          <span class="chip dim">MLOps</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>Education</h3>
+    <p class="muted">
+      Computer and Information Sciences · Concordia University Wisconsin · Expected Dec 2026
+    </p>
+
+
+    <div class="actions">
+      <a class="btn primary" href="https://github.com/BANDARI7575" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a class="btn" href="https://www.linkedin.com/in/abhiraj-bandari-83b50621b" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      <button class="btn" type="button" disabled>Resume · Coming Soon</button>
+      <a class="btn" href="mailto:abhirajbandari632@gmail.com">Contact</a>
+    </div>
+
+    <p class="fine">
+      Independent project, not affiliated with MCTS. Transit data: MCTS.
+      Map data: © OpenStreetMap contributors.
+    </p>
+  </div>
+</section>
     <!-- Retained implementation, excluded from public launch navigation. No rider data is removed. -->
     <section id="winter-watch" hidden aria-label="Winter Watch"><div class="winter-panel"></div></section>
   </main>

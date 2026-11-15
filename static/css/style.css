@@ -20,3 +20,94 @@ summary{cursor:pointer;min-height:44px;padding:8px 0}.alert-summary::after{conte
 .ayo-workspace[data-feature=reliability][data-advanced=true] .workspace-map{display:block}.ayo-workspace[data-feature=alerts] .workspace-map #map{height:220px;min-height:180px;max-height:30dvh}
 
 .ayo-workspace[data-feature=voice] .voice-log{max-height:24dvh}.voice-language{display:flex;align-items:center;gap:8px}.voice-language label{flex:1;min-width:0;margin:0;font-size:14px}.voice-language select{width:130px;min-height:44px;padding:8px;margin:0}.workspace-content .voice-replies{display:flex;align-items:center;gap:10px;min-height:44px;margin:8px 0;font-size:14px}.voice-replies input{margin:0}.voice-actions{display:flex;flex-wrap:wrap;gap:8px}.voice-actions button{flex:1;margin:0;font-size:14px;padding:8px}
+
+
+/* Supplied About the Founder design; all selectors are section-scoped. */
+.founder {
+    --bg: #14161b;
+    --card: #1b1e25;
+    --line: #2c303a;
+    --text: #f2f3f5;
+    --muted: #b8bcc4;
+    --accent: #f5b85c;
+    --accent-soft: rgba(245, 184, 92, 0.12);
+    max-width: 880px;
+    margin: 32px auto;
+    padding: 0 16px;
+    font-family: "DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .founder * { box-sizing: border-box; }
+  .founder .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 32px;
+  }
+  .founder .eyebrow {
+    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700; margin: 0 0 16px;
+  }
+  .founder .head { display: flex; gap: 20px; align-items: center; margin-bottom: 24px; }
+  .founder .avatar {
+    width: 88px; height: 88px; border-radius: 50%; flex: none;
+    border: 2px solid var(--accent); object-fit: cover;
+    display: grid; place-items: center; font-weight: 700; font-size: 28px;
+    color: var(--accent); background: var(--accent-soft);
+  }
+  .founder h2 { margin: 0; font-size: 28px; line-height: 1.2; }
+  .founder .role { margin: 4px 0 0; color: var(--muted); font-size: 15px; }
+  .founder .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .founder .tag {
+    font-size: 12px; padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--line); color: var(--muted);
+  }
+  .founder h3 { font-size: 17px; margin: 28px 0 8px; }
+  .founder p { margin: 0 0 12px; color: var(--text); font-size: 15.5px; }
+  .founder p.muted { color: var(--muted); }
+  .founder .pipeline {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    padding: 16px; border-radius: 14px; margin: 12px 0 16px;
+    background: var(--accent-soft); border: 1px solid rgba(245,184,92,.35);
+  }
+  .founder .pipeline span.step {
+    font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 8px;
+    background: var(--bg); border: 1px solid var(--line);
+  }
+  .founder .pipeline .arrow { color: var(--accent); font-weight: 700; }
+  .founder .skills { display: grid; gap: 14px; }
+  .founder .skill-group h4 {
+    margin: 0 0 8px; font-size: 12px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .founder .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .founder .chip {
+    font-size: 13px; padding: 6px 12px; border-radius: 8px;
+    background: var(--bg); border: 1px solid var(--line);
+  }
+  .founder .chip.dim { color: var(--muted); border-style: dashed; }
+  .founder .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+  .founder .btn {
+    text-decoration: none; font-size: 14px; font-weight: 600;
+    padding: 10px 18px; border-radius: 10px;
+    border: 1px solid var(--line); color: var(--text);
+  }
+  .founder .btn:hover { border-color: var(--accent); }
+  .founder .btn.primary { background: var(--accent); color: #1a1405; border-color: var(--accent); }
+  .founder .btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .founder .fine {
+    margin: 20px 0 0; padding-top: 16px; border-top: 1px solid var(--line);
+    font-size: 12.5px; color: var(--muted);
+  }
+  @media (max-width: 560px) {
+    .founder .card { padding: 22px; }
+    .founder .head { flex-direction: column; align-items: flex-start; }
+    .founder h2 { font-size: 24px; }
+  }
+
+/* Isolate the supplied Founder typography from the shared app heading/chip rules. */
+.founder h2, .founder h3, .founder h4 { letter-spacing: normal; }
+.founder h3, .founder h4 { line-height: inherit; }
+.founder .chips { margin-top: 0; }
+.founder .btn:disabled { background: transparent; opacity: 1; cursor: not-allowed; font-family: inherit; line-height: inherit; }
