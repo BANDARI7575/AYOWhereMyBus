@@ -21,14 +21,9 @@
 
   const WEATHER_REFRESH_MS = 15 * 60 * 1000;
 
-  const WEATHER_URL =
-    "https://api.open-meteo.com/v1/forecast" +
-    "?latitude=" + MILWAUKEE.latitude +
-    "&longitude=" + MILWAUKEE.longitude +
-    "&current=temperature_2m,weather_code,wind_speed_10m,is_day" +
-    "&temperature_unit=fahrenheit" +
-    "&wind_speed_unit=mph" +
-    "&timezone=America%2FChicago&timeformat=unixtime";
+  let weatherPoint={...MILWAUKEE}, weatherTimezone='America/Chicago', requestVersion=0, pendingController=null, locationDelay=null;
+  const weatherURL=()=> 'https://api.open-meteo.com/v1/forecast?'+new URLSearchParams({latitude:weatherPoint.latitude,longitude:weatherPoint.longitude,current:'temperature_2m,weather_code,wind_speed_10m,is_day',temperature_unit:'fahrenheit',wind_speed_unit:'mph',timezone:'auto',timeformat:'unixtime'});
+  function applyTimezone(zone){try{new Intl.DateTimeFormat('en-US',{timeZone:zone}).format();weatherTimezone=zone;}catch{weatherTimezone='America/Chicago';}const clock=document.getElementById('weatherClock');if(clock)clock.dataset.timezone=weatherTimezone;window.synchronizeClock?.();}
 
   const weatherIcon = document.getElementById(
     "weatherIcon"
@@ -195,9 +190,9 @@
       );
 
       widget.dataset.observedAt=String(current.time);
-      const updated=new Date(current.time*1000).toLocaleTimeString(document.documentElement.lang==='es'?'es-US':'en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit'});
-      widget.title = `Milwaukee · ${temperature}°F · ${window.AyoI18n?.translate(weather.condition,document.documentElement.lang)||weather.condition} · ${updated}`;
-      const spanish=document.documentElement.lang==='es';widget.setAttribute('aria-label',`${spanish?'Clima de Milwaukee':'Milwaukee weather'}: ${temperature}°F, ${window.AyoI18n?.translate(weather.condition,document.documentElement.lang)||weather.condition}. ${spanish?'Actualizado':'Updated'} ${updated}`);
+      const updated=new Date(current.time*1000).toLocaleTimeString(document.documentElement.lang==='es'?'es-US':'en-US',{timeZone:weatherTimezone,hour:'numeric',minute:'2-digit'});
+      widget.title = `${weatherPoint.name||'Milwaukee'} · ${temperature}°F · ${window.AyoI18n?.translate(weather.condition,document.documentElement.lang)||weather.condition} · ${updated}`;
+      const spanish=document.documentElement.lang==='es';widget.setAttribute('aria-label',`${spanish?'Clima':'Weather'} · ${weatherPoint.name||'Milwaukee'}: ${temperature}°F, ${window.AyoI18n?.translate(weather.condition,document.documentElement.lang)||weather.condition}. ${spanish?'Actualizado':'Updated'} ${updated}`);
     }
   }
 
@@ -211,11 +206,11 @@
     if(usable){weatherTemp.textContent=Math.round(lastWeather.current.temperature_2m)+(document.documentElement.lang==='es'?'°F (anterior)':'°F (earlier)');weatherCondition.textContent=message;return;}
     if(weatherTemp)weatherTemp.textContent=document.documentElement.lang==='es'?'Clima no disponible':'Weather unavailable';
     if(weatherCondition)weatherCondition.textContent=document.documentElement.lang==='es'?'Sin datos actuales':'No current data';
-    if(weatherIcon)weatherIcon.textContent='';
+    if(weatherIcon)weatherIcon.textContent='◐';
   }
 
   async function refreshWeather() {
-    const controller = new AbortController();
+    pendingController?.abort();const controller=pendingController=new AbortController(),version=++requestVersion;
 
     const timeout = setTimeout(
       () => controller.abort(),
@@ -223,7 +218,7 @@
     );
 
     try {
-      const response = await fetch(WEATHER_URL, {
+      const response = await fetch(weatherURL(), {
         cache: "no-store",
         signal: controller.signal
       });
@@ -236,13 +231,16 @@
 
       const data = await response.json();
 
+      if(version!==requestVersion)return;
       // Parse epoch time, not a timezone-less local string. Reject stale/future weather.
       const observed=Number(data.current?.time);
       if (!Number.isFinite(observed) || Date.now()/1000-observed>7200 || observed-Date.now()/1000>900) throw new Error('Weather timestamp is stale or invalid');
+      applyTimezone(data.timezone||weatherPoint.timezone||'America/Chicago');
       updateWeatherDisplay(data);
       lastWeather = data;
 
     } catch (error) {
+      if(version!==requestVersion)return;
       console.warn(
         "Weather information unavailable:",
         error
@@ -264,6 +262,7 @@
     document.addEventListener('visibilitychange',()=>document.documentElement.classList.toggle('weather-paused',document.hidden));
 
 
+    window.addEventListener('ayo:location-selected',event=>{const p=event.detail;if(!p||!Number.isFinite(p.latitude)||!Number.isFinite(p.longitude)||Math.abs(p.latitude)>90||Math.abs(p.longitude)>180)return;const same=Math.abs(p.latitude-weatherPoint.latitude)<.001&&Math.abs(p.longitude-weatherPoint.longitude)<.001;if(same)return;weatherPoint={latitude:p.latitude,longitude:p.longitude,name:p.name,timezone:p.timezone};lastWeather=null;requestVersion++;pendingController?.abort();applyTimezone(p.timezone||'America/Chicago');weatherUnavailable();clearTimeout(locationDelay);locationDelay=setTimeout(refreshWeather,300);});
     // Obtain current weather after page initialization.
     refreshWeather();
     // A navigation-aborted language fetch must not create an unhandled weather promise.

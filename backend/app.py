@@ -133,6 +133,9 @@ def parse_vehicle_feed(raw: bytes) -> dict:
             ),
 
             "trip_id": vehicle.trip.trip_id,
+            "trip_start_date": vehicle.trip.start_date or None,
+            "trip_start_time": vehicle.trip.start_time or None,
+            "trip_schedule_relationship": int(vehicle.trip.schedule_relationship),
             "direction_id": vehicle.trip.direction_id if vehicle.trip.HasField("direction_id") else None,
 
             "reported_at": (
@@ -204,6 +207,11 @@ def homepage():
     """Serve the AYO! website."""
 
     return render_template("index.html")
+
+
+@app.get("/ai")
+def ai_page():
+    return render_template("ai.html")
 
 
 @app.get("/static/privacy.html")

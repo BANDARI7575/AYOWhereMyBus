@@ -43,3 +43,18 @@ test('explicit Milwaukee departure resolves DST safely without guessing an ambig
  assert.throws(()=>chicagoDeparture('2026-11-01T01:30'),/ambiguous/);
  assert.throws(()=>chicagoDeparture('2026-03-08T02:30'),/ambiguous/);
 });
+
+test('planner coordinate validation rejects guessed or nonfinite locations',()=>{
+ const {validPoint}=require('../../static/js/journey.js');
+ assert.equal(validPoint({latitude:43.04,longitude:-87.9}),true);
+ for(const point of [{latitude:'43',longitude:-88},{latitude:91,longitude:0},{latitude:0,longitude:Infinity},{}])assert.equal(validPoint(point),false);
+});
+
+test('planner request failures have actionable English and Spanish messages',()=>{
+ const {journeyFailure}=require('../../static/js/journey.js');
+ assert.match(journeyFailure({code:'timeout'}),/timed out.*Retry/);
+ assert.match(journeyFailure({status:429}),/Wait a minute/);
+ assert.match(journeyFailure({status:400}),/selected stops.*Milwaukee/);
+ assert.match(journeyFailure({code:'timeout'},true),/tardó demasiado/);
+ assert.match(journeyFailure({status:429},true),/Espera un minuto/);
+});

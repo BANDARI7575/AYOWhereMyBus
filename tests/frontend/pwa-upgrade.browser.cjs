@@ -1,3 +1,4 @@
+const {openMap,waitForAsync}=require('./navigation-helpers.cjs');
 /* Upgrade a real v26 worker to the relocated shell on an isolated loopback origin. */
 const {chromium, webkit} = require('playwright');
 const assert = require('node:assert/strict');
@@ -38,25 +39,29 @@ const server = http.createServer(async (request, response) => {
         await page.evaluate(()=>navigator.serviceWorker.ready);
         await page.reload({waitUntil:'load'});
         await page.waitForFunction(()=>navigator.serviceWorker.controller);
-        await page.waitForFunction(async()=>{const r=await navigator.serviceWorker.getRegistration();return r.active&&!r.installing&&!r.waiting&&await caches.has('ayo-shell-v26');});
+        await waitForAsync(page,async()=>{const r=await navigator.serviceWorker.getRegistration();return r.active?.state==='activated'&&!r.installing&&!r.waiting&&await caches.has('ayo-shell-v26');});
         await page.evaluate(()=>localStorage.setItem('ayo-favorites',JSON.stringify(['19'])));
         oldShell = false;
+        await page.evaluate(()=>{window.__upgradeControlled=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{window.__upgradeControlled=true;},{once:true});});
         await page.evaluate(async()=>{const registration=await navigator.serviceWorker.ready;await registration.update();});
-        await page.waitForFunction(async()=>{const registration=await navigator.serviceWorker.getRegistration();const waiting=registration?.waiting;if(!waiting)return false;waiting.postMessage({type:'ACTIVATE'});return true;});
-        await page.waitForFunction(async()=>{if(await caches.has('ayo-shell-v26'))return false;const c=await caches.open('ayo-shell-v27');return !!await c.match('/static/js/app.js');});
+        await waitForAsync(page,async()=>{const registration=await navigator.serviceWorker.getRegistration();const waiting=registration?.waiting;if(!waiting)return false;waiting.postMessage({type:'ACTIVATE'});return true;});
+        await waitForAsync(page,async()=>{const r=await navigator.serviceWorker.getRegistration();return r.active?.state==='activated'&&!r.installing&&!r.waiting;});
+        await page.waitForFunction(()=>window.__upgradeControlled);
+        await waitForAsync(page,async()=>{const r=await navigator.serviceWorker.getRegistration();return r.active?.state==='activated'&&!r.installing&&!r.waiting;});
         await page.reload({waitUntil:'load'});
+        await waitForAsync(page,async()=>{const c=await caches.open('ayo-shell-v34');return !!await c.match('/static/js/app.js')&&!!await c.match('/static/css/home.css');});
         assert.equal(await page.locator('script[src="/static/js/app.js"]').count(),1);
         assert.equal(await page.evaluate(()=>localStorage.getItem('ayo-favorites')),JSON.stringify(['19']));
         assert.equal(await page.locator('#voiceShortcut').count(),1);
-        const assets=await page.evaluate(async()=>{const c=await caches.open('ayo-shell-v27');return(await c.keys()).map(r=>new URL(r.url).pathname);});
-        for(const asset of ['/static/js/app.js','/static/css/style.css','/static/img/icons.svg','/static/privacy.html'])assert.ok(assets.includes(asset),asset);
+        const assets=await page.evaluate(async()=>{const c=await caches.open('ayo-shell-v34');return(await c.keys()).map(r=>new URL(r.url).pathname);});
+        for(const asset of ['/static/js/app.js','/static/css/home.css','/static/js/home-stops.js','/static/css/style.css','/static/img/icons.svg','/static/privacy.html'])assert.ok(assets.includes(asset),asset);
         assert.ok(!assets.some(path=>path.startsWith('/api/')));
         await context.setOffline(true);await page.reload({waitUntil:'load'});
-        await page.waitForFunction(()=>window.AyoSite);
+        await page.waitForFunction(()=>window.AyoSite&&window.AyoHome);await page.locator('#homeManual').click();assert.equal(await page.locator('#homeLocationForm').isVisible(),true);
         await page.locator('.app-nav [data-view=trip]').click();assert.equal(await page.locator('#planFrom').isVisible(),true);
-        await page.locator('.app-nav [data-view=map]').click();assert.equal(await page.locator('#map').isVisible(),true);
+        await openMap(page);assert.equal(await page.locator('#map').isVisible(),true);
         assert.deepEqual(errors,[]);
-        await context.close();console.log('PASS',engine,'real v26→v27 worker upgrade, legacy asset delivery, favorite preservation and offline navigation');
+        await context.close();console.log('PASS',engine,'real v26→v34 worker upgrade, legacy asset delivery, favorite preservation and offline navigation');
       } finally {await browser.close();}
     }
   } finally {await new Promise(resolve=>server.close(resolve));}

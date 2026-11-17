@@ -22,7 +22,7 @@ class WorkspaceTests(test_release.ApiTests):
         self.assertEqual(self.client.get('/api/explore/stops/missing').status_code,400)
         self.assertEqual(self.client.get('/api/explore/routes?q=R').json['routes'][0]['route_id'],'R')
     def test_validation(self):
-        for query in ['lat=nan&lon=1','lat=43','lat=43&lon=-88&radius=3','q=A','q=Stop&offset=-1']:
+        for query in ['lat=nan&lon=1','lat=43','lat=43&lon=-88&radius=3.1','q=A','q=Stop&offset=-1']:
             self.assertEqual(self.client.get('/api/explore/stops?'+query).status_code,400)
         for name,args in [('arbitrary_url',{}),([],{}),('get_live_buses',{'url':'https://localhost/private'}),('find_nearby_stops',{'lat':True,'lon':0}),('find_nearby_stops',{'q':'AB','radius':True}),('find_nearby_stops',{'q':'AB','offset':float('inf')}),('find_nearby_stops',{'q':'AB','offset':1.5}),('get_live_buses',{'route':'http://evil'}),('open_feature',{'feature':'moderation'}),('plan_journey',{'from':'1','to':'3','walking':'yes'})]:
             self.assertEqual(self.client.post('/api/agent/tools',json={'name':name,'arguments':args}).status_code,400)

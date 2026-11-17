@@ -59,14 +59,15 @@ async function run() {
       await choose('planFrom','Wisconsin'); await choose('planTo','Airport');
       await page.locator('#planJourney').click();
       await page.locator('#journeyResults h3').waitFor();
-      assert.deepEqual(latestQuery,{from:'1',to:'3',walking:'0',choice:'0'});
+      assert.deepEqual(latestQuery,{from:'1',to:'3',walking:'1',choice:'0'});
+      await page.locator('.journey-result-card>summary').click();
       const text = await page.locator('#journeyResults').innerText();
       for (const term of ['Wisconsin & 6th','Airport','25 min','1 transfer','Take Route 30','Board at','Get off at','Transfer at','12:10','12:35']) assert.ok(text.includes(term),term);
       assert.ok(await page.evaluate(()=>window.state.map && Object.values(window.state.map._layers).some(x=>x instanceof L.Polyline)));
       assert.ok(await page.locator('.footer').innerText().then(x=>x.includes('Independent project'))); checks+=3;
       const overflow = await page.evaluate(()=>[...document.querySelectorAll('body *')].filter(n=>n.getBoundingClientRect().right>innerWidth+1 && getComputedStyle(n).position!=='absolute').slice(0,15).map(n=>[n.tagName,n.id,n.className,n.getBoundingClientRect().right]));
       assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`overflow at ${viewport.width}: ${JSON.stringify(overflow)}`);
-      assert.equal(await page.locator('.journey-search-grid').evaluate(n=>getComputedStyle(n).gridTemplateColumns.split(' ').length), viewport.width<=650 ? 1 : 3);
+      assert.equal(await page.locator('.journey-search-grid').evaluate(n=>getComputedStyle(n).display),'flex');assert.equal(await page.locator('.journey-search-grid').evaluate(n=>getComputedStyle(n).flexDirection),'column');
       checks+=2;
       if(output) { fs.mkdirSync(output,{recursive:true}); await page.locator('#journey').screenshot({path:path.join(output,`journey-${viewport.width}.png`),style:'.nav,.mobile-bottom-nav,.skip-link{visibility:hidden!important}'}); }
       await page.locator('#planFrom').fill('unknown');
@@ -88,7 +89,7 @@ async function run() {
       assert.match(await page.locator('#planFrom-info').innerText(),/access walking time is not included/); checks++;
       mode='walk'; await page.locator('#allowEstimatedWalking').check(); await page.locator('#planJourney').click();
       await page.waitForFunction(()=>document.querySelector('#journeyResults').textContent.includes('Walking connection:'));
-      assert.match(await page.locator('#journeyResults').innerText(), /36 ft straight-line distance/);
+      await page.locator('.journey-result-card>summary').click();assert.match(await page.locator('#journeyResults').innerText(), /36 ft straight-line distance/);
       assert.match(await page.locator('#journeyResults').innerText(), /estimated/);
       assert.match(await page.locator('#journeyResults').innerText(), /Tight scheduled connection/);checks++;
       assert.equal(await page.evaluate(()=>Object.values(window.state.map._layers).filter(x=>x instanceof L.Polyline).length), 2); checks++;
@@ -131,7 +132,7 @@ async function run() {
       await page.locator('#'+id).press('ArrowDown');await page.locator('#'+id).press('Enter');
     }
     await page.locator('#planJourney').click();await page.locator('#journeyResults h3').waitFor();
-    assert.match(await page.locator('#journeyResults').innerText(),/Toma la ruta 30/);
+    await page.locator('.journey-result-card>summary').click();assert.match(await page.locator('#journeyResults').innerText(),/Toma la ruta 30/);
     assert.match(await page.locator('#journeyResults').innerText(),/mapa no está disponible/);checks+=2;
     await context.close();
     console.log(`PASS ${checks} browser assertions/scenarios; three responsive viewports and Spanish/map fallback`);

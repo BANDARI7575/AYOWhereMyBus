@@ -682,7 +682,7 @@ function updateClock() {
     }).format(now);
   const weatherClock = $("weatherClock");
   if (weatherClock) {
-    weatherClock.textContent = new Intl.DateTimeFormat(locale, options).format(now);
+    weatherClock.textContent = new Intl.DateTimeFormat(locale, {...options,timeZone:weatherClock.dataset.timezone||'America/Chicago'}).format(now);
   }
 }
 

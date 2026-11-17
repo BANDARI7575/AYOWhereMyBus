@@ -9,6 +9,11 @@
   <link rel="stylesheet" href="/static/vendor/fonts/fonts.css">
   <link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css" integrity="sha256-M3v8pcq9A7OYFbJwD+vis7ft9VkhxZzUn4jssyghIwM=" crossorigin="">
   <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/home.css">
+  <link rel="stylesheet" href="/static/css/trip.css">
+  <link rel="stylesheet" href="/static/css/alerts.css">
+  <link rel="stylesheet" href="/static/css/saved.css">
+  <link rel="stylesheet" href="/static/css/founder.css">
   <link rel="manifest" href="/static/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/static/img/icon-192.png">
   <link rel="icon" href="/static/img/icon-192.png">
@@ -16,9 +21,9 @@
 <body>
   <a class="skip-link" href="#main">Skip to passenger tools</a>
   <header class="app-header" id="navbar">
-    <a class="brand" href="#stops" aria-label="AYO home">AYO<span aria-hidden="true">!</span></a>
+    <a class="brand" href="#stops" aria-label="AYO home"><span class="brand-name">AYO<span aria-hidden="true">!</span></span><span class="brand-subtitle">Where's My Bus?</span></a>
     <div class="weather-widget" id="weatherWidget" role="status" aria-label="Milwaukee weather">
-      <span id="weatherIcon" aria-hidden="true">◐</span><span id="weatherTemp">Weather</span><span id="weatherCondition" class="sr-only">Checking availability</span>
+      <span id="weatherIcon" aria-hidden="true">◐</span><span id="weatherTemp">Weather</span><span id="weatherCondition" class="sr-only">Checking availability</span><time id="weatherClock" aria-label="Local time"></time>
     </div>
     <div class="header-actions">
       <button id="languageButton" class="icon-button" type="button" aria-label="Switch language">ES</button>
@@ -26,7 +31,9 @@
     </div>
     <nav id="navLinks" class="menu-panel" aria-label="More options" hidden>
       <a href="#about">About this data</a>
+      <a href="#map">Live map</a>
       <a href="#founder">About the Founder</a>
+      <button id="nearbyButton" type="button">Nearby Stops</button>
       <button id="themeButton" type="button" aria-pressed="false">Light appearance</button>
       <button type="button" data-workspace="reliability">Data freshness</button>
       <button type="button" data-workspace="voice">Voice and readout options</button>
@@ -36,9 +43,34 @@
   </header>
   <main id="main" tabindex="-1">
     <p id="networkStatus" class="network-status" role="status" hidden></p>
-    <section id="stopsScreen" class="screen" data-screen="stops" aria-labelledby="homeTitle">
-      <div class="page-heading"><p class="eyebrow">Milwaukee transit</p><h1 id="homeTitle">Find your bus</h1><p>Routes, stops and trustworthy arrival information.</p></div>
-      <section class="panel route-panel" aria-labelledby="routeTitle">
+    <section id="stopsScreen" class="screen home-stops" data-screen="stops" aria-label="Stop finder">
+      <p id="homeStatus" class="home-status" role="status" aria-live="polite"></p>
+      <section id="homeWelcome" data-home-screen="welcome" aria-labelledby="homeTitle">
+        <div class="home-welcome-brand"><h1 id="homeTitle">AYO<span>!</span></h1><p class="home-tagline">Where's My Bus?</p><p>Find your stop. See what's coming. Get moving.</p></div>
+        <div class="home-location-card"><span class="home-location-symbol" aria-hidden="true">⌖</span><h2>Where are you?</h2><p>Choose your location to find bus stops near you.</p>
+          <button id="homeLocate" class="home-primary" type="button">Enable My Location</button><span class="home-or">OR</span><button id="homeManual" class="home-secondary" type="button">Enter Location Manually</button>
+          <form id="homeLocationForm" hidden><label for="homeLocationQuery">Address, place, intersection or stop</label><input id="homeLocationQuery" type="search" maxlength="80" autocomplete="off" aria-describedby="homeSearchNote"><p id="homeSearchNote" class="home-note">Official stop and intersection search is available. Full address search needs an approved location provider.</p><button class="home-primary" type="submit">Search locations</button><div id="homeLocationMatches" aria-live="polite"></div></form>
+          <p class="home-privacy">Your location is used to find nearby stops. Precise coordinates are not saved in your preferences.</p>
+        </div>
+      </section>
+      <section id="homeNearby" data-home-screen="nearby" aria-labelledby="homeNearbyTitle" hidden>
+        <div class="home-page-heading"><span id="homeLocationIndicator" class="home-location-indicator"></span><h1 id="homeNearbyTitle">Bus Stops Near You</h1><p>Choose your stop to see the next buses.</p><button id="homeChangeLocation" class="home-text-button" type="button">Change location</button></div>
+        <div class="home-radius-card"><div class="home-radius-label"><label for="homeRadius">Search Radius</label><output id="homeRadiusValue" for="homeRadius">0.5 miles</output></div>
+          <div id="homeRadiusControl" class="home-radius-control"><input id="homeRadius" type="range" min="0.1" max="3" step="0.1" value="0.5" aria-describedby="homeRadiusNote"><span id="homeRadiusBus" class="home-radius-bus" aria-hidden="true"><svg viewBox="0 0 62 28"><g class="home-exhaust" fill="currentColor"><circle cx="3" cy="15" r="2"/><circle cx="10" cy="14" r="2.5"/><circle cx="17" cy="15" r="2"/></g><rect x="22" y="3" width="38" height="19" rx="5" fill="currentColor"/><g fill="#141519"><rect x="27" y="6" width="7" height="7" rx="1"/><rect x="37" y="6" width="7" height="7" rx="1"/><rect x="47" y="6" width="8" height="7" rx="1"/><circle cx="31" cy="23" r="3.5"/><circle cx="51" cy="23" r="3.5"/></g></svg></span></div>
+          <div class="home-radius-scale" aria-hidden="true"><span>0.1 mi</span><span>3.0 mi</span></div><p id="homeRadiusNote" class="home-note">Distances are straight-line estimates, not walking-route distances.</p>
+        </div>
+        <p id="homeStopsUpdated" class="home-note"></p><div id="homeStopsList" class="home-stop-list"></div><button id="homeMoreStops" class="home-secondary" type="button" hidden>Show More Stops</button>
+      </section>
+      <section id="homeSelected" data-home-screen="selected" aria-labelledby="homeStopTitle" hidden>
+        <button id="homeBackStops" class="home-text-button" type="button">Back to Nearby Stops</button><div id="homeSelectedStop" class="home-selected-stop"></div><div id="homeWalkLinks" hidden></div>
+        <div class="home-page-heading"><h2>Buses Coming Next</h2><p>All upcoming arrivals · Earliest first</p></div><p id="homeArrivalFreshness" class="home-note" role="status"></p><button id="homeRefreshArrivals" class="home-text-button" type="button">Refresh arrivals</button><div id="homeArrivals" class="home-arrivals"></div>
+        <details id="homeLegacyTools" class="home-legacy-tools"><summary>More stop tools</summary><section id="riderTools" class="panel rider-tools" aria-labelledby="stopSearchTitle"></section></details>
+      </section>
+      <div id="homeCompatibility" hidden><div id="homeAlertsHost"></div></div>
+    </section>
+    <section id="mapScreen" class="screen" data-screen="map" aria-labelledby="mapTitle" hidden>
+      <div class="page-heading"><p class="eyebrow">Reported vehicle positions</p><h1 id="mapTitle">Live map</h1><p>GPS positions show where buses were reported, not when they will arrive.</p></div>
+      <details id="mapRouteSearch" class="panel route-panel"><summary>Search a route</summary>
         <h2 id="routeTitle">Search a route</h2>
         <form id="routeForm" class="route-form">
           <div class="field"><label for="routeInput">Route identifier</label><input id="routeInput" name="route" placeholder="e.g. 19 or BLU" maxlength="12" autocomplete="off" autocapitalize="characters"></div>
@@ -47,14 +79,7 @@
         </form>
         <div id="quickRoutes" class="chips" aria-label="Quick-select routes"></div>
         <div id="favorites" class="chips" aria-label="Saved route shortcuts"></div>
-      </section>
-      <div class="action-row"><button id="nearbyButton" class="primary" type="button"><svg class="icon" aria-hidden="true"><use href="/static/img/icons.svg#locate"/></svg>Nearby Stops</button><a class="button secondary" href="#map">Open live map<svg class="icon" aria-hidden="true"><use href="/static/img/icons.svg#arrow"/></svg></a></div>
-      <section id="riderTools" class="panel rider-tools" aria-labelledby="stopSearchTitle"></section>
-      <div id="homeAlertsHost"></div>
-      <p class="privacy-note">Location is requested only when you choose a location button. It is not saved in your favorites.</p>
-    </section>
-    <section id="mapScreen" class="screen" data-screen="map" aria-labelledby="mapTitle" hidden>
-      <div class="page-heading"><p class="eyebrow">Reported vehicle positions</p><h1 id="mapTitle">Live map</h1><p>GPS positions show where buses were reported, not when they will arrive.</p></div>
+      </details>
       <div class="map-toolbar"><button id="allRoutesButton" type="button">All routes</button><button id="filterRouteButton" type="button">Filter route</button><button id="resumeTracking" type="button">Refresh positions</button><span id="mapRouteLabel">All routes</span></div>
       <div class="status-strip" aria-live="polite"><span id="busCount">Checking vehicles</span><span id="connectionBadge">Checking feed</span></div>
       <div class="panel map-panel"><div id="map" role="region" aria-label="Milwaukee live bus map"></div></div>
@@ -62,18 +87,25 @@
       <p id="message" role="status"></p>
     </section>
     <section id="tripScreen" class="screen" data-screen="trip" aria-labelledby="tripTitle" hidden>
-      <div class="page-heading"><p class="eyebrow">Official MCTS schedules</p><h1 id="tripTitle">Plan a trip</h1></div>
+      <div class="page-heading"><p class="eyebrow">Official MCTS schedules</p><h1 id="tripTitle">Where to?</h1></div>
       <section id="journey" aria-label="Trip planner"><div class="panel journey-panel"><p>Loading the stop-to-stop planner.</p></div></section>
     </section>
     <section id="alertsScreen" class="screen" data-screen="alerts" aria-labelledby="alertsTitle" hidden>
-      <div class="page-heading"><p class="eyebrow">MCTS notices</p><h1 id="alertsTitle">Service alerts</h1><p>Review changes that may affect your journey.</p></div>
+      <div class="alert-center-hero"><p class="eyebrow">AYO! ALERT CENTER</p><h1 id="alertsTitle">Know before you go.</h1><p class="alert-center-subtitle">Milwaukee transit disruptions, nearby stop conditions, and rider updates.</p><span class="alert-center-tag">Official notices · Clear sources</span></div>
+      <section class="alert-dashboard" aria-label="Alert source summaries">
+        <article class="alert-dashboard-card"><p>Official Alerts</p><strong id="officialAlertCount" aria-label="Official alert count">—</strong><span id="officialAlertState" role="status">Checking official notices…</span></article>
+        <article class="alert-dashboard-card"><p>Nearby Alerts</p><strong aria-label="Nearby alert count unavailable">—</strong><span id="nearbyAlertState">Set location on Home · summary not loaded.</span></article>
+        <article class="alert-dashboard-card"><p>Community Reports</p><strong aria-label="Community report count not loaded">—</strong><span>Summary not loaded · unverified rider reports.</span></article>
+      </section>
+      <div class="alert-section-heading"><div><p class="eyebrow">FROM THE SOURCE</p><h2>Official MCTS notices</h2></div><span class="alert-source-badge">MCTS</span></div>
+      <p class="alert-center-note">Nearby matching and community summaries are not available on this page. Official notices retain their published details below.</p>
       <div id="alertsHost"></div>
       <button type="button" data-workspace="alerts">Manage arrival alerts</button>
       <p class="tiny-note">Arrival notifications require reliable predictions and device permission. Background delivery may require operator setup.</p>
     </section>
     <section id="savedScreen" class="screen" data-screen="saved" aria-labelledby="savedTitle" hidden>
-      <div class="page-heading"><p class="eyebrow">On this device</p><h1 id="savedTitle">Saved stops and journeys</h1></div>
-      <p id="savedStatus" role="status"></p><div id="savedContent" class="panel"></div>
+      <div class="saved-hero"><p class="eyebrow">ON THIS DEVICE</p><h1 id="savedTitle">SAVED</h1><p>Your stops, routes and journeys,<br>one tap away.</p><svg class="saved-transit-art" viewBox="0 0 400 70" aria-hidden="true"><path d="M0 53L400 25"/><g><circle cx="50" cy="49.5" r="4"/><circle cx="130" cy="43.9" r="4"/><circle cx="210" cy="38.3" r="4"/><circle cx="290" cy="32.7" r="4"/></g><circle class="saved-line-glow" cx="50" cy="49.5" r="3"/><circle class="saved-destination-glow" cx="365" cy="27.5" r="7"/></svg></div>
+      <p id="savedStatus" class="saved-feedback" role="status" aria-live="polite"></p><div id="savedContent" class="saved-content"></div>
     </section>
     <section id="about" class="about panel" aria-labelledby="aboutTitle" hidden>
       <h1 id="aboutTitle">About this data</h1>
@@ -86,31 +118,44 @@
     </section>
     <section id="founder" class="founder" data-screen="founder" hidden aria-labelledby="founder-name">
   <div class="card">
-    <p class="eyebrow">About the founder</p>
-
-    <div class="head">
-
-      <div class="avatar" aria-hidden="true">AB</div>
-      <div>
-        <h2 id="founder-name">Abhiraj Bandari</h2>
-        <p class="role">Data Engineer · Creator of AYO! Where's My Bus?</p>
-        <div class="tags">
-          <span class="tag">Milwaukee, Wisconsin</span>
-          <span class="tag">4+ years in data engineering</span>
-        </div>
+    <div class="founder-scene">
+      <div class="founder-light" aria-hidden="true">
+        <svg class="founder-lamp" viewBox="0 0 600 720" focusable="false">
+          <defs>
+            <linearGradient id="founder-shade" x1="0" x2="1">
+              <stop stop-color="#111216"/><stop offset=".48" stop-color="#45454f"/><stop offset=".67" stop-color="#292a31"/><stop offset="1" stop-color="#101115"/>
+            </linearGradient>
+            <linearGradient id="founder-beam" x1="0" y1="0" x2="0" y2="1">
+              <stop stop-color="#fbd780" stop-opacity=".35"/><stop offset=".5" stop-color="#e8b94e" stop-opacity=".12"/><stop offset="1" stop-color="#e8b94e" stop-opacity="0"/>
+            </linearGradient>
+            <radialGradient id="founder-bulb"><stop stop-color="#fff3c2"/><stop offset=".65" stop-color="#ffd37a"/><stop offset="1" stop-color="#d19a35"/></radialGradient>
+          </defs>
+          <path d="M300 0V139" stroke="#22232a" stroke-width="3"/>
+          <rect x="289" y="138" width="22" height="23" rx="4" fill="#1d1e24"/>
+          <rect x="281" y="157" width="38" height="10" rx="3" fill="#2b2c34"/>
+          <g class="founder-illumination">
+            <path d="M237 266L50 720H550L363 266Z" fill="url(#founder-beam)"/>
+            <path d="M249 266L111 720H489L351 266Z" fill="url(#founder-beam)" opacity=".65"/>
+          </g>
+          <path d="M220 263C225 216 258 172 300 170C342 172 375 216 380 263C345 274 255 274 220 263Z" fill="url(#founder-shade)"/>
+          <ellipse class="founder-lamp-glow" cx="300" cy="266" rx="63" ry="7" fill="url(#founder-bulb)"/>
+        </svg>
       </div>
+      <p class="eyebrow founder-scene-label">About the founder</p>
+      <div class="founder-stage">
+        <div class="founder-heading">
+          <h2 id="founder-name" data-no-translate>Abhiraj <span>Bandari</span></h2>
+          <p class="founder-signature">BUILT IN MILWAUKEE</p>
+        </div>
+        <figure class="founder-character">
+          <img src="/static/img/founder-leaning.png" width="1199" height="1312" alt="Illustrated Abhiraj in a black-and-yellow AYO! hoodie" decoding="async">
+        </figure>
+      </div>
+      <p class="role">Data Engineer · Co-founder, A Work Connect Private Limited · Creator of AYO!</p>
+      <p class="founder-location-line">Milwaukee, WI · Concordia University Wisconsin, CIS (Dec 2026)</p>
     </div>
-
-    <p>
-      I'm a data engineer with 4+ years of experience building ETL/ELT pipelines
-      in Python and SQL, now focusing on the data infrastructure behind AI and
-      machine learning applications. Previously, I was a Senior Data Engineer at
-      A Work Connect (Jan 2021 – Aug 2025).
-    </p>
-    <p>
-      I built AYO! because Milwaukee riders shouldn't have to wait in freezing
-      winter weather without knowing when the bus is coming.
-    </p>
+    <div class="founder-details">
+    <p class="founder-biography">I build data pipelines for a living and products for fun. I co-founded A Work Connect Private Limited, a DPIIT-recognized startup in India, and learned most of what I know about data engineering building it. I built AYO! because Milwaukee riders shouldn't have to wait in freezing weather without knowing when the bus is coming.</p>
 
     <h3>The engineering behind AYO!</h3>
     <div class="pipeline" role="img"
@@ -169,10 +214,24 @@
       <a class="btn" href="mailto:abhirajbandari632@gmail.com">Contact</a>
     </div>
 
+    <div class="founder-mission" aria-labelledby="founder-mission-title">
+      <p class="eyebrow">WHY WE BUILT AYO!</p>
+      <h3 id="founder-mission-title">LESS WAITING. <span>MORE LIVING.</span></h3>
+      <p class="founder-mission-lead">Because nobody deserves to be left waiting in the cold.</p>
+      <p>Milwaukee winters can be brutal. Snowstorms, freezing temperatures, icy sidewalks, and unexpected bus delays make everyday travel difficult. Sometimes, a few minutes of uncertainty means standing outside much longer than expected.</p>
+      <p>That's why we built AYO! Where's My Bus?</p>
+      <p>We wanted to create something simple, useful, and accessible — a place where Milwaukee riders can check available bus information, find nearby stops, plan journeys, and stay informed about service disruptions.</p>
+      <p>Our goal isn't just to show where a bus is.</p>
+      <p>It's to help people spend less time waiting, make better travel decisions, and get where they're going with more confidence.</p>
+      <p class="founder-mission-close">Built in Milwaukee. Inspired by everyday riders. Made for the journey.</p>
+      <svg class="founder-route-line" viewBox="0 0 800 40" aria-hidden="true" focusable="false"><path d="M0 28C220 28 390 10 800 10" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 10" stroke-linecap="round"/><g fill="#111216" stroke="currentColor" stroke-width="2"><circle cx="100" cy="27" r="5"/><circle cx="355" cy="18" r="5"/><circle cx="600" cy="12" r="5"/></g></svg>
+    </div>
+
     <p class="fine">
       Independent project, not affiliated with MCTS. Transit data: MCTS.
       Map data: © OpenStreetMap contributors.
     </p>
+  </div>
   </div>
 </section>
     <!-- Retained implementation, excluded from public launch navigation. No rider data is removed. -->
@@ -181,12 +240,13 @@
   <footer class="footer"><p>Independent project, not affiliated with MCTS.</p><p>Transit data: MCTS. Map data: OpenStreetMap contributors.</p><a href="/static/privacy.html">Privacy &amp; data</a><p data-support-contact></p></footer>
   <nav class="app-nav" aria-label="Passenger navigation">
     <a href="#stops" data-view="stops" aria-current="page"><svg class="icon" aria-hidden="true"><use href="/static/img/icons.svg#stop"/></svg><span>Stops</span></a>
-    <a href="#map" data-view="map"><svg class="icon" aria-hidden="true"><use href="/static/img/icons.svg#map"/></svg><span>Map</span></a>
     <a href="#trip" data-view="trip"><svg class="icon" aria-hidden="true"><use href="/static/img/icons.svg#trip"/></svg><span>Trip</span></a>
+    <a href="/ai" data-primary-ai data-view="ai"><svg class="icon" aria-hidden="true"><use href="/static/img/icons.svg#chat"/></svg><span>AYO AI</span></a>
     <a href="#alerts" data-view="alerts"><svg class="icon" aria-hidden="true"><use href="/static/img/icons.svg#alert"/></svg><span>Alerts</span></a>
     <a href="#saved" data-view="saved"><svg class="icon" aria-hidden="true"><use href="/static/img/icons.svg#star"/></svg><span>Saved</span></a>
   </nav>
-  <button id="voiceShortcut" class="voice-shortcut" type="button" aria-label="Open AYO Voice"><svg class="icon" aria-hidden="true"><use href="/static/img/icons.svg#mic"/></svg></button>
+  <a id="aiGreeting" class="ai-greeting" href="/ai">👋 Hey! Need help? Click me! I'll help you find your bus.</a>
+  <button id="voiceShortcut" class="voice-shortcut" type="button" aria-label="Open AYO AI"><svg class="icon" aria-hidden="true"><use href="/static/img/icons.svg#chat"/></svg></button>
   <noscript><p class="panel">JavaScript is needed for live tools. <a href="https://www.ridemcts.com/" target="_blank" rel="noopener noreferrer">Use the official MCTS website</a>.</p></noscript>
   <script src="/static/vendor/leaflet/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="/static/js/i18n.js" defer></script>
@@ -201,7 +261,10 @@
   <script src="/static/js/journey.js" defer></script>
   <script src="/static/js/pwa.js" defer></script>
   <script src="/static/js/workspaces.js" defer></script>
+  <script src="/static/js/saved.js" defer></script>
   <script src="/static/js/navigation.js" defer></script>
   <script src="/static/js/home-experience.js" defer></script>
+  <script src="/static/js/home-stops.js" defer></script>
+  <script src="/static/js/alerts-appearance.js" defer></script>
 </body>
 </html>

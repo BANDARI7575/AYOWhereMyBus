@@ -57,6 +57,8 @@ def db():
     return c
 
 def install(app):
+    from backend.services.geocoding_service import install_geocoding
+    install_geocoding(app)
     production=os.getenv('AYO_ENV')=='production'
     if production:
         for name in (['PRIVACY_KEY'] if os.getenv('MODERATOR_TOKENS') else ['MODERATOR_TOKEN','PRIVACY_KEY']):
@@ -159,7 +161,11 @@ def install(app):
     def departures(stop_id):
         if not stop_id.isdigit() or len(stop_id)>12: raise ValueError('Invalid stop ID')
         rows,status=realtime.apply(schedule.departures(stop_id))
-        return jsonify(departures=rows[:30],realtime_status=status,timezone=str(TZ),message='Scheduled times are not predictions. No departures may mean no covered service.')
+        limit=request.args.get('limit','30')
+        if limit not in {'30','200'}:raise ValueError('Choose a supported departure limit')
+        cached=realtime.cache.get('updates')
+        feed=cached[1] if cached else None
+        return jsonify(departures=rows[:int(limit)],total_departures=len(rows),truncated=len(rows)>int(limit),realtime_status=status,feed_timestamp=int(feed.header.timestamp) if feed and feed.header.timestamp else None,retrieved_at=int(time.time()),timezone=str(TZ),message='Scheduled times are not predictions. No departures may mean no covered service.')
     @app.get('/api/routes/<route>/shape')
     def shape(route):
         if len(route)>20 or not all(x.isalnum() or x in '-_' for x in route): raise ValueError('Invalid route')

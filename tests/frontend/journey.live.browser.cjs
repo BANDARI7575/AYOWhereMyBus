@@ -66,12 +66,12 @@ const selected = JSON.parse(setup.stdout);
         const response=await journeyResponse;assert.equal(response.status(),200);
         const journey=await response.json(); assert.equal(journey.status,'ok'); assert.ok(journey.legs.length);
         await page.locator('#journeyResults h3').waitFor();
-        const text=await page.locator('#journeyResults').innerText();
+        await page.locator('.journey-result-card>summary').click();const text=await page.locator('#journeyResults').innerText();
         assert.ok(text.includes(selected.origin.name));assert.ok(text.includes(selected.destination.name));
         assert.match(text,/Scheduled departure/);assert.match(text,/Take Route/);
         assert.ok(!/Stop search is unavailable/.test(await page.locator('#journey').innerText()));
         assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
-        assert.equal(await page.locator('.journey-search-grid').evaluate(n=>getComputedStyle(n).gridTemplateColumns.split(' ').length),viewport.width<=650?1:3);
+        assert.equal(await page.locator('.journey-search-grid').evaluate(n=>getComputedStyle(n).display),'flex');assert.equal(await page.locator('.journey-search-grid').evaluate(n=>getComputedStyle(n).flexDirection),'column');
         // Both selectors must give real empty results, not an availability error.
         for(const id of ['planFrom','planTo']) {
           await page.locator('#'+id).fill('NoSuchAYOStopzzzz');

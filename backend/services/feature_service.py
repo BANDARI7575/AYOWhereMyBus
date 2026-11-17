@@ -5,9 +5,10 @@ import re
 import json
 import time
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import jsonify,request
-from backend.services.transit_engine import TZ
+from google.transit import gtfs_realtime_pb2 as pb
+from backend.services.transit_engine import TZ, service_epoch, seconds
 from backend.services.alert_service import snapshot as alert_snapshot, filter_route
 from backend.services.stops_service import distance_km
 
@@ -33,7 +34,7 @@ def discover(schedule,args):
     if isinstance(args.get('offset'),bool) or isinstance(args.get('radius'),bool) or isinstance(args.get('offset'),float) and not args['offset'].is_integer():raise ValueError('Invalid page or radius')
     try:offset=int(args.get('offset',0));radius=float(args.get('radius',0.5))
     except (ValueError,TypeError,OverflowError):raise ValueError('Invalid page or radius')
-    if offset<0 or offset>10000 or radius not in RADII:raise ValueError('Invalid page or radius')
+    if offset<0 or offset>10000 or not (radius in RADII or math.isfinite(radius) and 0.1 <= radius <= 3.0 and abs(radius*10-round(radius*10)) < 1e-8):raise ValueError('Invalid page or radius')
     point=coordinates(args) if 'lat' in args or 'lon' in args else None
     if not point and len(q)<2 and not q.isdigit():raise ValueError('Search by stop, street or route, or choose your location')
     route=text(args.get('route',''),'route',20)
@@ -54,7 +55,7 @@ def discover(schedule,args):
         matches.sort(key=lambda r:(r['distance_meters'] if point else r['name'],r['stop_id']))
         page=matches[offset:offset+50]
         for row in page:row['scheduled_directions']=all_directions(c,row['stop_id'])
-    return {'stops':page,'total':len(matches),'offset':offset,'next_offset':offset+len(page) if offset+len(page)<len(matches) else None,'radius_miles':radius,'distance_type':'straight_line','source':'MCTS GTFS'}
+    return {'stops':page,'total':len(matches),'offset':offset,'next_offset':offset+len(page) if offset+len(page)<len(matches) else None,'radius_miles':radius,'distance_type':'straight_line','source':'MCTS GTFS','retrieved_at':int(time.time())}
 
 def all_directions(c,sid):
     return [dict(r) for r in c.execute("SELECT DISTINCT t.route_id,COALESCE(NULLIF(r.route_short_name,''),t.route_id) AS route_number,t.trip_headsign AS headsign,t.direction_id FROM stop_times st JOIN trips t USING(trip_id) JOIN routes r ON r.route_id=t.route_id WHERE st.stop_id=? ORDER BY route_number,headsign",(sid,))]
@@ -66,6 +67,38 @@ def official_stop(schedule,sid):
         if row is None:raise ValueError('Stop is not in the current GTFS timetable')
         directions=all_directions(c,sid)
         return {'stop_id':sid,'name':row['stop_name'],'latitude':float(row['stop_lat']),'longitude':float(row['stop_lon']),'scheduled_directions':directions,'source':'MCTS GTFS'}
+
+def qualify_service_day(schedule, trip_id, reported_at, descriptor_date=None):
+    """Bind a reported trip to one active GTFS occurrence, never to route alone.
+
+    Missing vehicle dates are common in MCTS. A unique active occurrence within
+    15 minutes before scheduled start / 60 minutes after scheduled end supports
+    association. These tolerances are not ETA predictions. Ambiguity fails closed.
+    """
+    if isinstance(reported_at,bool) or not isinstance(reported_at,(int,float)) or not math.isfinite(reported_at):return None
+    try:day=datetime.fromtimestamp(reported_at,TZ).date()
+    except (ValueError,OverflowError,OSError):return None
+    with schedule.connect() as c:
+        trip=c.execute('SELECT service_id FROM trips WHERE trip_id=?',(trip_id,)).fetchone()
+        if c.execute('SELECT 1 FROM frequencies WHERE trip_id=? LIMIT 1',(trip_id,)).fetchone():return None
+        rows=c.execute('SELECT departure_time,arrival_time FROM stop_times WHERE trip_id=? ORDER BY CAST(stop_sequence AS INTEGER)',(trip_id,)).fetchall()
+    if trip is None or not rows:return None
+    if descriptor_date:
+        if not isinstance(descriptor_date,str) or not re.fullmatch(r'\d{8}',descriptor_date):return None
+        try:selected=datetime.strptime(descriptor_date,'%Y%m%d').date()
+        except (ValueError,TypeError):return None
+        return (descriptor_date,'vehicle_trip_descriptor') if trip['service_id'] in schedule.services(selected) else None
+    try:lookback=max(seconds(rows[0]['departure_time']),seconds(rows[-1]['arrival_time'] or rows[-1]['departure_time']))//86400+1
+    except (ValueError,TypeError):return None
+    if lookback>7:return None  # Unsupported extreme service hours fail closed.
+    matches=[]
+    for offset in range(-lookback,2):
+        candidate=day+timedelta(days=offset)
+        if trip['service_id'] not in schedule.services(candidate):continue
+        try:start=service_epoch(candidate,rows[0]['departure_time']);end=service_epoch(candidate,rows[-1]['arrival_time'] or rows[-1]['departure_time'])
+        except (ValueError,TypeError):continue
+        if start<=end and start-900<=reported_at<=end+3600:matches.append(candidate.strftime('%Y%m%d'))
+    return (matches[0],'unique_active_gtfs_occurrence') if len(matches)==1 else None
 
 def install_features(app,get_schedule,realtime,db,journey_slots=None):
     slots=journey_slots or threading.BoundedSemaphore(2)
@@ -113,6 +146,39 @@ def install_features(app,get_schedule,realtime,db,journey_slots=None):
         with db() as c:reports=[dict(r) for r in c.execute("SELECT id,stop_id,text,expires FROM reports WHERE state='approved' AND expires>? ORDER BY created DESC LIMIT 100",(time.time(),))]
         if route:reports=[r for r in reports if r['stop_id'] in served]
         return {'vehicles':data,'official_alerts':alerts,'community_reports':reports,'community_status':'Anonymous unverified community observations','historical_analytics_available':False,'retrieved_at':int(time.time())}
+    @app.get('/api/trips/<trip_id>/vehicle')
+    def trip_vehicle(trip_id):
+        trip_id=text(trip_id,'trip ID',128)
+        date=text(request.args.get('service_date',''),'service date',8)
+        sid=text(request.args.get('stop_id',''),'stop ID',128)
+        try:
+            if not re.fullmatch(r'\d{8}',date):raise ValueError()
+            day=datetime.strptime(date,'%Y%m%d').date();sequence=int(request.args.get('stop_sequence',''))
+            if not 0<=sequence<=4294967295:raise ValueError()
+        except (ValueError,TypeError):raise ValueError('Choose a valid trip occurrence and stop sequence')
+        schedule=get_schedule()
+        with schedule.connect() as c:
+            trip=c.execute('SELECT route_id,service_id,direction_id FROM trips WHERE trip_id=?',(trip_id,)).fetchone()
+            stop=c.execute('SELECT 1 FROM stop_times WHERE trip_id=? AND stop_id=? AND CAST(stop_sequence AS INTEGER)=?',(trip_id,sid,sequence)).fetchone()
+        if trip is None or stop is None or trip['service_id'] not in schedule.services(day):raise ValueError('Departure does not match the active GTFS timetable')
+        data=live(trip['route_id']);now=time.time();matches=[]
+        if data['feed_fresh']:
+            for bus in data['buses']:
+                stamp=bus.get('reported_at')
+                if bus.get('trip_id')!=trip_id or bus.get('trip_schedule_relationship',pb.TripDescriptor.SCHEDULED)!=pb.TripDescriptor.SCHEDULED or not isinstance(stamp,(int,float)) or not -60<=now-stamp<=120:continue
+                if bus.get('direction_id') is not None and trip['direction_id'] not in (None,'') and str(bus['direction_id'])!=str(trip['direction_id']):continue
+                qualified=qualify_service_day(schedule,trip_id,stamp,bus.get('trip_start_date'))
+                if qualified and qualified[0]==date:matches.append({**bus,'qualified_service_date':qualified[0],'service_date_basis':qualified[1]})
+        return jsonify(status='matched' if len(matches)==1 else 'unavailable',buses=matches if len(matches)==1 else [],feed_fresh=data['feed_fresh'],feed_timestamp=data.get('feed_timestamp'),retrieved_at=int(now),source='MCTS GTFS-Realtime / active GTFS timetable')
+    @app.get('/api/trips/<trip_id>/shape')
+    def trip_shape(trip_id):
+        trip_id=text(trip_id,'trip ID',128)
+        schedule=get_schedule()
+        with schedule.connect() as c:
+            trip=c.execute('SELECT route_id,shape_id FROM trips WHERE trip_id=?',(trip_id,)).fetchone()
+            if trip is None:raise ValueError('Trip is not in the current GTFS timetable')
+            points=[[float(r[0]),float(r[1])] for r in c.execute('SELECT shape_pt_lat,shape_pt_lon FROM shapes WHERE shape_id=? ORDER BY CAST(shape_pt_sequence AS INTEGER)',(trip['shape_id'],))]
+        return jsonify(trip_id=trip_id,route_id=trip['route_id'],shape_id=trip['shape_id'],points=points,source='MCTS GTFS',geometry_scope='full_scheduled_trip')
     @app.get('/api/explore/stops')
     def stops():return jsonify(discover(get_schedule(),request.args))
     @app.get('/api/explore/stops/<sid>')

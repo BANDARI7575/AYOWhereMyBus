@@ -40,7 +40,7 @@ class OrganizationTests(unittest.TestCase):
         assets = json.loads(re.search(r'const SHELL=(\[.*?\]);', worker, re.S)[1])
         for asset in assets:
             with self.subTest(asset=asset):
-                local = PROJECT_ROOT / ('templates/index.html' if asset == '/' else 'templates/privacy.html' if asset == '/static/privacy.html' else asset.lstrip('/'))
+                local = PROJECT_ROOT / ('templates/index.html' if asset == '/' else 'templates/ai.html' if asset == '/ai' else 'templates/privacy.html' if asset == '/static/privacy.html' else asset.lstrip('/'))
                 self.assertTrue(local.is_file(), asset)
 
     def test_repository_defaults_do_not_depend_on_working_directory(self):

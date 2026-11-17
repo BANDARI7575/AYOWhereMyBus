@@ -1,3 +1,4 @@
+const {openMap,openRouteSearch,openLegacyStop}=require('./navigation-helpers.cjs');
 /* Utility-first UI regression. Fixtures stay in the browser, never rider storage. */
 const {chromium,webkit}=require('playwright');const {default:AxeBuilder}=require('@axe-core/playwright');
 const assert=require('node:assert/strict'),fs=require('node:fs');const journey=require('../fixtures/journey.json');
@@ -31,18 +32,18 @@ const base=process.env.AYO_TEST_URL||'http://127.0.0.1:5055';const results=[];
    return r.continue();
   });
   await page.goto(base,{waitUntil:'load'});await page.evaluate(()=>AyoI18n.ready);await page.waitForFunction(()=>window.AyoSite&&state.markerIndex.size===1);
-  assert.equal(await page.locator('.bats,.hero-background,#clock,#weatherClock').count(),0);
+  assert.equal(await page.locator('.bats,.hero-background,#clock').count(),0);assert.equal(await page.locator('#weatherClock').isVisible(),true);
   assert.equal(await page.locator('#winter-watch').isVisible(),false);
-  assert.equal(await page.locator('.app-nav a').count(),5);
+  assert.equal(await page.locator('.app-nav>a,.app-nav>button').count(),5);
   assert.equal(await page.locator('#quickRoutes button').count(),5);
   assert.equal(await page.evaluate(()=>scrollY),0);
-  await page.locator('.app-nav [data-view=map]').click();await page.waitForFunction(()=>AyoSite.activeView==='map');await page.waitForTimeout(100);
+  await openMap(page);await page.waitForFunction(()=>AyoSite.activeView==='map');await page.waitForTimeout(100);
   const center=await page.evaluate(()=>state.map.getCenter());assert.ok(Math.abs(center.lat-43.0389)<.001&&Math.abs(center.lng+87.9065)<.001,JSON.stringify(center));
   assert.equal(await page.evaluate(()=>state.map.getZoom()),12);assert.equal(await page.evaluate(()=>state.markerIndex.values().next().value.getLatLng().lat),43.4);
   await page.evaluate(()=>state.markerIndex.values().next().value.openPopup());await page.locator('.leaflet-popup-content').waitFor({state:'visible'});assert.match(await page.locator('.leaflet-popup-content').textContent(),/62.1 mph/);await page.evaluate(()=>state.map.closePopup());
-  await page.locator('.app-nav [data-view=stops]').click();await page.locator('#routeInput').fill('19');await page.locator('#routeForm button[type=submit]').click();await page.waitForFunction(()=>state.route==='19'&&AyoSite.activeView==='map');
-  await page.locator('.app-nav [data-view=stops]').click();await page.locator('#favoriteButton').click();assert.deepEqual(await page.evaluate(()=>state.favorites),['19']);
-  await page.locator('#stopQuery').fill('Wisconsin');await page.locator('.search-stops button').click();await page.locator('.stop-matches button').first().click();await page.locator('#selectedArrivals .arrival-card').first().waitFor();
+  await openRouteSearch(page);await page.locator('#routeInput').fill('19');await page.locator('#routeForm button[type=submit]').click();await page.waitForFunction(()=>state.route==='19'&&AyoSite.activeView==='map');
+  await page.locator('#favoriteButton').click();assert.deepEqual(await page.evaluate(()=>state.favorites),['19']);
+  await openLegacyStop(page);await page.locator('#stopQuery').fill('Wisconsin');await page.locator('.search-stops button').click();await page.locator('.stop-matches button').first().click();await page.locator('#selectedArrivals .arrival-card').first().waitFor();
   assert.match(await page.locator('#selectedArrivals').innerText(),language==='es'?/Llegada estimada/:/Predicted arrival/);
   assert.match(await page.locator('#selectedArrivals').innerText(),language==='es'?/Cancelado/:/Canceled/);
   const disclosure=page.locator('.stop-detail>details');await disclosure.locator('summary').click();await disclosure.getByRole('button',{name:language==='es'?'Guardar / quitar favorito':'Save / remove favorite',exact:true}).click();
@@ -52,19 +53,19 @@ const base=process.env.AYO_TEST_URL||'http://127.0.0.1:5055';const results=[];
   await page.locator('.app-nav [data-view=trip]').click();
   assert.equal(await page.locator('.journey-search-grid').evaluate(n=>[...n.children].map(x=>x.classList.contains('journey-swap')?'swap':x.querySelector('input')?.id).join(',')),'planFrom,swap,planTo');
   await page.evaluate(stops=>dispatchEvent(new CustomEvent('ayo:planner-context',{detail:{from:stops[0],to:stops[1]}})),stops);
-  await page.locator('#planJourney').click();await page.locator('#journeyResults h3').waitFor();assert.deepEqual(planned,{from:'1',to:'3',walking:'0',choice:'0'});assert.equal(await page.evaluate(()=>Object.values(state.map._layers).filter(l=>l instanceof L.Polyline).length),2);
+  await page.locator('#planJourney').click();await page.locator('#journeyResults h3').waitFor();assert.deepEqual(planned,{from:'1',to:'3',walking:'1',choice:'0'});assert.equal(await page.evaluate(()=>Object.values(state.map._layers).filter(l=>l instanceof L.Polyline).length),2);
   await page.getByRole('button',{name:language==='es'?'Guardar viaje':'Save Journey',exact:true}).click();
   const priorView=await page.evaluate(()=>AyoSite.activeView);await page.locator('#languageButton').click();await page.waitForLoadState('load');await page.waitForFunction(()=>window.AyoSite);await page.evaluate(()=>AyoI18n.ready);assert.equal(await page.evaluate(()=>AyoSite.activeView),priorView);assert.equal(await page.locator('html').getAttribute('lang'),language==='es'?'en':'es');
   // Return to the original language while preserving the selected destination.
   await page.locator('#languageButton').click();await page.waitForLoadState('load');await page.waitForFunction(()=>window.AyoSite);await page.evaluate(()=>AyoI18n.ready);
-  await page.locator('.app-nav [data-view=map]').click();const oldRequests=feedRequests;await page.locator('#resumeTracking').click();await page.waitForFunction(()=>state.request===null);assert.ok(feedRequests>oldRequests);
+  await openMap(page);const oldRequests=feedRequests;await page.locator('#resumeTracking').click();await page.waitForFunction(()=>state.request===null);assert.ok(feedRequests>oldRequests);
   await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));});assert.equal(await page.evaluate(()=>state.timer),null);
   await page.evaluate(()=>{delete document.hidden;document.dispatchEvent(new Event('visibilitychange'));});await page.waitForFunction(()=>state.timer!==null);assert.doesNotMatch(await page.locator('#trackingState').innerText(),/paused|pausadas/);
   await page.locator('.app-nav [data-view=stops]').click();await page.waitForFunction(()=>document.getElementById('weatherTemp').textContent==='32°F');weatherFailure=true;await page.evaluate(()=>dispatchEvent(new Event('online')));await page.waitForFunction(()=>document.getElementById('weatherWidget').dataset.availability==='unavailable');assert.match(await page.locator('#weatherTemp').textContent(),/32°F/);
   await page.locator('#mobileMenuButton').click();await page.locator('#themeButton').click();await page.keyboard.press('Escape');assert.equal(await page.locator('body').evaluate(n=>n.classList.contains('day-mode')),true);
   for(const theme of ['light','dark']){
    if(theme==='dark'){await page.locator('#mobileMenuButton').click();await page.locator('#themeButton').click();await page.keyboard.press('Escape');}
-   for(const view of ['stops','map','trip','alerts','saved']){await page.locator(`.app-nav [data-view=${view}]`).click();assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`${view} overflow`);if(process.env.AYO_REDESIGN_AXE==='1'){const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();assert.deepEqual(axe.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})),[],`${engine} ${language} ${width} ${theme} ${view}`);}}
+   for(const view of ['stops','map','trip','alerts','saved']){if(view==='map')await openMap(page);else await page.locator(`.app-nav [data-view=${view}]`).click();assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`${view} overflow`);if(process.env.AYO_REDESIGN_AXE==='1'){const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();assert.deepEqual(axe.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})),[],`${engine} ${language} ${width} ${theme} ${view}`);}}
    await page.evaluate(()=>AyoSite.navigate('founder'));if(process.env.AYO_REDESIGN_AXE==='1'){const founder=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();assert.deepEqual(founder.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})),[]);}
   }
   assert.deepEqual(errors,[]);results.push({engine,language,width,accessibilityScans:process.env.AYO_REDESIGN_AXE==='1'?12:0,checks:'screens, tracking, route IDs, popups, arrivals, alerts, saves, planner, language, visibility, weather, themes',errors});console.log('PASS utility redesign',engine,language,width);await context.close();
