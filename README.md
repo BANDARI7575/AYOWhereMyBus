@@ -1,3 +1,46 @@
+# 🚌 AYO! Where's My Bus?
+
+### Less Waiting. More Living.
+
+**A Milwaukee Transit Intelligence Project**
+
+AYO! Where's My Bus? is a transit website designed to help Milwaukee riders spend less time waiting outside and more time getting where they need to go.
+
+## Why We Built AYO!
+
+Milwaukee winters can be brutal. Freezing temperatures, snowstorms, icy sidewalks, and unexpected bus delays can make everyday travel difficult.
+
+AYO! was created to make bus information easier to access, especially when riders need to decide when to leave home.
+
+## Project Features
+
+- **Nearby Stops:** Find MCTS stops near your location.
+- **Bus Tracking:** View reported bus GPS locations.
+- **Trip Planner:** Search for journeys between locations.
+- **Service Alerts:** Review official MCTS service notices.
+- **AYO AI:** Transit-focused text assistant.
+- **Saved:** Keep favorite stops, routes, and journeys.
+- **English and Spanish:** Multilingual interface controls.
+- **Responsive Design:** Designed for desktop and mobile devices.
+
+Some features remain under development or require further testing before public launch.
+
+## About the Founder
+
+**Abhiraj Bandari**
+
+Data Engineer · Co-founder, A Work Connect Private Limited · Creator of AYO!
+
+Milwaukee, Wisconsin · Concordia University Wisconsin · Computer and Information Sciences (December 2026)
+
+AYO! combines an interest in data engineering, web development, and building practical tools for everyday problems.
+
+**Built in Milwaukee. Inspired by everyday riders. Made for the journey.**
+
+---
+
+
+
 # AYO! Where’s My Bus?
 
 AYO helps Milwaukee riders find official stops, track reported MCTS bus positions,
