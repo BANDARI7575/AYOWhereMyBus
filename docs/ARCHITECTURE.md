@@ -44,7 +44,8 @@ transfer and detour policies. Search is bounded to two rides, four incoming-trip
 labels per stop and an eight-second computation budget. Ranking preferences and
 no-route outcomes are not a guarantee of global optimality or no other service.
 
-Walking is explicit opt-in, estimated straight-line access/transfer/egress; no
+When walking connections are enabled, they use estimated straight-line access,
+transfer and egress distances; no
 pedestrian path, crossing safety or accessibility is inferred. Shapes use source
 distances when compatible, otherwise disclose a full-trip fallback. Distinct stops
 published in the same minute retain their source elapsed value with an honest
@@ -63,8 +64,10 @@ Application code lives in `static/js/`, styles in `static/css/`, icons/retained
 artwork in `static/img/`. Vendor libraries/fonts/licenses stay in `static/vendor/`;
 the translation catalog stays at `static/es.json`.
 
-- `navigation.js` manages the Stops, Map, Trip, Alerts, Saved and supporting views,
-  history positions and menu controls.
+- `navigation.js` manages Stops, Trip, Alerts, Saved and supporting views,
+  history positions and menu controls. The five primary destinations are Stops,
+  Trip, AYO AI (`/ai`), Alerts and Saved. The map remains an internal tracking/
+  journey view, not a separate primary navigation tab.
 - `app.js` owns the live vehicle/map state; `journey.js` owns the scheduled planner.
 - `workspaces.js` reuses the map/planner in rider dialogs and maintains typed/native
   Voice, saved stops, arrival watches and data-freshness controls.
@@ -72,7 +75,7 @@ the translation catalog stays at `static/es.json`.
   source semantics and alert snapshots.
 - `location-access.js` and `location-search.js` centralize permission/errors and
   official boarding-stop selection. Location is requested by a user action.
-- `home-experience.js` controls the divider bus and floating Voice shortcut, with
+- `home-experience.js` controls the divider bus and floating AYO AI shortcut, with
   visibility, reduced-motion, modal and keyboard behavior.
 - `weather.js`, `i18n.js` and `pwa.js` handle their named responsibilities.
 - `stops-ui.js` is retained older source, not loaded by the current homepage.
@@ -99,7 +102,7 @@ templates, backend modules, databases and secrets are not exposed as files.
 
 `static/sw.js` is still served at `/sw.js` with no-cache and root scope permission.
 Both manifests retain their locations, ID, start URL and scope. Their icon URLs
-now use `static/img/`. The shell namespace changes from v26 to v27; activation uses
+now use `static/img/`. The current shell uses `ayo-shell-v34`; activation uses
 the existing update flow. Shell fetches refresh successful online files before
 falling back offline. API responses are never cached as live transit data.
 

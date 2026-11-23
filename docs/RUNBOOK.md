@@ -1,6 +1,6 @@
 # Operations runbook
 
-Operational procedures reviewed for repository restructuring on November 13, 2026. Historical test observations below retain their original scope. **No public beta; no deployment authorization.** Complete the [launch checklist](archive/PRODUCTION_LAUNCH_CHECKLIST.md) before publication. Do not expose the development server. Local restructuring uses `chore/restructure`; the release branch remains unchanged. No Git push, merge or deployment has been performed.
+Operational procedures reviewed for repository restructuring on November 13, 2026. Historical test observations below retain their original scope. **No public beta; no deployment authorization.** Complete the [launch checklist](archive/PRODUCTION_LAUNCH_CHECKLIST.md) before publication. Do not expose the development server. Local restructuring uses `chore/restructure`; the release branch remains unchanged. This runbook does not authorize a Git push, merge or deployment.
 
 ## 1. Release provenance and runtime
 
@@ -130,7 +130,7 @@ and use the guide's optional owner-controlled transfer rather than clearing data
 
 The migration preserves old static asset URLs through an explicit alias map,
 keeps `/static/privacy.html` as a template response and retains service-worker
-scope `/`. Test v26-to-v27 upgrade and offline navigation with
+scope `/`. Test old-shell-to-current-worker upgrade and offline navigation with
 `npm run test:pwa-upgrade`. APIs are never cached as current transit data.
 Historical test reports are in `docs/archive/`; current restructuring results and
-coverage limits are in [the restructuring report](RESTRUCTURING_REPORT.md).
+coverage limits are in [the restructuring report](archive/PHASE_B_ORGANIZATION.md).

@@ -3,6 +3,7 @@ require('./control-audit.cjs');
 /* Browser feature contracts use isolated API fixtures; no real reports are posted. */
 const {chromium,webkit}=require('playwright');const assert=require('node:assert/strict');
 const base=process.env.AYO_TEST_URL||'http://127.0.0.1:5001';
+const shellCache=require('node:fs').readFileSync('static/sw.js','utf8').match(/const CACHE='([^']+)'/)[1];
 (async()=>{
  for(const [engine,type] of [['chromium',chromium],['webkit',webkit]]){
  const browser=await type.launch({headless:true,...(engine==='chromium'&&process.env.AYO_CHROME_PATH?{executablePath:process.env.AYO_CHROME_PATH}:{})});
@@ -39,7 +40,7 @@ const base=process.env.AYO_TEST_URL||'http://127.0.0.1:5001';
   await page.clock.fastForward(31000);assert.equal(await page.evaluate(()=>window.notices.length),1); // same trip not repeated
   // Legacy Winter Watch form was retired by the approved redesign; API moderation remains covered in backend tests.
   await page.evaluate(()=>navigator.serviceWorker.ready);await page.reload({waitUntil:'domcontentloaded'});await page.locator('#planFrom').waitFor({state:'attached'});
-  const cached=await page.evaluate(async()=>{const c=await caches.open('ayo-shell-v28');return(await c.keys()).map(r=>new URL(r.url).pathname);});
+  const cached=await page.evaluate(async name=>{const c=await caches.open(name);return(await c.keys()).map(r=>new URL(r.url).pathname);},shellCache);
   assert.ok(cached.includes('/static/js/journey.js'));assert.ok(!cached.some(p=>p.startsWith('/api/')));
   await context.setOffline(true);await page.waitForFunction(()=>!navigator.onLine);await page.reload({waitUntil:'domcontentloaded'});await page.locator('#planFrom').waitFor({state:'attached'});
   assert.match(await page.locator('#riderTools').innerText(),/Offline:/);

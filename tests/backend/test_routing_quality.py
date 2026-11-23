@@ -35,6 +35,25 @@ class RoutingQualityTests(test_release.ScheduleTests):
             c.executemany('INSERT INTO stop_times VALUES(?,?,?,?,?)',[('V','1','1','24:11:00','24:11:00'),('V','3','2','24:36:00','24:36:00')])
         result=self.engine.itinerary('1','3',NOW,allow_walks=False)
         self.assertEqual([l['trip_id'] for l in result['legs']],['V'])
+    def test_faster_short_walk_ranks_before_available_direct_bus(self):
+        # Isolated timetable: a nearby stop with a slower published direct bus.
+        with self.engine.connect(readonly=False) as c:
+            c.execute("UPDATE stops SET stop_lat='43.0001',stop_lon='-88.001' WHERE stop_id='3'")
+            c.execute("INSERT INTO trips VALUES('V','R','S','C','0','X')")
+            c.executemany('INSERT INTO stop_times VALUES(?,?,?,?,?)', [
+                ('V','1','1','24:11:00','24:11:00'),
+                ('V','3','2','24:36:00','24:36:00')])
+        bus = self.engine.itinerary('1','3',NOW,allow_walks=False)
+        self.assertEqual([leg['trip_id'] for leg in bus['legs']], ['V'])
+        walking = self.engine.itinerary('1','3',NOW,allow_walks=True)
+        self.assertEqual([leg['type'] for leg in walking['legs']], ['walk'])
+        self.assertLess(walking['arrival'], bus['arrival'])
+        self.assertTrue(walking['walking_estimated'])
+        self.assertEqual(walking['data_type'], 'estimated_walk')
+        self.assertTrue(walking['legs'][0]['estimated'])
+        self.assertEqual(walking['legs'][0]['geometry'], [])
+        self.assertIn('not a verified pedestrian', walking['limitations'])
+
     def test_later_incoming_trip_survives_trip_specific_transfer_restriction(self):
         with self.engine.connect(readonly=False) as c:
             c.execute('ALTER TABLE transfers ADD COLUMN from_trip_id TEXT')

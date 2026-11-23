@@ -23,9 +23,11 @@ const base=process.env.AYO_TEST_URL||'http://127.0.0.1:5050';
    assert.ok(exact.legs.length===0||exact.legs.length===1,'no reversing transfer for this short trip');
    await page.waitForFunction(()=>document.querySelector('#journeyResults').textContent.includes('These stops are about'));
    const nearby=page.getByRole('button',{name:/Choose nearby destination:.*Stop 9651/});await nearby.waitFor();await nearby.click();
-   const direct=await plan();assert.equal(direct.status,'ok');assert.equal(direct.destination.stop_id,'9651');assert.equal(direct.legs.length,1);assert.equal(direct.legs[0].type,'bus');
+   // This assertion verifies direct bus service, so explicitly disable walking.
+   await page.locator('#allowEstimatedWalking').uncheck();
+   const direct=await plan();assert.equal(direct.estimated_walks_allowed,false);assert.equal(direct.status,'ok');assert.equal(direct.destination.stop_id,'9651');assert.equal(direct.legs.length,1);assert.equal(direct.legs[0].type,'bus');
    await choose('planTo','Wisconsin Jackson','66');await page.locator('#allowEstimatedWalking').check();
-   const walk=await plan();assert.equal(walk.status,'ok');assert.equal(walk.walking_estimated,true);const walkingLegs=walk.legs.filter(l=>l.type==='walk');assert.ok(walkingLegs.length);for(const leg of walkingLegs){assert.deepEqual(leg.geometry,[]);assert.equal(leg.estimated,true);}for(const leg of walk.legs.filter(l=>l.type==='bus')){assert.ok(leg.trip_id);assert.ok(leg.to_sequence>leg.from_sequence);}
+   const walk=await plan();assert.equal(walk.estimated_walks_allowed,true);assert.equal(walk.status,'ok');assert.equal(walk.walking_estimated,true);const walkingLegs=walk.legs.filter(l=>l.type==='walk');assert.ok(walkingLegs.length);for(const leg of walkingLegs){assert.deepEqual(leg.geometry,[]);assert.equal(leg.estimated,true);}for(const leg of walk.legs.filter(l=>l.type==='bus')){assert.ok(leg.trip_id);assert.ok(leg.to_sequence>leg.from_sequence);}
    // Available schedules can rank a real bus-plus-walk ahead of walking only.
    // Deterministic journey.browser.cjs still requires the walking-only fixture.
    if(walk.legs.every(l=>l.type==='walk')){await page.waitForFunction(()=>document.querySelector('#journeyResults').textContent.includes('Estimated walk only'));assert.ok(!(await page.locator('#journeyResults').innerText()).includes('Scheduled departure'));}

@@ -41,12 +41,7 @@ AYO! combines an interest in data engineering, web development, and building pra
 
 
 
-# AYO! Where’s My Bus?
-
-AYO helps Milwaukee riders find official stops, track reported MCTS bus positions,
-plan scheduled journeys and review service alerts. It includes saved stops and
-routes, English and Spanish controls, weather, a transit question helper and an
-installable offline shell.
+## Data accuracy
 
 Vehicle GPS positions are not arrival predictions. The interface labels scheduled
 times, qualified realtime predictions, estimated walking and unavailable data
@@ -122,6 +117,9 @@ account, authentication, spending and acceptance requirements are approved.
 
 ## Tests
 
+For the current release assessment and remaining acceptance gates, see
+[release readiness](docs/RELEASE_READINESS.md).
+
 ```sh
 .venv/bin/python -B -m unittest discover -s tests -t . -v
 npm test
@@ -182,6 +180,6 @@ Read [deployment](docs/DEPLOYMENT.md), [architecture](docs/ARCHITECTURE.md) and
 trusted HTTPS, real operator configuration, backups, monitoring, moderation and
 physical-device acceptance. The development server is not the public deployment.
 
-The [restructuring report](docs/RESTRUCTURING_REPORT.md) records verification and
+The [restructuring report](docs/archive/PHASE_B_ORGANIZATION.md) records verification and
 moves. [Deletion candidates](docs/DELETION_CANDIDATES.md) are review-only: no files
 were removed. Do not execute the retained historical automatic-push script.
