@@ -1,0 +1,6 @@
+@font-face{font-family:'DM Sans';font-style:normal;font-display:swap;font-weight:100 1000;src:url('/static/vendor/fonts/dm-sans-latin-wght-normal.woff2') format('woff2');}
+@font-face{font-family:'DM Sans';font-style:italic;font-display:swap;font-weight:100 1000;src:url('/static/vendor/fonts/dm-sans-latin-wght-italic.woff2') format('woff2');}
+@font-face{font-family:'Playfair Display';font-style:normal;font-display:swap;font-weight:400 900;src:url('/static/vendor/fonts/playfair-display-latin-wght-normal.woff2') format('woff2');}
+@font-face{font-family:'Playfair Display';font-style:italic;font-display:swap;font-weight:400 900;src:url('/static/vendor/fonts/playfair-display-latin-wght-italic.woff2') format('woff2');}
+@font-face{font-family:'DM Mono';font-style:normal;font-display:swap;font-weight:400;src:url('/static/vendor/fonts/dm-mono-latin-400-normal.woff2') format('woff2');}
+@font-face{font-family:'DM Mono';font-style:normal;font-display:swap;font-weight:500;src:url('/static/vendor/fonts/dm-mono-latin-500-normal.woff2') format('woff2');}

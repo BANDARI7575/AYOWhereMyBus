@@ -1,0 +1,11 @@
+{
+  "checked_at": 1794237827,
+  "vehicles": 188,
+  "feed_age_seconds": 23,
+  "trip_status": "fresh",
+  "trip_entities": 367,
+  "sampled_stop_events": 30,
+  "matched_predictions": 34,
+  "alerts_status": "fresh",
+  "active_alerts": 8
+}

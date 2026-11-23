@@ -1,0 +1,181 @@
+
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1600" height="900"
+     viewBox="0 0 1600 900">
+
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1">
+      <stop offset="0" stop-color="#070b16"/>
+      <stop offset=".65" stop-color="#172638"/>
+      <stop offset="1" stop-color="#364251"/>
+    </linearGradient>
+
+    <linearGradient id="road" x2="0" y2="1">
+      <stop offset="0" stop-color="#27323c"/>
+      <stop offset="1" stop-color="#080b11"/>
+    </linearGradient>
+
+    <linearGradient id="bus" x2="0" y2="1">
+      <stop offset="0" stop-color="#e7eaec"/>
+      <stop offset="1" stop-color="#8d9ca8"/>
+    </linearGradient>
+
+    <radialGradient id="moonGlow">
+      <stop offset="0" stop-color="#d5c4a5"
+            stop-opacity=".30"/>
+      <stop offset="1" stop-color="#d5c4a5"
+            stop-opacity="0"/>
+    </radialGradient>
+
+    <pattern id="windows" width="35" height="43"
+             patternUnits="userSpaceOnUse">
+      <rect x="10" y="11" width="8" height="14"
+            fill="#b89b72" opacity=".4"/>
+      <rect x="24" y="11" width="5" height="14"
+            fill="#83acc1" opacity=".35"/>
+    </pattern>
+  </defs>
+
+  <!-- Night sky -->
+  <rect width="1600" height="900" fill="url(#sky)"/>
+
+  <!-- Moon and atmospheric light -->
+  <circle cx="1230" cy="190" r="270"
+          fill="url(#moonGlow)"/>
+  <circle cx="1230" cy="190" r="49"
+          fill="#d9d9cb" opacity=".88"/>
+
+  <!-- Stars -->
+  <g fill="#c6d6de" opacity=".55">
+    <circle cx="200" cy="100" r="1.5"/>
+    <circle cx="440" cy="175" r="1"/>
+    <circle cx="730" cy="80" r="1.5"/>
+    <circle cx="1040" cy="105" r="1"/>
+    <circle cx="1450" cy="90" r="1.5"/>
+    <circle cx="1520" cy="300" r="1"/>
+  </g>
+
+  <!-- Distant skyline -->
+  <g fill="#17222d">
+    <path d="M0 540H70V410H125V480H190V355H260V470
+             H310V390H390V485H450V345H510V480H570
+             V400H640V480H710V330H770V475H830V370
+             H900V490H970V345H1030V465H1080V390
+             H1140V475H1210V350H1270V470H1350V390
+             H1430V470H1510V410H1600V650H0Z"/>
+  </g>
+
+  <!-- Milwaukee-inspired landmark silhouettes -->
+  <g fill="#202c37">
+    <!-- Tower -->
+    <path d="M900 550V270H925V230H940V180H954V230
+             H970V270H995V550Z"/>
+    <rect x="938" y="125" width="13" height="65"/>
+
+    <!-- Modern stepped tower -->
+    <path d="M1040 550V315H1075V275H1110V235
+             H1150V275H1185V315H1215V550Z"/>
+
+    <!-- Lakeside architectural sails -->
+    <path d="M1250 550L1340 400L1440 550Z"/>
+    <path d="M1320 550L1410 435L1520 550Z"
+          fill="#374956"/>
+  </g>
+
+  <!-- Foreground buildings -->
+  <g>
+    <rect x="700" y="430" width="150" height="150"
+          fill="#111b25"/>
+    <rect x="700" y="430" width="150" height="150"
+          fill="url(#windows)"/>
+
+    <rect x="1020" y="390" width="130" height="190"
+          fill="#121d27"/>
+    <rect x="1020" y="390" width="130" height="190"
+          fill="url(#windows)"/>
+
+    <rect x="1160" y="460" width="190" height="120"
+          fill="#18232e"/>
+    <rect x="1160" y="460" width="190" height="120"
+          fill="url(#windows)"/>
+  </g>
+
+  <!-- Lakefront haze -->
+  <path d="M0 540Q400 520 800 550T1600 530V720H0Z"
+        fill="#6e8995" opacity=".12"/>
+
+  <!-- Street -->
+  <path d="M0 640L1600 610V900H0Z" fill="url(#road)"/>
+
+  <path d="M150 775L500 758M700 745L1040 727
+           M1180 718L1530 700"
+        stroke="#c0ae8a" stroke-width="5"
+        opacity=".45" stroke-linecap="round"/>
+
+  <!-- Cinematic MCTS-inspired transit bus -->
+  <g transform="translate(880 560)">
+    <!-- Ground shadow -->
+    <ellipse cx="340" cy="222" rx="335" ry="29"
+             fill="#000" opacity=".48"/>
+
+    <!-- Bus body -->
+    <path d="M25 35Q25 8 63 8H575
+             Q623 8 638 58L666 158
+             Q672 191 641 193H40
+             Q10 193 10 163V70
+             Q10 45 25 35Z"
+          fill="url(#bus)" stroke="#2b3945"
+          stroke-width="5"/>
+
+    <!-- Windshield and side windows -->
+    <path d="M58 32H414V116H36V61
+             Q36 32 58 32Z"
+          fill="#172b3c"/>
+
+    <path d="M439 32H566Q590 32 601 68
+             L615 116H439Z"
+          fill="#193246"/>
+
+    <!-- Window reflections -->
+    <path d="M90 35L220 115M260 35L390 115
+             M475 35L570 112"
+          stroke="#91b6cb" stroke-width="6"
+          opacity=".12"/>
+
+    <!-- Door and paneling -->
+    <rect x="420" y="30" width="7" height="154"
+          fill="#778c9e"/>
+    <rect x="440" y="118" width="174" height="64"
+          fill="#d4dce1" opacity=".6"/>
+
+    <!-- Bronze accent -->
+    <path d="M15 140H647" stroke="#b89b72"
+          stroke-width="10"/>
+
+    <!-- Destination display -->
+    <rect x="59" y="46" width="215" height="42"
+          rx="5" fill="#08131b"/>
+    <text x="75" y="74"
+          font-size="23"
+          font-family="monospace"
+          font-weight="bold"
+          fill="#e9c18b">MILWAUKEE</text>
+
+    <!-- Lights -->
+    <rect x="634" y="139" width="25" height="17"
+          rx="5" fill="#f4dfb2"/>
+    <rect x="13" y="142" width="16" height="19"
+          rx="4" fill="#b85e50"/>
+
+    <!-- Tires -->
+    <circle cx="149" cy="191" r="47" fill="#0a1016"/>
+    <circle cx="149" cy="191" r="24" fill="#62717d"/>
+    <circle cx="548" cy="191" r="47" fill="#0a1016"/>
+    <circle cx="548" cy="191" r="24" fill="#62717d"/>
+  </g>
+
+  <!-- Atmospheric foreground shading -->
+  <rect width="1600" height="900"
+        fill="#05070c" opacity=".13"/>
+
+</svg>

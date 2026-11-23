@@ -1,0 +1,18 @@
+{
+  "tls_verified_with_isolated_ca": true,
+  "ready": {
+    "background_worker_healthy": true,
+    "moderation_configured": true,
+    "schedule_active_today": true,
+    "source_revision": "8215c2dbbe17",
+    "status": "ready"
+  },
+  "moderation_cli_queue_review_summary_audit": true,
+  "pending_invisible": true,
+  "approved_visible": true,
+  "rejected_invisible": true,
+  "secure_cookie": true,
+  "cross_origin_blocked": true,
+  "unauthenticated_admin_blocked": true,
+  "spoofed_forwarded_ips_overwritten_by_proxy": true
+}

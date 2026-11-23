@@ -1,0 +1,124 @@
+{
+  "data_type": "scheduled",
+  "legs": [
+    {
+      "type": "bus",
+      "route": "R",
+      "trip_id": "T",
+      "shape_id": "X",
+      "headsign": "B",
+      "from": "1",
+      "to": "2",
+      "departure": 1794291000,
+      "arrival": 1794291600,
+      "from_stop": {
+        "stop_id": "1",
+        "name": "Wisconsin & 6th",
+        "latitude": 43.0,
+        "longitude": -88.0
+      },
+      "to_stop": {
+        "stop_id": "2",
+        "name": "Wisconsin & 7th",
+        "latitude": 43.01,
+        "longitude": -88.0
+      },
+      "route_number": "30",
+      "route_name": "Wisconsin Avenue",
+      "geometry": [
+        [
+          43.0,
+          -88.0
+        ],
+        [
+          43.02,
+          -88.0
+        ]
+      ],
+      "geometry_scope": "full_scheduled_trip",
+      "duration_seconds": 600
+    },
+    {
+      "type": "walk",
+      "from": "2",
+      "to": "4",
+      "meters": 11,
+      "departure": 1794291600,
+      "arrival": 1794291720,
+      "from_stop": {
+        "stop_id": "2",
+        "name": "Wisconsin & 7th",
+        "latitude": 43.01,
+        "longitude": -88.0
+      },
+      "to_stop": {
+        "stop_id": "4",
+        "name": "Transfer across street",
+        "latitude": 43.0101,
+        "longitude": -88.0
+      },
+      "estimated": true,
+      "geometry": [],
+      "duration_seconds": 120
+    },
+    {
+      "type": "bus",
+      "route": "R",
+      "trip_id": "U",
+      "shape_id": "X",
+      "headsign": "C",
+      "from": "4",
+      "to": "3",
+      "departure": 1794291900,
+      "arrival": 1794292500,
+      "from_stop": {
+        "stop_id": "4",
+        "name": "Transfer across street",
+        "latitude": 43.0101,
+        "longitude": -88.0
+      },
+      "to_stop": {
+        "stop_id": "3",
+        "name": "Airport",
+        "latitude": 43.02,
+        "longitude": -88.0
+      },
+      "route_number": "30",
+      "route_name": "Wisconsin Avenue",
+      "geometry": [
+        [
+          43.0,
+          -88.0
+        ],
+        [
+          43.02,
+          -88.0
+        ]
+      ],
+      "geometry_scope": "full_scheduled_trip",
+      "duration_seconds": 600
+    }
+  ],
+  "arrival": 1794292500,
+  "limitations": "Up to one transfer; walking is straight-line, not a verified pedestrian or accessible path. Not exhaustive. Allow extra transfer time.",
+  "status": "ok",
+  "timezone": "America/Chicago",
+  "requested_at": 1794290400,
+  "departure": 1794291000,
+  "duration_seconds": 1500,
+  "initial_wait_seconds": 600,
+  "transfers": 1,
+  "walking_estimated": true,
+  "origin": {
+    "stop_id": "1",
+    "name": "Wisconsin & 6th",
+    "latitude": 43.0,
+    "longitude": -88.0
+  },
+  "destination": {
+    "stop_id": "3",
+    "name": "Airport",
+    "latitude": 43.02,
+    "longitude": -88.0
+  }
+}

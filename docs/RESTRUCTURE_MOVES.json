@@ -1,0 +1,952 @@
+{
+  "base_commit": "6032d893d900b23cc0226930b8b91fe87b994fa7",
+  "branch": "chore/restructure",
+  "count": 118,
+  "deletions": [],
+  "moves": [
+    {
+      "source": "backend/alert_service.py",
+      "destination": "backend/services/alert_service.py",
+      "group": "Backend services",
+      "sha256": "b2cbda71b6f5a43f7b419cc239b8f8ae4212b6c0293e924d8dd227ca96596870",
+      "status": "moved using git mv",
+      "sha256_after": "b2cbda71b6f5a43f7b419cc239b8f8ae4212b6c0293e924d8dd227ca96596870"
+    },
+    {
+      "source": "backend/feature_service.py",
+      "destination": "backend/services/feature_service.py",
+      "group": "Backend services",
+      "sha256": "f639e10bd3b9ca62958760d3dd3b93e28ded9adce8cbb25543abee89885d03da",
+      "status": "moved using git mv",
+      "sha256_after": "3ac8fa3ad84f4d20beb198edb8dac3a53fccb2ab7c84b3a8e5531531cdf59f5e"
+    },
+    {
+      "source": "backend/feed_http.py",
+      "destination": "backend/services/feed_http.py",
+      "group": "Backend services",
+      "sha256": "1b6c42ad1938635098d76efc9a42cba6f2c3788150a30b66ac3149266cbc63b8",
+      "status": "moved using git mv",
+      "sha256_after": "1b6c42ad1938635098d76efc9a42cba6f2c3788150a30b66ac3149266cbc63b8"
+    },
+    {
+      "source": "backend/moderation_service.py",
+      "destination": "backend/services/moderation_service.py",
+      "group": "Backend services",
+      "sha256": "eb9dbba3e990c043950745d09ac479af6a55573fa48a7bc702abe8872fdba1d6",
+      "status": "moved using git mv",
+      "sha256_after": "eb9dbba3e990c043950745d09ac479af6a55573fa48a7bc702abe8872fdba1d6"
+    },
+    {
+      "source": "backend/push_service.py",
+      "destination": "backend/services/push_service.py",
+      "group": "Backend services",
+      "sha256": "b17118b97f69939ded1b5b64282a5b5d60c38b1871dcc7828c73c7da5e98619f",
+      "status": "moved using git mv",
+      "sha256_after": "996aad94091f87b7c2b2eb02b4c1c78510abf8e4db17d1b04e913cbd082a39ad"
+    },
+    {
+      "source": "backend/realtime_service.py",
+      "destination": "backend/services/realtime_service.py",
+      "group": "Backend services",
+      "sha256": "18470d162b9cba1f6e4f5626abb7bf3cbd0cf3c5642ee5eb037a60f7dc4f3e2d",
+      "status": "moved using git mv",
+      "sha256_after": "9deef08d2b204732dcde723073627530ccb43283c4b247203ea77daae7ef7adb"
+    },
+    {
+      "source": "backend/routes_service.py",
+      "destination": "backend/services/routes_service.py",
+      "group": "Backend services",
+      "sha256": "e4abe4157479aa5a744a0264feb722257487b781d5163897d3eb1817301b91ea",
+      "status": "moved using git mv",
+      "sha256_after": "dcca2b44607cf159deb01a2b6b026c069eb781779c42da5eff1906de0ba62a33"
+    },
+    {
+      "source": "backend/stops_service.py",
+      "destination": "backend/services/stops_service.py",
+      "group": "Backend services",
+      "sha256": "4c5ea9a7891b96bde8d76647727c59004b04acd8021a39f18fa7eccde4fde420",
+      "status": "moved using git mv",
+      "sha256_after": "983130ae4aedd5a5613c6fddb4942291fb439104773c48dcf2a947e41a501f98"
+    },
+    {
+      "source": "backend/transit_engine.py",
+      "destination": "backend/services/transit_engine.py",
+      "group": "Backend services",
+      "sha256": "2033ba0d43a94c226a19febd90d24f567584366c9a4793e16de59955d0cca087",
+      "status": "moved using git mv",
+      "sha256_after": "a74e164d7233280ff553556847e544b05b47684ebf1362f5e070b5022329f1a8"
+    },
+    {
+      "source": "buses.json",
+      "destination": "data/buses.json",
+      "group": "Transit data",
+      "sha256": "862383f3034a8617e8e8fbb88545f395063439191f66b2640bb6e7ce73a7ed04",
+      "status": "moved using git mv",
+      "sha256_after": "862383f3034a8617e8e8fbb88545f395063439191f66b2640bb6e7ce73a7ed04"
+    },
+    {
+      "source": "google_transit/agency.txt",
+      "destination": "data/google_transit/agency.txt",
+      "group": "Transit data",
+      "sha256": "40f14341ecbac488ddd11fce09e1d39dd883996c83c188f918cc0a7208f0f8c7",
+      "status": "moved using git mv",
+      "sha256_after": "40f14341ecbac488ddd11fce09e1d39dd883996c83c188f918cc0a7208f0f8c7"
+    },
+    {
+      "source": "google_transit/calendar_dates.txt",
+      "destination": "data/google_transit/calendar_dates.txt",
+      "group": "Transit data",
+      "sha256": "335eced607d19561ee2e30427c0e88dc62fc99e5e16275c256278db66c129a31",
+      "status": "moved using git mv",
+      "sha256_after": "335eced607d19561ee2e30427c0e88dc62fc99e5e16275c256278db66c129a31"
+    },
+    {
+      "source": "google_transit/fare_attributes.txt",
+      "destination": "data/google_transit/fare_attributes.txt",
+      "group": "Transit data",
+      "sha256": "0d18dc4683badcd7a23333699e05cd46892fc24ca26d55683dc38840a321fc65",
+      "status": "moved using git mv",
+      "sha256_after": "0d18dc4683badcd7a23333699e05cd46892fc24ca26d55683dc38840a321fc65"
+    },
+    {
+      "source": "google_transit/fare_rules.txt",
+      "destination": "data/google_transit/fare_rules.txt",
+      "group": "Transit data",
+      "sha256": "eeea1fd966cc06166a84aa054399e3ce485db4e038db9dde72dc29b4c813c43c",
+      "status": "moved using git mv",
+      "sha256_after": "eeea1fd966cc06166a84aa054399e3ce485db4e038db9dde72dc29b4c813c43c"
+    },
+    {
+      "source": "google_transit/routes.txt",
+      "destination": "data/google_transit/routes.txt",
+      "group": "Transit data",
+      "sha256": "8e9b0dc45d821fa20a19b76bf0a86cf145d6c2a9a996c8096e2403a602e042e2",
+      "status": "moved using git mv",
+      "sha256_after": "8e9b0dc45d821fa20a19b76bf0a86cf145d6c2a9a996c8096e2403a602e042e2"
+    },
+    {
+      "source": "google_transit/shapes.txt",
+      "destination": "data/google_transit/shapes.txt",
+      "group": "Transit data",
+      "sha256": "c7366ae637a0867e2cae00c22bc8343e712a1e9bacb4a4061ddccc759b08a147",
+      "status": "moved using git mv",
+      "sha256_after": "c7366ae637a0867e2cae00c22bc8343e712a1e9bacb4a4061ddccc759b08a147"
+    },
+    {
+      "source": "google_transit/stop_times.txt",
+      "destination": "data/google_transit/stop_times.txt",
+      "group": "Transit data",
+      "sha256": "5c1383e84f1f9d34fc5f6326abe62256affb3a4713d164eb73f340e639a8ddad",
+      "status": "moved using git mv",
+      "sha256_after": "5c1383e84f1f9d34fc5f6326abe62256affb3a4713d164eb73f340e639a8ddad"
+    },
+    {
+      "source": "google_transit/stops.txt",
+      "destination": "data/google_transit/stops.txt",
+      "group": "Transit data",
+      "sha256": "03a452011f63281e146bd2207f52451d9cc86482868a80e4475cd9a4bdc52f59",
+      "status": "moved using git mv",
+      "sha256_after": "03a452011f63281e146bd2207f52451d9cc86482868a80e4475cd9a4bdc52f59"
+    },
+    {
+      "source": "google_transit/trips.txt",
+      "destination": "data/google_transit/trips.txt",
+      "group": "Transit data",
+      "sha256": "7362eb14009b43cffe2c6cba35cb6325b0f37d610722e565859a5f746c4e350a",
+      "status": "moved using git mv",
+      "sha256_after": "7362eb14009b43cffe2c6cba35cb6325b0f37d610722e565859a5f746c4e350a"
+    },
+    {
+      "source": "index.html",
+      "destination": "templates/index.html",
+      "group": "HTML templates",
+      "sha256": "b6dc9cbed616f9c3118e3416d4fea7486c2f4ef39ee0f191b146aaee304475ec",
+      "status": "moved using git mv",
+      "sha256_after": "b6f80024052ab2806a297362d693c4fcf0d41f502422bdb942b676e8ad662de1"
+    },
+    {
+      "source": "static/privacy.html",
+      "destination": "templates/privacy.html",
+      "group": "HTML templates",
+      "sha256": "a046fda2d4e40628bcc40044752c9854bc21cdcac12979b2df9576a6668d61a6",
+      "status": "moved using git mv",
+      "sha256_after": "c749a096f6837d6df7a7973b979bb440bb27a0b727f552b4cbaa4e23c89e0850"
+    },
+    {
+      "source": "static/alert-store.js",
+      "destination": "static/js/alert-store.js",
+      "group": "Application JavaScript",
+      "sha256": "d04f30e7b135f1e9c9904bfc7ea63ffaa5e3cceca62a99e7a3909f3c5fd9f684",
+      "status": "moved using git mv",
+      "sha256_after": "d04f30e7b135f1e9c9904bfc7ea63ffaa5e3cceca62a99e7a3909f3c5fd9f684"
+    },
+    {
+      "source": "static/app.js",
+      "destination": "static/js/app.js",
+      "group": "Application JavaScript",
+      "sha256": "ea07740cb32e3a42957d14e3f3bbb811d910db094a20d4102983a4a6c0edfe1c",
+      "status": "moved using git mv",
+      "sha256_after": "ea07740cb32e3a42957d14e3f3bbb811d910db094a20d4102983a4a6c0edfe1c"
+    },
+    {
+      "source": "static/home-experience.js",
+      "destination": "static/js/home-experience.js",
+      "group": "Application JavaScript",
+      "sha256": "ea22d559247c10dc09277181f98ed23fdb34b8a040d7993c93b27fb8f46f0598",
+      "status": "moved using git mv",
+      "sha256_after": "ea22d559247c10dc09277181f98ed23fdb34b8a040d7993c93b27fb8f46f0598"
+    },
+    {
+      "source": "static/i18n.js",
+      "destination": "static/js/i18n.js",
+      "group": "Application JavaScript",
+      "sha256": "068c5a76221b7984dca26f3ba74b90ed3beef69e52d60993291e7f0051e89325",
+      "status": "moved using git mv",
+      "sha256_after": "068c5a76221b7984dca26f3ba74b90ed3beef69e52d60993291e7f0051e89325"
+    },
+    {
+      "source": "static/journey.js",
+      "destination": "static/js/journey.js",
+      "group": "Application JavaScript",
+      "sha256": "9005aca963ca5c01377fe76578b547e93e66b502c9e2570413bc6e290d9e1911",
+      "status": "moved using git mv",
+      "sha256_after": "9005aca963ca5c01377fe76578b547e93e66b502c9e2570413bc6e290d9e1911"
+    },
+    {
+      "source": "static/location-access.js",
+      "destination": "static/js/location-access.js",
+      "group": "Application JavaScript",
+      "sha256": "98a07c43bee86bc6acfd9028ed7df2cc9421a708d2217f7df8a4c70c6e4c642a",
+      "status": "moved using git mv",
+      "sha256_after": "98a07c43bee86bc6acfd9028ed7df2cc9421a708d2217f7df8a4c70c6e4c642a"
+    },
+    {
+      "source": "static/location-search.js",
+      "destination": "static/js/location-search.js",
+      "group": "Application JavaScript",
+      "sha256": "f3b9e1294502763374022a3748b0c57c566b6b28e930fdde1e2331e45ccac2f5",
+      "status": "moved using git mv",
+      "sha256_after": "f3b9e1294502763374022a3748b0c57c566b6b28e930fdde1e2331e45ccac2f5"
+    },
+    {
+      "source": "static/navigation.js",
+      "destination": "static/js/navigation.js",
+      "group": "Application JavaScript",
+      "sha256": "fdcc8e2569b884921f1fc33b0fd80cf701e51948842b0508b97e0b26260c914c",
+      "status": "moved using git mv",
+      "sha256_after": "fdcc8e2569b884921f1fc33b0fd80cf701e51948842b0508b97e0b26260c914c"
+    },
+    {
+      "source": "static/pwa.js",
+      "destination": "static/js/pwa.js",
+      "group": "Application JavaScript",
+      "sha256": "75c975b102255596fedd6de1ef97ab28af137181c2ab7c022d297c711581e8b5",
+      "status": "moved using git mv",
+      "sha256_after": "75c975b102255596fedd6de1ef97ab28af137181c2ab7c022d297c711581e8b5"
+    },
+    {
+      "source": "static/rider-tools.js",
+      "destination": "static/js/rider-tools.js",
+      "group": "Application JavaScript",
+      "sha256": "009733d1a2d22b3db9c4dc8028a9085f61b5cd6ed47bfc0d4d9ff0f5f37f7461",
+      "status": "moved using git mv",
+      "sha256_after": "009733d1a2d22b3db9c4dc8028a9085f61b5cd6ed47bfc0d4d9ff0f5f37f7461"
+    },
+    {
+      "source": "static/stops-ui.js",
+      "destination": "static/js/stops-ui.js",
+      "group": "Application JavaScript",
+      "sha256": "f184700f4ff2c1351e003bf19fd998f5bf7890d676f72f85765dd5594d1ca0f2",
+      "status": "moved using git mv",
+      "sha256_after": "f184700f4ff2c1351e003bf19fd998f5bf7890d676f72f85765dd5594d1ca0f2"
+    },
+    {
+      "source": "static/transit-ui.js",
+      "destination": "static/js/transit-ui.js",
+      "group": "Application JavaScript",
+      "sha256": "c059f7ccd0ea0abbaafeb6db09bd4cdc601fc5c105d59e3314c7a726b4bb1f10",
+      "status": "moved using git mv",
+      "sha256_after": "c059f7ccd0ea0abbaafeb6db09bd4cdc601fc5c105d59e3314c7a726b4bb1f10"
+    },
+    {
+      "source": "static/units.js",
+      "destination": "static/js/units.js",
+      "group": "Application JavaScript",
+      "sha256": "2135bfe0c5c7c4849ac5ffa66700626a042765c6e59c7a2b528fe21aa776491f",
+      "status": "moved using git mv",
+      "sha256_after": "2135bfe0c5c7c4849ac5ffa66700626a042765c6e59c7a2b528fe21aa776491f"
+    },
+    {
+      "source": "static/weather.js",
+      "destination": "static/js/weather.js",
+      "group": "Application JavaScript",
+      "sha256": "527427ae7c11152c454c0990fecea315f6e5f9bee49fd7562f8272faee51d928",
+      "status": "moved using git mv",
+      "sha256_after": "a0d70207a8518d59c9bfe889f148ef8d167a7e574461df45aa2cda942d1e8f9f"
+    },
+    {
+      "source": "static/workspaces.js",
+      "destination": "static/js/workspaces.js",
+      "group": "Application JavaScript",
+      "sha256": "841bc581577fec90608f7e75e416199d9672b9d5c9c4e27eaaeefef064f3c0fa",
+      "status": "moved using git mv",
+      "sha256_after": "841bc581577fec90608f7e75e416199d9672b9d5c9c4e27eaaeefef064f3c0fa"
+    },
+    {
+      "source": "static/style.css",
+      "destination": "static/css/style.css",
+      "group": "Styles",
+      "sha256": "da687dc9f504b56a913e6fd504e76b001ad91580ba7f368bbbad1e4c6934c663",
+      "status": "moved using git mv",
+      "sha256_after": "da687dc9f504b56a913e6fd504e76b001ad91580ba7f368bbbad1e4c6934c663"
+    },
+    {
+      "source": "static/icon-192.png",
+      "destination": "static/img/icon-192.png",
+      "group": "Images",
+      "sha256": "24fd590c8d786880e9266977c6398fd0ad8e2ab33b649147b34f189bbd331e17",
+      "status": "moved using git mv",
+      "sha256_after": "24fd590c8d786880e9266977c6398fd0ad8e2ab33b649147b34f189bbd331e17"
+    },
+    {
+      "source": "static/icon-512.png",
+      "destination": "static/img/icon-512.png",
+      "group": "Images",
+      "sha256": "371e4b1f21f8823c7e2b6c1bfac7bd8da9a43f8136b6206732c4cab47dc45d87",
+      "status": "moved using git mv",
+      "sha256_after": "371e4b1f21f8823c7e2b6c1bfac7bd8da9a43f8136b6206732c4cab47dc45d87"
+    },
+    {
+      "source": "static/icons.svg",
+      "destination": "static/img/icons.svg",
+      "group": "Images",
+      "sha256": "cda2241fba51fdac7437bef52d82231bb2ff67109a1beac9958040735f122d1a",
+      "status": "moved using git mv",
+      "sha256_after": "cda2241fba51fdac7437bef52d82231bb2ff67109a1beac9958040735f122d1a"
+    },
+    {
+      "source": "static/milwaukee-cinematic.png",
+      "destination": "static/img/milwaukee-cinematic.png",
+      "group": "Images",
+      "sha256": "f5e99c93662cc706d550692a2c04ffda87eb6cd16f9c2a05d9941798684480ab",
+      "status": "moved using git mv",
+      "sha256_after": "f5e99c93662cc706d550692a2c04ffda87eb6cd16f9c2a05d9941798684480ab"
+    },
+    {
+      "source": "static/milwaukee-cinematic.svg",
+      "destination": "static/img/milwaukee-cinematic.svg",
+      "group": "Images",
+      "sha256": "a84dcdae38e82e00853219fe979fa501de0ab93186cd138458dd35fd1b3b368f",
+      "status": "moved using git mv",
+      "sha256_after": "a84dcdae38e82e00853219fe979fa501de0ab93186cd138458dd35fd1b3b368f"
+    },
+    {
+      "source": "scripts/audit_gtfs.py",
+      "destination": "scripts/gtfs/audit_gtfs.py",
+      "group": "Scripts",
+      "sha256": "a34a9b2ecff35d336c3cdf31f200f2dcd0a273324a5d0b0fbce4b7565e0f316c",
+      "status": "moved using git mv",
+      "sha256_after": "33238f9079db7bf29d89b3f24cfeb0cea4384cc4ac54c75def1db9b33ba4ddd0"
+    },
+    {
+      "source": "scripts/check_worker.py",
+      "destination": "scripts/ops/check_worker.py",
+      "group": "Scripts",
+      "sha256": "d903622d99c6410be384c93c2aaebaa43c7420281c46a7109503c685fb1c9ac8",
+      "status": "moved using git mv",
+      "sha256_after": "2e4585af4d5d0a36f3a5082e9cae4c3a8c6e038a671c5fac975c177d193fd3a1"
+    },
+    {
+      "source": "scripts/community_storage.py",
+      "destination": "scripts/ops/community_storage.py",
+      "group": "Scripts",
+      "sha256": "40dfd857b28b8100c99a42244107e8ba66567aac88916b92da7a708b9db65a0a",
+      "status": "moved using git mv",
+      "sha256_after": "fc7d9f422fa8a1bba9e5150200b467ac274332d5f1f3e42ca8872801ca92903f"
+    },
+    {
+      "source": "scripts/dev_server.py",
+      "destination": "scripts/dev/dev_server.py",
+      "group": "Scripts",
+      "sha256": "276a29e914c751a6c4fc29f0adf10c31e1c57c20132e91abf5fae4310a59933f",
+      "status": "moved using git mv",
+      "sha256_after": "8eb79cb694e7c59cf4cc4c356398d7a4ba75b8ada0013addca333b5d816cc7d8"
+    },
+    {
+      "source": "scripts/generate_push_keys.py",
+      "destination": "scripts/ops/generate_push_keys.py",
+      "group": "Scripts",
+      "sha256": "409e46fe2a9a155c67549ceeb947790897be55294d57f2183a9aeed864f01d46",
+      "status": "moved using git mv",
+      "sha256_after": "409e46fe2a9a155c67549ceeb947790897be55294d57f2183a9aeed864f01d46"
+    },
+    {
+      "source": "scripts/maintenance.py",
+      "destination": "scripts/ops/maintenance.py",
+      "group": "Scripts",
+      "sha256": "024c17923285a8a3d83d3943c92dd594b606d4794a071cf7ccbb34e421feb8fe",
+      "status": "moved using git mv",
+      "sha256_after": "b5d73bf25ade22ba35054915f1f668d51732f310c5ad01415bc49ff94b96549e"
+    },
+    {
+      "source": "scripts/moderate.py",
+      "destination": "scripts/ops/moderate.py",
+      "group": "Scripts",
+      "sha256": "b45f26ab552ce746e0dd7ab4a023ee261919a8c3d6a590730b305bcc0db997ed",
+      "status": "moved using git mv",
+      "sha256_after": "b45f26ab552ce746e0dd7ab4a023ee261919a8c3d6a590730b305bcc0db997ed"
+    },
+    {
+      "source": "scripts/monitor.py",
+      "destination": "scripts/ops/monitor.py",
+      "group": "Scripts",
+      "sha256": "a25f4cbc104407501b79c6a672ac67d862967442b7677e5de6d11c8e80abe256",
+      "status": "moved using git mv",
+      "sha256_after": "a25f4cbc104407501b79c6a672ac67d862967442b7677e5de6d11c8e80abe256"
+    },
+    {
+      "source": "scripts/package_release.py",
+      "destination": "scripts/ops/package_release.py",
+      "group": "Scripts",
+      "sha256": "3efd5d1f2bbca90001d3bb8aec51598c854d62c771e3776a4a6200e460e66e4f",
+      "status": "moved using git mv",
+      "sha256_after": "9cbbdacd4b4e7d1359a239f2fe71e1609c7a270cd679de17f7696a3d292056fa"
+    },
+    {
+      "source": "scripts/prepare_dev_https.py",
+      "destination": "scripts/dev/prepare_dev_https.py",
+      "group": "Scripts",
+      "sha256": "1c413b6b29aa786c67b7a063cb7d49b858442ed5e317f25d976ca5d5b015929d",
+      "status": "moved using git mv",
+      "sha256_after": "45cd220de5d07db62cda04e198a5e6079d723ab34a1ce53b21e70f5e5a2dc529"
+    },
+    {
+      "source": "scripts/restore_backup.py",
+      "destination": "scripts/ops/restore_backup.py",
+      "group": "Scripts",
+      "sha256": "51d60db7e4c81daed59aaae36054ee2b8e68f9b755686b8ea1f701af26e60cad",
+      "status": "moved using git mv",
+      "sha256_after": "51d60db7e4c81daed59aaae36054ee2b8e68f9b755686b8ea1f701af26e60cad"
+    },
+    {
+      "source": "scripts/run_alerts.py",
+      "destination": "scripts/ops/run_alerts.py",
+      "group": "Scripts",
+      "sha256": "215140e42278e6d9cbd83c35a76a5ade0fd41c988c61aa478e3f12f96c331caa",
+      "status": "moved using git mv",
+      "sha256_after": "812d280d9a8d21a0841b9727bf0feac16fd64513f863ca4bfaa12dfa6d58df0c"
+    },
+    {
+      "source": "scripts/stage_gtfs.py",
+      "destination": "scripts/gtfs/stage_gtfs.py",
+      "group": "Scripts",
+      "sha256": "43295d5453128170f93b4ac86293cc6497ae32d8007d563223978666e0455fda",
+      "status": "moved using git mv",
+      "sha256_after": "38e684e71e0b937ee2e9c886e35bd9d08d0a7512228761b767c8c3b41303d7e1"
+    },
+    {
+      "source": "scripts/start_production.py",
+      "destination": "scripts/ops/start_production.py",
+      "group": "Scripts",
+      "sha256": "c2e1c5a0216c93f3e6ba77df1524c560aab1ecf8a7da7813f5be2111420cef0f",
+      "status": "moved using git mv",
+      "sha256_after": "d87c5617fe192393171972597235e7534ecb88043b1ff8527425d50c545a54ce"
+    },
+    {
+      "source": "scripts/verify_release.py",
+      "destination": "scripts/ops/verify_release.py",
+      "group": "Scripts",
+      "sha256": "0f5b5cf6eeaf423c3ce801f0b1ae98beec323d67ca1d9878b96539160d7eefb7",
+      "status": "moved using git mv",
+      "sha256_after": "0f5b5cf6eeaf423c3ce801f0b1ae98beec323d67ca1d9878b96539160d7eefb7"
+    },
+    {
+      "source": "docs/PRODUCTION_RUNBOOK.md",
+      "destination": "docs/RUNBOOK.md",
+      "group": "Documentation",
+      "sha256": "21d501528e95c29d7e63f08e9bad7cba6aa24452759df1561fb0670d84425db4",
+      "status": "moved using git mv",
+      "sha256_after": "3ae9fa2c0698c5f5908d526979663adbf9bbe9ec79b49a74864d39035e8571b1"
+    },
+    {
+      "source": "docs/AUDIT.md",
+      "destination": "docs/archive/AUDIT.md",
+      "group": "Historical documentation",
+      "sha256": "9cf988c63bb569f645fb25ba81b816a5739de263ef9595150c7e9cfd21760d5f",
+      "status": "moved using git mv",
+      "sha256_after": "9cf988c63bb569f645fb25ba81b816a5739de263ef9595150c7e9cfd21760d5f"
+    },
+    {
+      "source": "docs/BROWSER_TEST_MIGRATION.json",
+      "destination": "docs/archive/BROWSER_TEST_MIGRATION.json",
+      "group": "Historical documentation",
+      "sha256": "a0216c266d2d4c827c34bf89451ff85bd006db9003fdd45f95d2c8e63c351321",
+      "status": "moved using git mv",
+      "sha256_after": "a0216c266d2d4c827c34bf89451ff85bd006db9003fdd45f95d2c8e63c351321"
+    },
+    {
+      "source": "docs/BROWSER_TEST_MIGRATION.md",
+      "destination": "docs/archive/BROWSER_TEST_MIGRATION.md",
+      "group": "Historical documentation",
+      "sha256": "0ef82a203af2160d22f5aa7a9cc21545a39891dcf50dd924fef1173621e3aae5",
+      "status": "moved using git mv",
+      "sha256_after": "0ef82a203af2160d22f5aa7a9cc21545a39891dcf50dd924fef1173621e3aae5"
+    },
+    {
+      "source": "docs/EXECUTION_PROGRESS.md",
+      "destination": "docs/archive/EXECUTION_PROGRESS.md",
+      "group": "Historical documentation",
+      "sha256": "525aa57dcc463df94e20d616d85efa3cee616c7c84d03a7fc8146ee4b3509d5b",
+      "status": "moved using git mv",
+      "sha256_after": "525aa57dcc463df94e20d616d85efa3cee616c7c84d03a7fc8146ee4b3509d5b"
+    },
+    {
+      "source": "docs/FEATURE_WORKSPACES_PLAN.md",
+      "destination": "docs/archive/FEATURE_WORKSPACES_PLAN.md",
+      "group": "Historical documentation",
+      "sha256": "8d301eeb78b61f2bf84e151249c963fb72d415f412b5d75860b0dba51d5a4749",
+      "status": "moved using git mv",
+      "sha256_after": "8d301eeb78b61f2bf84e151249c963fb72d415f412b5d75860b0dba51d5a4749"
+    },
+    {
+      "source": "docs/FEATURE_WORKSPACES_RELEASE.md",
+      "destination": "docs/archive/FEATURE_WORKSPACES_RELEASE.md",
+      "group": "Historical documentation",
+      "sha256": "1c8c5196004bd87aa71e5df62f23a8f69755fd788066b78b8f6d675eb0652fbd",
+      "status": "moved using git mv",
+      "sha256_after": "1c8c5196004bd87aa71e5df62f23a8f69755fd788066b78b8f6d675eb0652fbd"
+    },
+    {
+      "source": "docs/IMPLEMENTATION_CHANGES.json",
+      "destination": "docs/archive/IMPLEMENTATION_CHANGES.json",
+      "group": "Historical documentation",
+      "sha256": "a73f74250a5c5c87757f12fa7f5a037965178c6da201261a1d31caa690d9d969",
+      "status": "moved using git mv",
+      "sha256_after": "a73f74250a5c5c87757f12fa7f5a037965178c6da201261a1d31caa690d9d969"
+    },
+    {
+      "source": "docs/IMPLEMENTATION_REPORT.md",
+      "destination": "docs/archive/IMPLEMENTATION_REPORT.md",
+      "group": "Historical documentation",
+      "sha256": "63b355466db5d637ae3ae3a8684acf7d5e063890d494a1e5070fe6c7abf0cd8c",
+      "status": "moved using git mv",
+      "sha256_after": "63b355466db5d637ae3ae3a8684acf7d5e063890d494a1e5070fe6c7abf0cd8c"
+    },
+    {
+      "source": "docs/INDEX.md",
+      "destination": "docs/archive/INDEX.md",
+      "group": "Historical documentation",
+      "sha256": "2d62a161abc4c3e13821e4151b467b87f38d72b663bec2ffef7415c2df911886",
+      "status": "moved using git mv",
+      "sha256_after": "2d62a161abc4c3e13821e4151b467b87f38d72b663bec2ffef7415c2df911886"
+    },
+    {
+      "source": "docs/INTEGRATED_AUDIT.md",
+      "destination": "docs/archive/INTEGRATED_AUDIT.md",
+      "group": "Historical documentation",
+      "sha256": "6deeafad502c6c5ac25f1c41f4bc976d23f2a18a58ca82679b8574a625359fd8",
+      "status": "moved using git mv",
+      "sha256_after": "6deeafad502c6c5ac25f1c41f4bc976d23f2a18a58ca82679b8574a625359fd8"
+    },
+    {
+      "source": "docs/JOURNEY_PLANNER.md",
+      "destination": "docs/archive/JOURNEY_PLANNER.md",
+      "group": "Historical documentation",
+      "sha256": "45bf17e833788e136a8fd26e769a8a1fc5f8c9fb6fb498e602d21771ba397a09",
+      "status": "moved using git mv",
+      "sha256_after": "45bf17e833788e136a8fd26e769a8a1fc5f8c9fb6fb498e602d21771ba397a09"
+    },
+    {
+      "source": "docs/LAUNCH_READINESS.md",
+      "destination": "docs/archive/LAUNCH_READINESS.md",
+      "group": "Historical documentation",
+      "sha256": "9ba4075fbf16cb7998a0e9790fa83a518e8c0b433b97089d3c0b926aa9fc5d25",
+      "status": "moved using git mv",
+      "sha256_after": "9ba4075fbf16cb7998a0e9790fa83a518e8c0b433b97089d3c0b926aa9fc5d25"
+    },
+    {
+      "source": "docs/MAP_LAYOUT_FIX.md",
+      "destination": "docs/archive/MAP_LAYOUT_FIX.md",
+      "group": "Historical documentation",
+      "sha256": "a133e645dc462691d020f11770be67539ecffeaffe5d0816a7257b3139a249bc",
+      "status": "moved using git mv",
+      "sha256_after": "a133e645dc462691d020f11770be67539ecffeaffe5d0816a7257b3139a249bc"
+    },
+    {
+      "source": "docs/PHASE_A_BASELINE.md",
+      "destination": "docs/archive/PHASE_A_BASELINE.md",
+      "group": "Historical documentation",
+      "sha256": "cfdf06e8df2df8eb3a7f939b0355a81fe3aaadabaf30627d318479b6e5c98884",
+      "status": "moved using git mv",
+      "sha256_after": "cfdf06e8df2df8eb3a7f939b0355a81fe3aaadabaf30627d318479b6e5c98884"
+    },
+    {
+      "source": "docs/PHASE_B_CHANGES.json",
+      "destination": "docs/archive/PHASE_B_CHANGES.json",
+      "group": "Historical documentation",
+      "sha256": "7fbc60c69ac51a87d88921321ce1608e64896614197fd010b48ee7951359b07b",
+      "status": "moved using git mv",
+      "sha256_after": "7fbc60c69ac51a87d88921321ce1608e64896614197fd010b48ee7951359b07b"
+    },
+    {
+      "source": "docs/PHASE_B_MOVES.json",
+      "destination": "docs/archive/PHASE_B_MOVES.json",
+      "group": "Historical documentation",
+      "sha256": "ef75cc68c251fdc9f9fe0b0dee3cdb6bc1d33b2335b1a6118f342bc26336b00a",
+      "status": "moved using git mv",
+      "sha256_after": "ef75cc68c251fdc9f9fe0b0dee3cdb6bc1d33b2335b1a6118f342bc26336b00a"
+    },
+    {
+      "source": "docs/PHASE_B_ORGANIZATION.md",
+      "destination": "docs/archive/PHASE_B_ORGANIZATION.md",
+      "group": "Historical documentation",
+      "sha256": "e774ffbaeacc566c5e62dda4484fb9882373dc79bfcb2dbfdcdeadd80e1b93d1",
+      "status": "moved using git mv",
+      "sha256_after": "e774ffbaeacc566c5e62dda4484fb9882373dc79bfcb2dbfdcdeadd80e1b93d1"
+    },
+    {
+      "source": "docs/PRODUCTION_LAUNCH_CHECKLIST.md",
+      "destination": "docs/archive/PRODUCTION_LAUNCH_CHECKLIST.md",
+      "group": "Historical documentation",
+      "sha256": "9178a276b03b7e73fb8289cfb559ab5d1771b62e4abe9ed68fcc875d0c073976",
+      "status": "moved using git mv",
+      "sha256_after": "9178a276b03b7e73fb8289cfb559ab5d1771b62e4abe9ed68fcc875d0c073976"
+    },
+    {
+      "source": "docs/REDESIGN_PLAN.md",
+      "destination": "docs/archive/REDESIGN_PLAN.md",
+      "group": "Historical documentation",
+      "sha256": "32cf3ae59acd9a7e9c371ccc28bd711b9c24b54c3bd9679adad7c8c9c9cc78fb",
+      "status": "moved using git mv",
+      "sha256_after": "32cf3ae59acd9a7e9c371ccc28bd711b9c24b54c3bd9679adad7c8c9c9cc78fb"
+    },
+    {
+      "source": "docs/RELEASE.md",
+      "destination": "docs/archive/RELEASE.md",
+      "group": "Historical documentation",
+      "sha256": "c6a8ee9a10efdf61f648c200b199b1605271de4d914f38e43e82a832cb5a9d8d",
+      "status": "moved using git mv",
+      "sha256_after": "c6a8ee9a10efdf61f648c200b199b1605271de4d914f38e43e82a832cb5a9d8d"
+    },
+    {
+      "source": "docs/STOP_SEARCH_FIX.md",
+      "destination": "docs/archive/STOP_SEARCH_FIX.md",
+      "group": "Historical documentation",
+      "sha256": "b65ed22f1ff30bc594b3e439ad1444e3739acbef64f9a50d83408a826c147e84",
+      "status": "moved using git mv",
+      "sha256_after": "b65ed22f1ff30bc594b3e439ad1444e3739acbef64f9a50d83408a826c147e84"
+    },
+    {
+      "source": "docs/archive-audit.json",
+      "destination": "docs/archive/archive-audit.json",
+      "group": "Historical documentation",
+      "sha256": "8249a25f894db0426688049651e124b222cf30f4cbf85381caf91429db6b30d9",
+      "status": "moved using git mv",
+      "sha256_after": "8249a25f894db0426688049651e124b222cf30f4cbf85381caf91429db6b30d9"
+    },
+    {
+      "source": "docs/live-verification.json",
+      "destination": "docs/archive/live-verification.json",
+      "group": "Historical documentation",
+      "sha256": "589b786ff230e4cb8c67c3435f1681dea9660b108cb80c2649e5bc92b12d46ad",
+      "status": "moved using git mv",
+      "sha256_after": "589b786ff230e4cb8c67c3435f1681dea9660b108cb80c2649e5bc92b12d46ad"
+    },
+    {
+      "source": "docs/qa/accessibility-audit.json",
+      "destination": "docs/archive/qa/accessibility-audit.json",
+      "group": "QA evidence",
+      "sha256": "e04f4905b8d9fdc6823fd7286d4088bfc80619e1615cbec9f22d8b10fcd2106c",
+      "status": "moved using git mv",
+      "sha256_after": "e04f4905b8d9fdc6823fd7286d4088bfc80619e1615cbec9f22d8b10fcd2106c"
+    },
+    {
+      "source": "docs/qa/features-accessibility.json",
+      "destination": "docs/archive/qa/features-accessibility.json",
+      "group": "QA evidence",
+      "sha256": "bf343af39697f8f3c0a11a7907ec9c7ff1acd18c5b7a3acd2037d29597f483cb",
+      "status": "moved using git mv",
+      "sha256_after": "bf343af39697f8f3c0a11a7907ec9c7ff1acd18c5b7a3acd2037d29597f483cb"
+    },
+    {
+      "source": "docs/qa/features-changed-files.json",
+      "destination": "docs/archive/qa/features-changed-files.json",
+      "group": "QA evidence",
+      "sha256": "c6937cd6950e2f7164f30557e498ae20b7c4afb5432cb54188982977f46e9f8b",
+      "status": "moved using git mv",
+      "sha256_after": "c6937cd6950e2f7164f30557e498ae20b7c4afb5432cb54188982977f46e9f8b"
+    },
+    {
+      "source": "docs/qa/features-context.json",
+      "destination": "docs/archive/qa/features-context.json",
+      "group": "QA evidence",
+      "sha256": "0b63e6f79a9b983e1eaee15dafee69308a80b87f334ca3182be1faab581333cc",
+      "status": "moved using git mv",
+      "sha256_after": "0b63e6f79a9b983e1eaee15dafee69308a80b87f334ca3182be1faab581333cc"
+    },
+    {
+      "source": "docs/qa/features-controls.json",
+      "destination": "docs/archive/qa/features-controls.json",
+      "group": "QA evidence",
+      "sha256": "56186288dd253bc95dfa491fac57ac2dd2656dda646e439b0580a6926745d437",
+      "status": "moved using git mv",
+      "sha256_after": "56186288dd253bc95dfa491fac57ac2dd2656dda646e439b0580a6926745d437"
+    },
+    {
+      "source": "docs/qa/features-failures.json",
+      "destination": "docs/archive/qa/features-failures.json",
+      "group": "QA evidence",
+      "sha256": "68a4b9af1e1c9c95c75d9117353dfa32b75082b36d562f9c93931c30a33f6217",
+      "status": "moved using git mv",
+      "sha256_after": "68a4b9af1e1c9c95c75d9117353dfa32b75082b36d562f9c93931c30a33f6217"
+    },
+    {
+      "source": "docs/qa/features-gtfs-audit.json",
+      "destination": "docs/archive/qa/features-gtfs-audit.json",
+      "group": "QA evidence",
+      "sha256": "4712c569b10364cd3913cef7be7e774453c7285f6a2e12bbbaff888a762e72f3",
+      "status": "moved using git mv",
+      "sha256_after": "4712c569b10364cd3913cef7be7e774453c7285f6a2e12bbbaff888a762e72f3"
+    },
+    {
+      "source": "docs/qa/features-light.json",
+      "destination": "docs/archive/qa/features-light.json",
+      "group": "QA evidence",
+      "sha256": "0b63e6f79a9b983e1eaee15dafee69308a80b87f334ca3182be1faab581333cc",
+      "status": "moved using git mv",
+      "sha256_after": "0b63e6f79a9b983e1eaee15dafee69308a80b87f334ca3182be1faab581333cc"
+    },
+    {
+      "source": "docs/qa/features-links.json",
+      "destination": "docs/archive/qa/features-links.json",
+      "group": "QA evidence",
+      "sha256": "9968bce21cd016ea4aa8750686f9e6326da75d300347c73248f65c9697194185",
+      "status": "moved using git mv",
+      "sha256_after": "9968bce21cd016ea4aa8750686f9e6326da75d300347c73248f65c9697194185"
+    },
+    {
+      "source": "docs/qa/features-live.json",
+      "destination": "docs/archive/qa/features-live.json",
+      "group": "QA evidence",
+      "sha256": "eb13562bbfdc2ef055ec64cd4066740343c3d57e9de71338a01a5330bdf5b40f",
+      "status": "moved using git mv",
+      "sha256_after": "eb13562bbfdc2ef055ec64cd4066740343c3d57e9de71338a01a5330bdf5b40f"
+    },
+    {
+      "source": "docs/qa/features-npm-dependencies.json",
+      "destination": "docs/archive/qa/features-npm-dependencies.json",
+      "group": "QA evidence",
+      "sha256": "c4a784b78403b13731024248ec1f44ef1e7cc2742720a87270182316366705fd",
+      "status": "moved using git mv",
+      "sha256_after": "c4a784b78403b13731024248ec1f44ef1e7cc2742720a87270182316366705fd"
+    },
+    {
+      "source": "docs/qa/features-python-dependencies.json",
+      "destination": "docs/archive/qa/features-python-dependencies.json",
+      "group": "QA evidence",
+      "sha256": "76bd513a9b3c34b588d86fcfd390b15483c099a87dec4dc2996150213e475885",
+      "status": "moved using git mv",
+      "sha256_after": "76bd513a9b3c34b588d86fcfd390b15483c099a87dec4dc2996150213e475885"
+    },
+    {
+      "source": "docs/qa/features-weather.json",
+      "destination": "docs/archive/qa/features-weather.json",
+      "group": "QA evidence",
+      "sha256": "04c967d3c39464bd95fe572a10497758de831524170f292c1b08da28fa55c4f2",
+      "status": "moved using git mv",
+      "sha256_after": "04c967d3c39464bd95fe572a10497758de831524170f292c1b08da28fa55c4f2"
+    },
+    {
+      "source": "docs/qa/features-workspaces.json",
+      "destination": "docs/archive/qa/features-workspaces.json",
+      "group": "QA evidence",
+      "sha256": "bc938b236db5bd921de3ff9a8a602ff59d64a61a6493059c56c3fb138dffdc23",
+      "status": "moved using git mv",
+      "sha256_after": "bc938b236db5bd921de3ff9a8a602ff59d64a61a6493059c56c3fb138dffdc23"
+    },
+    {
+      "source": "docs/qa/full-release-accessibility.json",
+      "destination": "docs/archive/qa/full-release-accessibility.json",
+      "group": "QA evidence",
+      "sha256": "bf343af39697f8f3c0a11a7907ec9c7ff1acd18c5b7a3acd2037d29597f483cb",
+      "status": "moved using git mv",
+      "sha256_after": "bf343af39697f8f3c0a11a7907ec9c7ff1acd18c5b7a3acd2037d29597f483cb"
+    },
+    {
+      "source": "docs/qa/full-release-dependency-audit.json",
+      "destination": "docs/archive/qa/full-release-dependency-audit.json",
+      "group": "QA evidence",
+      "sha256": "76bd513a9b3c34b588d86fcfd390b15483c099a87dec4dc2996150213e475885",
+      "status": "moved using git mv",
+      "sha256_after": "76bd513a9b3c34b588d86fcfd390b15483c099a87dec4dc2996150213e475885"
+    },
+    {
+      "source": "docs/qa/full-release-https.json",
+      "destination": "docs/archive/qa/full-release-https.json",
+      "group": "QA evidence",
+      "sha256": "62bcfb46df1760c72db70c8cc917c6238d523556053920020c155f37e4df1af0",
+      "status": "moved using git mv",
+      "sha256_after": "62bcfb46df1760c72db70c8cc917c6238d523556053920020c155f37e4df1af0"
+    },
+    {
+      "source": "docs/qa/full-release-live-feeds.json",
+      "destination": "docs/archive/qa/full-release-live-feeds.json",
+      "group": "QA evidence",
+      "sha256": "cac3f55f40cf6c6801292ce437bd11936e5c0f83c6e605d5a767fd1129af06c0",
+      "status": "moved using git mv",
+      "sha256_after": "cac3f55f40cf6c6801292ce437bd11936e5c0f83c6e605d5a767fd1129af06c0"
+    },
+    {
+      "source": "docs/qa/full-release-live-journeys.json",
+      "destination": "docs/archive/qa/full-release-live-journeys.json",
+      "group": "QA evidence",
+      "sha256": "5bfa085231cb651dfe2e996ef4bdf29d0f1ddf4600f1debf4139f472c824f685",
+      "status": "moved using git mv",
+      "sha256_after": "5bfa085231cb651dfe2e996ef4bdf29d0f1ddf4600f1debf4139f472c824f685"
+    },
+    {
+      "source": "docs/qa/full-release-performance.json",
+      "destination": "docs/archive/qa/full-release-performance.json",
+      "group": "QA evidence",
+      "sha256": "c25e2ebd640ad4703676f6fadecfe235cf45087d0056d6060bfec8d463fb9edb",
+      "status": "moved using git mv",
+      "sha256_after": "c25e2ebd640ad4703676f6fadecfe235cf45087d0056d6060bfec8d463fb9edb"
+    },
+    {
+      "source": "docs/qa/full-release-timetable.json",
+      "destination": "docs/archive/qa/full-release-timetable.json",
+      "group": "QA evidence",
+      "sha256": "efbedfab3e0df321dfaf0380de0dfc97a608cac8a9baa8d19c245b86bfcbcc8b",
+      "status": "moved using git mv",
+      "sha256_after": "efbedfab3e0df321dfaf0380de0dfc97a608cac8a9baa8d19c245b86bfcbcc8b"
+    },
+    {
+      "source": "docs/qa/gtfs-integrity-audit.json",
+      "destination": "docs/archive/qa/gtfs-integrity-audit.json",
+      "group": "QA evidence",
+      "sha256": "4712c569b10364cd3913cef7be7e774453c7285f6a2e12bbbaff888a762e72f3",
+      "status": "moved using git mv",
+      "sha256_after": "4712c569b10364cd3913cef7be7e774453c7285f6a2e12bbbaff888a762e72f3"
+    },
+    {
+      "source": "docs/qa/gunicorn-verification.json",
+      "destination": "docs/archive/qa/gunicorn-verification.json",
+      "group": "QA evidence",
+      "sha256": "dafdaf01362c7b2949887a8f609bb2557309b5011d69dd6387d5e41c68488059",
+      "status": "moved using git mv",
+      "sha256_after": "dafdaf01362c7b2949887a8f609bb2557309b5011d69dd6387d5e41c68488059"
+    },
+    {
+      "source": "docs/qa/image-pins.json",
+      "destination": "docs/archive/qa/image-pins.json",
+      "group": "QA evidence",
+      "sha256": "06b388bbf0a960da9192a110222c78a484b54625bf5a3288976aeb1ade81f99a",
+      "status": "moved using git mv",
+      "sha256_after": "06b388bbf0a960da9192a110222c78a484b54625bf5a3288976aeb1ade81f99a"
+    },
+    {
+      "source": "docs/qa/integrated-accessibility.json",
+      "destination": "docs/archive/qa/integrated-accessibility.json",
+      "group": "QA evidence",
+      "sha256": "bf343af39697f8f3c0a11a7907ec9c7ff1acd18c5b7a3acd2037d29597f483cb",
+      "status": "moved using git mv",
+      "sha256_after": "bf343af39697f8f3c0a11a7907ec9c7ff1acd18c5b7a3acd2037d29597f483cb"
+    },
+    {
+      "source": "docs/qa/integrated-gtfs-audit.json",
+      "destination": "docs/archive/qa/integrated-gtfs-audit.json",
+      "group": "QA evidence",
+      "sha256": "4712c569b10364cd3913cef7be7e774453c7285f6a2e12bbbaff888a762e72f3",
+      "status": "moved using git mv",
+      "sha256_after": "4712c569b10364cd3913cef7be7e774453c7285f6a2e12bbbaff888a762e72f3"
+    },
+    {
+      "source": "docs/qa/integrated-https.json",
+      "destination": "docs/archive/qa/integrated-https.json",
+      "group": "QA evidence",
+      "sha256": "82f037066cbd5ba407fbab263a6922c437fb853ea681a8df0bde3653cef027ad",
+      "status": "moved using git mv",
+      "sha256_after": "82f037066cbd5ba407fbab263a6922c437fb853ea681a8df0bde3653cef027ad"
+    },
+    {
+      "source": "docs/qa/integrated-live-feeds.json",
+      "destination": "docs/archive/qa/integrated-live-feeds.json",
+      "group": "QA evidence",
+      "sha256": "301136001556be05ba8e96dd1c765e015b09cb6120219b379bc6b1d925ed57a1",
+      "status": "moved using git mv",
+      "sha256_after": "301136001556be05ba8e96dd1c765e015b09cb6120219b379bc6b1d925ed57a1"
+    },
+    {
+      "source": "docs/qa/integrated-live-journeys.json",
+      "destination": "docs/archive/qa/integrated-live-journeys.json",
+      "group": "QA evidence",
+      "sha256": "4d3cbbf1b9e9b535c873bbca2229ac49b5b39dd6c0673b76701211c4e042571e",
+      "status": "moved using git mv",
+      "sha256_after": "4d3cbbf1b9e9b535c873bbca2229ac49b5b39dd6c0673b76701211c4e042571e"
+    },
+    {
+      "source": "docs/qa/integrated-performance.json",
+      "destination": "docs/archive/qa/integrated-performance.json",
+      "group": "QA evidence",
+      "sha256": "0a971422fc4554a161a751b5a72460518ea0c9912e4f62d8f8aa9d2a6dc7f188",
+      "status": "moved using git mv",
+      "sha256_after": "0a971422fc4554a161a751b5a72460518ea0c9912e4f62d8f8aa9d2a6dc7f188"
+    },
+    {
+      "source": "docs/qa/integrated-python-dependencies.json",
+      "destination": "docs/archive/qa/integrated-python-dependencies.json",
+      "group": "QA evidence",
+      "sha256": "76bd513a9b3c34b588d86fcfd390b15483c099a87dec4dc2996150213e475885",
+      "status": "moved using git mv",
+      "sha256_after": "76bd513a9b3c34b588d86fcfd390b15483c099a87dec4dc2996150213e475885"
+    },
+    {
+      "source": "docs/qa/integrated-routing-browser.json",
+      "destination": "docs/archive/qa/integrated-routing-browser.json",
+      "group": "QA evidence",
+      "sha256": "12b2a383318670652c0f34e9570ed92e48b27ef750d04114bf349d2b1c469a10",
+      "status": "moved using git mv",
+      "sha256_after": "12b2a383318670652c0f34e9570ed92e48b27ef750d04114bf349d2b1c469a10"
+    },
+    {
+      "source": "docs/qa/production-live-feeds.json",
+      "destination": "docs/archive/qa/production-live-feeds.json",
+      "group": "QA evidence",
+      "sha256": "200e868a575f72c1282fedc3cd0b8e1954e55dcc61e5172e8447fc2a65f8ce33",
+      "status": "moved using git mv",
+      "sha256_after": "200e868a575f72c1282fedc3cd0b8e1954e55dcc61e5172e8447fc2a65f8ce33"
+    },
+    {
+      "source": "docs/qa/production-live-journeys.json",
+      "destination": "docs/archive/qa/production-live-journeys.json",
+      "group": "QA evidence",
+      "sha256": "73a7e8480055a6b4e84dabf3edf37dbcef8e2e369e7080bf7577814da4e4234e",
+      "status": "moved using git mv",
+      "sha256_after": "73a7e8480055a6b4e84dabf3edf37dbcef8e2e369e7080bf7577814da4e4234e"
+    },
+    {
+      "source": "docs/qa/python-dependency-audit.json",
+      "destination": "docs/archive/qa/python-dependency-audit.json",
+      "group": "QA evidence",
+      "sha256": "65c589992f092e56e7e28de3937a65d5c053d0516626a79c38161bab79ed101d",
+      "status": "moved using git mv",
+      "sha256_after": "65c589992f092e56e7e28de3937a65d5c053d0516626a79c38161bab79ed101d"
+    },
+    {
+      "source": "docs/qa/stop-search-live-verification.json",
+      "destination": "docs/archive/qa/stop-search-live-verification.json",
+      "group": "QA evidence",
+      "sha256": "b01c113ef51e419b75a210be81531645ed0a9fb0302046e549dd0a50227fc040",
+      "status": "moved using git mv",
+      "sha256_after": "b01c113ef51e419b75a210be81531645ed0a9fb0302046e549dd0a50227fc040"
+    },
+    {
+      "source": "docs/qa/vendored-fonts.json",
+      "destination": "docs/archive/qa/vendored-fonts.json",
+      "group": "QA evidence",
+      "sha256": "a85ed067800a9fe523cb0a67d77cf48d30791de85a2d90414ca614aa634874cc",
+      "status": "moved using git mv",
+      "sha256_after": "a85ed067800a9fe523cb0a67d77cf48d30791de85a2d90414ca614aa634874cc"
+    }
+  ]
+}

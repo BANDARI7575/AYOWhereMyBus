@@ -1,0 +1,8 @@
+fare_id,price,currency_type,payment_method,transfers,transfer_duration
+OZEVENT,10.0,USD,0,0,
+SUMMERFEST,10.0,USD,1,0,
+PREMIUM,2.75,USD,0,,5400
+FESTIVAL,10.0,USD,0,0,
+BRT,2.75,USD,1,,5400
+SPECIALEVENT,10.0,USD,0,0,
+REGULAR,2.75,USD,0,,5400

@@ -1,0 +1,10 @@
+{
+  "checked_at": "2026-11-09T20:27:19.779943+00:00",
+  "vehicles": 189,
+  "vehicle_feed_age_seconds": 16,
+  "gps_fresh_count": 189,
+  "trip_feed_status": "fresh",
+  "trip_entities": 343,
+  "alerts_status": "fresh",
+  "active_alerts": 8
+}

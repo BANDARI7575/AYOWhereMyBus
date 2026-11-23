@@ -1,0 +1,39 @@
+name: Release tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      AYO_TEST_URL: http://127.0.0.1:5099
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: pip install -r requirements.lock
+      - name: Prepare official bundled timetable index
+        run: python -c "from backend.services.transit_engine import Schedule; Schedule().build()"
+      - run: python -m unittest discover -s tests -t . -v
+      - name: Check frontend syntax
+        run: for ayo_script in static/*.js static/js/*.js tests/frontend/*.cjs; do node --check "$ayo_script"; done
+      - run: npm ci
+      - run: npm test
+      - run: npx playwright install --with-deps chromium webkit
+      - name: Planner browser and responsive tests
+        run: |
+          python -m flask --app app run --host 127.0.0.1 --port 5099 > /tmp/ayo-test-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          python -c "import time, urllib.request; time.sleep(2); urllib.request.urlopen('http://127.0.0.1:5099/').close()"
+          AYO_REDESIGN_AXE=1 npm run test:release
+          npm run test:pwa-upgrade
+          npm run test:failure-recovery
+          npm run test:weather
+          npm run test:journey-fixtures
+          npm run test:svg
+          npm run test:scroll
+          npm run test:units-browser
+          npm run test:map-layout

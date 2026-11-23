@@ -1,0 +1,21 @@
+{
+  "scope": "Current code; loopback-only production Gunicorn and Caddy internal CA, isolated QA secrets/storage. No public TLS provisioned.",
+  "checked_at": 1794256478.034219,
+  "checks": {
+    "health": {
+      "status": 200,
+      "revision": "17d2910d71f4"
+    },
+    "ready": {
+      "status": 200
+    },
+    "search": {
+      "status": 200
+    },
+    "anonymous_admin_denied": 401,
+    "protected_operator_queue": 200,
+    "cross_origin_write_denied": 403,
+    "insecure_api_denied": 400,
+    "untrusted_host_denied": 400
+  }
+}

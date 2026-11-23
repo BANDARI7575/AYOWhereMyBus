@@ -1,0 +1,57 @@
+/* Founder-only cinematic scene. No shared page or navigation selectors. */
+#founder{--founder-swing:6deg;--founder-name-size:clamp(44px,6.1vw,78px);--lean-height:clamp(250px,24vw,330px);--text:#f1eee5;--muted:#bdbbb5;--accent:#edc66d;--bg:#0b0c0f;--line:#34312a;max-width:1160px;margin:24px auto 40px;padding:0 20px 30px;color:var(--text)}
+#founder .card{isolation:isolate;overflow:hidden;position:relative;padding:0;border:1px solid #34332f;border-radius:26px;background:#0b0c0f;box-shadow:0 20px 60px #0003}
+#founder .founder-scene{position:relative;isolation:isolate;overflow:hidden;padding:330px 6% 38px;background:radial-gradient(ellipse at 50% 38%,#29221966,transparent 70%)}
+#founder .founder-light{position:absolute;inset:0;z-index:-1;pointer-events:none;transform-origin:50% 0;animation:founder-swing 8s ease-in-out infinite}
+#founder .founder-lamp{display:block;position:absolute;left:50%;top:0;transform:translateX(-50%);width:680px;height:816px;max-width:none;overflow:visible}
+#founder .founder-illumination,#founder .founder-lamp-glow{animation:founder-warmth 13s ease-in-out infinite}
+#founder .founder-lamp-glow{filter:drop-shadow(0 0 9px #f7cb6b)}
+#founder .founder-scene-label{position:relative;display:flex;align-items:center;justify-content:center;gap:22px;text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:13px;letter-spacing:.3em;margin:0 0 25px;color:var(--accent)}
+#founder .founder-scene-label::before,#founder .founder-scene-label::after{content:'';height:1px;flex:1;max-width:130px;background:linear-gradient(90deg,transparent,#a38240)}
+#founder .founder-scene-label::after{transform:rotate(180deg)}
+#founder .founder-stage{display:grid;grid-template-columns:max-content calc(var(--lean-height)*.65);justify-content:center;gap:0;align-items:start;min-height:var(--lean-height);max-width:900px;margin:0 auto 32px}
+#founder .founder-heading{padding:0 0 14px;position:relative;z-index:1;margin-top:calc(var(--lean-height)*.328 - var(--founder-name-size)*1.21)}
+#founder h2{font-family:Georgia,'Times New Roman',serif;font-weight:400;text-transform:uppercase;font-size:var(--founder-name-size);line-height:1.03;letter-spacing:.025em;text-shadow:0 3px 25px #0007;margin:0}
+#founder h2 span{display:block}
+#founder .founder-signature{font-size:10px;letter-spacing:.25em;color:var(--accent);margin:22px 0 0}
+#founder .founder-character{position:relative;width:100%;height:var(--lean-height);margin:0;transform:none;animation:none}
+/* Source elbow landmark: (365, 430) in the unchanged 1199 × 1312 PNG. */
+#founder .founder-character::after{content:none}
+#founder .founder-character img{position:absolute;top:0;left:calc(var(--lean-height)*-.278);display:block;width:auto;height:var(--lean-height);max-width:none;max-height:none;filter:drop-shadow(-2px 2px 3px #0007)}
+#founder .role{font-size:14px;letter-spacing:.07em;color:var(--accent);text-align:center;max-width:750px;margin:0 auto 14px;line-height:1.8}
+#founder .founder-location-line{text-align:center;color:var(--muted);font-family:Georgia,'Times New Roman',serif;font-size:17px;margin:0;line-height:1.6}
+#founder .founder-details{padding:8px 6% 32px}
+#founder .founder-biography{border-left:2px solid #b3914e;padding:3px 0 3px 26px;font-family:var(--sans);font-style:normal;font-weight:400;font-size:18px;line-height:1.7;letter-spacing:.01em;max-width:72ch;color:#e5dfd1;margin:30px 0 55px}
+#founder h3{font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:1.3;margin:36px 0 18px;font-weight:400}
+#founder .pipeline{background:#d4ad5010;border-color:#b3914e55;padding:18px;gap:10px}
+#founder .pipeline span.step{background:#151518;color:#ede9de;border-color:#39352b}
+#founder .pipeline .arrow{color:var(--accent)}
+#founder .skills{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+#founder .skill-group{background:#ffffff04;border:1px solid #34312a;border-radius:14px;padding:20px}
+#founder .skill-group h4{font-size:11px;color:var(--accent);line-height:1.8;letter-spacing:.12em;min-height:40px}
+#founder .chip{font-size:12px;padding:5px 8px;color:var(--text);background:#151518;border-color:#39352b}
+#founder .chip.dim{color:var(--muted)}
+#founder .actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:32px 0 0}
+#founder .btn{text-align:center;display:flex;align-items:center;justify-content:center;min-height:48px;background:#151518;color:var(--text);border-color:#51452e;transition:background .2s,border-color .2s,transform .2s}
+#founder .btn.primary{background:var(--accent);color:#1a1405;border-color:var(--accent)}
+#founder .btn:hover:not(:disabled){border-color:var(--accent);transform:translateY(-2px)}
+#founder .btn:focus-visible{outline:3px solid #edc66d;outline-offset:4px}
+#founder .btn:disabled{color:#bdbbb5;border-style:dashed;background:transparent;white-space:normal}
+#founder .founder-mission{position:relative;overflow:hidden;margin:60px -6.82% 0;padding:50px 6% 35px;border-top:1px solid #6a532c66;background:radial-gradient(ellipse at 10% 0,#c2963922,transparent 65%)}
+#founder .founder-mission .eyebrow{color:var(--accent);letter-spacing:.22em;font-size:11px}
+#founder #founder-mission-title{font-family:Impact,'Arial Narrow',sans-serif;letter-spacing:.02em;font-size:clamp(38px,6vw,68px);font-weight:400;line-height:1.08;margin:22px 0 26px}
+#founder #founder-mission-title span{display:block;color:var(--accent)}
+#founder .founder-mission p{max-width:760px;line-height:1.85;color:#d2cfc5;margin-bottom:18px}
+#founder .founder-mission .founder-mission-lead{font-family:Georgia,'Times New Roman',serif;font-size:23px;color:var(--text);line-height:1.5}
+#founder .founder-mission .founder-mission-close{font-weight:600;color:var(--accent);margin-top:28px}
+#founder .founder-route-line{display:block;color:#a98a45;width:100%;height:40px;margin-top:32px}
+#founder .fine{color:var(--muted);font-size:12px;border-top-color:#34312a;line-height:1.8;margin-top:0;padding-top:25px}
+#founder:not([hidden]) .founder-scene{animation:founder-entrance 1.6s ease-out both}
+#founder[hidden] *{animation-play-state:paused!important}
+@keyframes founder-swing{0%,100%{transform:rotate(calc(-1 * var(--founder-swing)))}50%{transform:rotate(var(--founder-swing))}}
+@keyframes founder-warmth{0%,38%,60%,100%{opacity:1}45%{opacity:.94}52%{opacity:.98}}
+@keyframes founder-breathe{0%,100%{transform:rotate(-1.5deg) scale(1)}50%{transform:rotate(-1.5deg) scale(1.003)}}
+@keyframes founder-entrance{from{opacity:.12}to{opacity:1}}
+@media(max-width:760px){#founder .skills{grid-template-columns:1fr}#founder .skill-group h4{min-height:0}#founder .actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){#founder{--founder-swing:4deg;--founder-name-size:clamp(28px,8vw,46px);--lean-height:clamp(150px,45vw,190px);margin:14px auto 30px;padding:0 12px 25px}#founder .card{padding:0;border-radius:20px}#founder .founder-scene{padding:270px 6% 30px}#founder .founder-lamp{width:520px;height:624px}#founder .founder-scene-label{font-size:10px;gap:12px;letter-spacing:.22em;margin-bottom:30px}#founder .founder-stage{margin-bottom:28px}#founder h2{font-size:var(--founder-name-size);line-height:1.1;letter-spacing:0}#founder .founder-heading{padding:0 0 8px;margin-top:calc(var(--lean-height)*.328 - var(--founder-name-size)*1.28)}#founder .founder-signature{font-size:8px;letter-spacing:.1em;margin-top:14px}#founder .role{font-size:12px;line-height:1.9;letter-spacing:.04em}#founder .founder-location-line{font-size:15px}#founder .founder-biography{padding-left:18px;font-size:16px;margin:20px 0 35px}#founder .founder-details{padding-bottom:25px}#founder .pipeline{flex-direction:column;align-items:stretch;text-align:center}#founder .pipeline .arrow{transform:rotate(90deg);line-height:1}#founder .pipeline span.step{font-size:12px;padding:9px}#founder .founder-mission{margin-top:40px;padding-top:36px}#founder .founder-mission .founder-mission-lead{font-size:21px}#founder .founder-mission p{font-size:15px}}
+@media(prefers-reduced-motion:reduce){#founder *,#founder:not([hidden]) .founder-scene{animation:none!important;transition:none!important}#founder .btn:hover:not(:disabled){transform:none}}

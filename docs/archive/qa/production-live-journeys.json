@@ -1,0 +1,120 @@
+{
+  "checked_at": "2026-11-09T15:29:44.658Z",
+  "base": "http://127.0.0.1:5050",
+  "results": [
+    {
+      "engine": "chromium",
+      "viewport": 1440,
+      "revision": "58f4ee874324",
+      "origin": "WISCONSIN & CASS",
+      "destination": "WISCONSIN & N5 BRT STATION",
+      "routes": [
+        "14"
+      ],
+      "scheduled_departure": 1794239820,
+      "scheduled_arrival": 1794240120,
+      "duration_seconds": 300,
+      "search_responses": [
+        200,
+        200,
+        200,
+        200
+      ]
+    },
+    {
+      "engine": "chromium",
+      "viewport": 390,
+      "revision": "58f4ee874324",
+      "origin": "WISCONSIN & CASS",
+      "destination": "WISCONSIN & N5 BRT STATION",
+      "routes": [
+        "14"
+      ],
+      "scheduled_departure": 1794239820,
+      "scheduled_arrival": 1794240120,
+      "duration_seconds": 300,
+      "search_responses": [
+        200,
+        200,
+        200,
+        200
+      ]
+    },
+    {
+      "engine": "chromium",
+      "viewport": 320,
+      "revision": "58f4ee874324",
+      "origin": "WISCONSIN & CASS",
+      "destination": "WISCONSIN & N5 BRT STATION",
+      "routes": [
+        "14"
+      ],
+      "scheduled_departure": 1794239820,
+      "scheduled_arrival": 1794240120,
+      "duration_seconds": 300,
+      "search_responses": [
+        200,
+        200,
+        200,
+        200
+      ]
+    },
+    {
+      "engine": "webkit",
+      "viewport": 1440,
+      "revision": "58f4ee874324",
+      "origin": "WISCONSIN & CASS",
+      "destination": "WISCONSIN & N5 BRT STATION",
+      "routes": [
+        "14"
+      ],
+      "scheduled_departure": 1794239820,
+      "scheduled_arrival": 1794240120,
+      "duration_seconds": 300,
+      "search_responses": [
+        200,
+        200,
+        200,
+        200
+      ]
+    },
+    {
+      "engine": "webkit",
+      "viewport": 390,
+      "revision": "58f4ee874324",
+      "origin": "WISCONSIN & CASS",
+      "destination": "WISCONSIN & N5 BRT STATION",
+      "routes": [
+        "14"
+      ],
+      "scheduled_departure": 1794239820,
+      "scheduled_arrival": 1794240120,
+      "duration_seconds": 300,
+      "search_responses": [
+        200,
+        200,
+        200,
+        200
+      ]
+    },
+    {
+      "engine": "webkit",
+      "viewport": 320,
+      "revision": "58f4ee874324",
+      "origin": "WISCONSIN & CASS",
+      "destination": "WISCONSIN & N5 BRT STATION",
+      "routes": [
+        "14"
+      ],
+      "scheduled_departure": 1794239820,
+      "scheduled_arrival": 1794240120,
+      "duration_seconds": 300,
+      "search_responses": [
+        200,
+        200,
+        200,
+        200
+      ]
+    }
+  ]
+}

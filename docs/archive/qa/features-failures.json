@@ -1,0 +1,32 @@
+[
+  {
+    "engine": "chromium",
+    "denied_location": true,
+    "pagination": true,
+    "late_stop_response_ignored": true,
+    "late_error_ignored": true,
+    "storage_failure": true,
+    "duplicate_alert_prevention": true,
+    "multiple_alerts": true,
+    "stale_suppression": true,
+    "threshold_trigger": true,
+    "denied_microphone_no_provider_request": true,
+    "clear_confirmation": true,
+    "offline": true
+  },
+  {
+    "engine": "webkit",
+    "denied_location": true,
+    "pagination": true,
+    "late_stop_response_ignored": true,
+    "late_error_ignored": true,
+    "storage_failure": true,
+    "duplicate_alert_prevention": true,
+    "multiple_alerts": true,
+    "stale_suppression": true,
+    "threshold_trigger": true,
+    "denied_microphone_no_provider_request": true,
+    "clear_confirmation": true,
+    "offline": true
+  }
+]

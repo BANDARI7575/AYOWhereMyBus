@@ -1,0 +1,41 @@
+{
+  "name": "ayo-rider-experience-tests",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/frontend/journey.frontend.test.cjs tests/frontend/i18n.test.cjs tests/frontend/sw.test.cjs tests/frontend/assets.test.cjs tests/frontend/units.test.cjs tests/frontend/transit-ui.test.cjs tests/frontend/completion.test.cjs tests/frontend/home.test.cjs tests/frontend/assistant.test.cjs tests/frontend/saved.test.cjs",
+    "test:browser": "node tests/frontend/redesign.browser.cjs",
+    "test:live": "node tests/frontend/journey.live.browser.cjs",
+    "test:a11y": "AYO_REDESIGN_AXE=1 node tests/frontend/redesign.browser.cjs",
+    "test:features": "node tests/frontend/redesign-advanced.browser.cjs && node tests/frontend/completion.browser.cjs",
+    "test:release": "node tests/frontend/redesign.browser.cjs && node tests/frontend/redesign-advanced.browser.cjs && node tests/frontend/redesign-pwa.browser.cjs && node tests/frontend/completion.browser.cjs && node tests/frontend/home.browser.cjs",
+    "test:map": "node tests/frontend/redesign.browser.cjs",
+    "test:routing": "node tests/frontend/routing-quality.browser.cjs",
+    "test:workspaces": "node tests/frontend/redesign-advanced.browser.cjs",
+    "test:workspace-failures": "node tests/frontend/redesign-advanced.browser.cjs",
+    "test:weather": "node tests/frontend/weather.browser.cjs",
+    "test:workspaces-live": "node tests/frontend/workspaces.live.browser.cjs",
+    "test:controls": "node tests/frontend/redesign.browser.cjs",
+    "test:utility": "node tests/frontend/redesign.browser.cjs",
+    "test:utility-pwa": "node tests/frontend/redesign-pwa.browser.cjs",
+    "test:completion": "node tests/frontend/completion.browser.cjs",
+    "test:journey-fixtures": "node tests/frontend/journey.browser.cjs",
+    "test:svg": "node tests/frontend/svg.browser.cjs",
+    "test:scroll": "node tests/frontend/homepage-scroll.browser.cjs",
+    "test:units-browser": "node tests/frontend/units.browser.cjs",
+    "test:map-layout": "node tests/frontend/map-layout.browser.cjs",
+    "test:failure-recovery": "node tests/frontend/features.browser.cjs && node tests/frontend/workspace-failures.browser.cjs",
+    "test:pwa-upgrade": "node tests/frontend/pwa-upgrade.browser.cjs",
+    "test:home": "node tests/frontend/home.browser.cjs",
+    "test:chat": "node tests/frontend/chat-home.browser.cjs",
+    "test:trip": "node tests/frontend/trip.browser.cjs",
+    "test:trip-controls": "node tests/frontend/trip-controls.browser.cjs",
+    "test:alerts-visual": "node tests/frontend/alerts-visual.browser.cjs",
+    "test:saved": "node tests/frontend/saved.browser.cjs",
+    "test:founder": "node tests/frontend/founder.browser.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.65.0",
+    "leaflet": "1.9.4",
+    "@axe-core/playwright": "4.14.0"
+  }
+}

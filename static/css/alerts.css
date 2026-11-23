@@ -1,0 +1,46 @@
+/* Isolated visual phase: no global palette, routing or alert-renderer changes. */
+#alertsScreen{--alert-amber:#f0c169;--alert-surface:#1c1d23;--alert-line:#47413a;max-width:1000px;margin:0 auto;padding-bottom:calc(110px + env(safe-area-inset-bottom))}
+#alertsScreen .alert-center-hero{position:relative;isolation:isolate;overflow:hidden;padding:34px 28px;margin:12px 0 20px;border:1px solid var(--alert-line);border-radius:24px;background:linear-gradient(125deg,#242124 0%,#15171d 62%,#191b22 100%);animation:alert-entrance .5s ease-out both}
+#alertsScreen .alert-center-hero::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(115deg,transparent 20%,#f0c1690c 48%,transparent 70%);transform:translateX(-100%);animation:alert-sweep 1s ease-out .1s both}
+#alertsScreen .eyebrow{color:var(--alert-amber);font-size:11px;font-weight:700;letter-spacing:.13em;margin:0 0 12px}
+#alertsScreen h1{font-size:clamp(32px,6vw,48px);letter-spacing:-.045em;line-height:1.1;margin:0 0 16px;max-width:16ch}
+#alertsScreen .alert-center-subtitle{font-size:15px;line-height:1.65;color:var(--muted);max-width:55ch;margin:0 0 20px}
+#alertsScreen .alert-center-tag{display:inline-flex;align-items:center;min-height:32px;border:1px solid #61503a;border-radius:20px;padding:5px 11px;color:var(--alert-amber);font-size:11px;background:#f0c16908}
+#alertsScreen .alert-dashboard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:30px}
+#alertsScreen .alert-dashboard-card{padding:20px 18px;border:1px solid var(--alert-line);border-radius:18px;background:linear-gradient(160deg,#24252d,#191b21);animation:alert-entrance .4s ease-out both}
+#alertsScreen .alert-dashboard-card:nth-child(2){animation-delay:60ms}#alertsScreen .alert-dashboard-card:nth-child(3){animation-delay:120ms}
+#alertsScreen .alert-dashboard-card>p{margin:0 0 12px;font-size:13px;font-weight:600;color:var(--text)}
+#alertsScreen .alert-dashboard-card>strong{display:block;font-size:34px;line-height:1.2;color:var(--alert-amber);font-variant-numeric:tabular-nums;margin-bottom:8px}
+#alertsScreen .alert-dashboard-card>strong.has-value{animation:alert-count .35s ease-out both}
+#alertsScreen .alert-dashboard-card>span{font-size:11px;line-height:1.6;color:var(--muted);display:block}
+#alertsScreen .alert-section-heading{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:12px}
+#alertsScreen .alert-section-heading .eyebrow{font-size:10px;margin-bottom:5px}#alertsScreen h2{font-size:21px;letter-spacing:-.025em;margin:0}
+#alertsScreen .alert-source-badge{padding:5px 10px;border:1px solid var(--alert-line);border-radius:8px;color:var(--alert-amber);font-size:11px;font-weight:700;letter-spacing:.08em}
+#alertsScreen .alert-center-note{font-size:12px;line-height:1.6;color:var(--muted);max-width:75ch;margin:0 0 20px}
+#alertsScreen #serviceAlerts{border:0;padding:0;background:transparent;margin:0 0 24px}
+#alertsScreen #serviceAlerts>.alert-summary{font-size:14px;padding:12px 0;color:var(--muted);border-bottom:1px solid var(--alert-line);margin-bottom:12px}
+#alertsScreen #serviceAlerts>.status-note{font-size:12px;color:var(--muted);line-height:1.6;margin:8px 0}
+#alertsScreen .service-alert{padding:22px;margin:16px 0;border:1px solid #464950;border-radius:19px;background:var(--alert-surface);box-shadow:0 8px 26px #00000016;animation:alert-card-in .35s ease-out both}
+#alertsScreen .service-alert h3{font-size:18px;line-height:1.45;font-weight:650;letter-spacing:-.02em;margin:0 0 12px}
+#alertsScreen .alert-routes{gap:7px;margin:8px 0 14px}#alertsScreen .route-badge{background:#f0c1690b;color:var(--alert-amber);border:1px solid #6a5940;border-radius:9px;font-size:12px;padding:4px 10px}
+#alertsScreen .service-alert>.status-note{font-size:12px;line-height:1.6;color:var(--muted);margin:0 0 8px}
+#alertsScreen .service-alert details{border-top:1px solid #3b3d45;margin-top:12px;padding-top:4px}
+#alertsScreen .service-alert details>summary{color:var(--alert-amber);font-size:13px;padding:12px 0;min-height:44px}
+#alertsScreen .service-alert details[open] .alert-description{animation:alert-description-in .2s ease-out both}
+#alertsScreen .alert-description{font-size:14px;line-height:1.8;color:var(--text);overflow-wrap:anywhere}
+#alertsScreen .service-alert a{display:inline-flex;align-items:center;min-height:44px;color:var(--alert-amber);font-size:13px}
+#alertsScreen>button[data-workspace=alerts]{border:1px solid #6a5940;background:#f0c1690b;color:var(--alert-amber);border-radius:14px;min-height:48px;padding:12px 18px}
+#alertsScreen>.tiny-note{font-size:12px;line-height:1.6;color:var(--muted);margin-top:14px}
+#alertsScreen :focus-visible{outline:3px solid var(--alert-amber);outline-offset:3px}
+.day-mode #alertsScreen{--alert-surface:#fff;--alert-line:#c3b6a1;--alert-amber:#795000}
+.day-mode #alertsScreen .alert-center-hero{background:linear-gradient(120deg,#f7f0e3,#fff)}.day-mode #alertsScreen .alert-dashboard-card{background:linear-gradient(140deg,#fff,#f5f0e8)}
+@keyframes alert-entrance{from{opacity:.65;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@keyframes alert-sweep{to{transform:translateX(100%)}}
+@keyframes alert-count{from{opacity:.55;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+@keyframes alert-card-in{from{opacity:.7;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@keyframes alert-description-in{from{opacity:.65;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:540px){#alertsScreen .alert-center-hero{padding:25px 20px;border-radius:20px}#alertsScreen .alert-dashboard{gap:8px}#alertsScreen .alert-dashboard-card{padding:14px 10px;border-radius:14px}#alertsScreen .alert-dashboard-card>p{font-size:11px;min-height:34px;margin-bottom:4px}#alertsScreen .alert-dashboard-card>strong{font-size:28px}#alertsScreen .alert-dashboard-card>span{font-size:10px}#alertsScreen .service-alert{padding:18px 16px}#alertsScreen .service-alert h3{font-size:17px}}
+@media(prefers-reduced-motion:reduce){#alertsScreen *,#alertsScreen *::before{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+#alertsScreen .service-alert.alert-new{animation:alert-card-in .35s ease-out both,alert-new-highlight 1.4s ease-out both}
+@keyframes alert-new-highlight{from{box-shadow:0 0 0 1px #f0c16980,0 5px 24px #f0c16912}to{box-shadow:0 8px 26px #00000016}}

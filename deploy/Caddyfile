@@ -1,0 +1,15 @@
+{
+    email {$TLS_EMAIL}
+}
+{$AYO_DOMAIN} {
+    encode zstd gzip
+    request_body {
+        max_size 8KB
+    }
+    reverse_proxy app:8000 {
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+    # Access logging is disabled here; Gunicorn logs redacted paths/status/latency.
+    # Never enable raw URI logging without excluding GPS query strings.
+}

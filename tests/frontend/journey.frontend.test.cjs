@@ -1,0 +1,60 @@
+const {test} = require('node:test');
+const assert = require('node:assert/strict');
+const {duration, timeLabel, walkingLink} = require('../../static/js/journey.js');
+test('durations include fractional minutes without negative output', () => {
+  assert.equal(duration(1500), '25 min');
+  assert.equal(duration(121), '3 min');
+  assert.equal(duration(-1), '0 min');
+});
+test('scheduled labels retain Chicago calendar date after midnight', () => {
+  const label = timeLabel(Date.parse('2026-11-10T06:10:00Z') / 1000);
+  assert.match(label, /Nov 10/); assert.match(label, /12:10/);
+});
+test('Spanish date labels are available', () => {
+  const label = timeLabel(Date.parse('2026-11-10T06:10:00Z') / 1000, true);
+  assert.match(label, /nov/); assert.match(label, /12:10/);
+});
+test('external walking link uses only verified stop coordinates', () => {
+  assert.equal(walkingLink({from_stop:{latitude:43,longitude:-88},to_stop:{latitude:43.01,longitude:-88}}),
+    'https://www.google.com/maps/dir/?api=1&origin=43,-88&destination=43.01,-88&travelmode=walking');
+});
+test('missing local API reports a stale server, not a connection failure', () => {
+  const {searchFailure} = require('../../static/js/journey.js');
+  assert.match(searchFailure({status:404},false,'127.0.0.1'),/Restart it with the latest project code/);
+  assert.match(searchFailure({status:404},false,'example.com'),/being updated/);
+  assert.doesNotMatch(searchFailure({status:404},false,'example.com'),/local server/);
+});
+test('rate limiting and unavailable stop data have actionable messages', () => {
+  const {searchFailure} = require('../../static/js/journey.js');
+  assert.match(searchFailure({status:429},false,'localhost'),/Wait a minute/);
+  assert.match(searchFailure({status:503},false,'localhost'),/Stop data is temporarily unavailable/);
+  assert.match(searchFailure({status:404},true,'localhost'),/Reinícialo/);
+});
+test('itineraries expire at departure or five-minute revalidation deadline', () => {
+  const {itineraryExpired}=require('../../static/js/journey.js');
+  assert.equal(itineraryExpired({departure:1000,requested_at:100,valid_until:400},399),false);
+  assert.equal(itineraryExpired({departure:1000,requested_at:100,valid_until:400},400),true);
+  assert.equal(itineraryExpired({departure:200,requested_at:100},201),true);
+});
+
+test('explicit Milwaukee departure resolves DST safely without guessing an ambiguous clock',()=>{
+ const {chicagoDeparture}=require('../../static/js/journey.js');
+ assert.equal(chicagoDeparture('2026-11-10T12:00'),'2026-11-10T18:00:00.000Z');
+ assert.throws(()=>chicagoDeparture('2026-11-01T01:30'),/ambiguous/);
+ assert.throws(()=>chicagoDeparture('2026-03-08T02:30'),/ambiguous/);
+});
+
+test('planner coordinate validation rejects guessed or nonfinite locations',()=>{
+ const {validPoint}=require('../../static/js/journey.js');
+ assert.equal(validPoint({latitude:43.04,longitude:-87.9}),true);
+ for(const point of [{latitude:'43',longitude:-88},{latitude:91,longitude:0},{latitude:0,longitude:Infinity},{}])assert.equal(validPoint(point),false);
+});
+
+test('planner request failures have actionable English and Spanish messages',()=>{
+ const {journeyFailure}=require('../../static/js/journey.js');
+ assert.match(journeyFailure({code:'timeout'}),/timed out.*Retry/);
+ assert.match(journeyFailure({status:429}),/Wait a minute/);
+ assert.match(journeyFailure({status:400}),/selected stops.*Milwaukee/);
+ assert.match(journeyFailure({code:'timeout'},true),/tardó demasiado/);
+ assert.match(journeyFailure({status:429},true),/Espera un minuto/);
+});

@@ -1,0 +1,24 @@
+[
+  {
+    "engine": "chromium",
+    "width": 1440,
+    "origin": "2783",
+    "exact_destination": "66",
+    "exact_outcome": "no_route",
+    "selected_destination": "9651",
+    "route": "14",
+    "scheduled_ride_seconds": 60,
+    "reported_route19_buses": 10
+  },
+  {
+    "engine": "webkit",
+    "width": 390,
+    "origin": "2783",
+    "exact_destination": "66",
+    "exact_outcome": "no_route",
+    "selected_destination": "9651",
+    "route": "14",
+    "scheduled_ride_seconds": 60,
+    "reported_route19_buses": 10
+  }
+]

@@ -1,0 +1,39 @@
+{
+  "scope": "Continuation after final implementation; source application and production settings unchanged.",
+  "moves": [
+    {
+      "from": "tests/frontend/clock.browser.cjs",
+      "to": "archive/legacy/tests/frontend/clock.browser.cjs",
+      "sha256": "fde5e79dd6acf226443f3a995c9a0694288c49e5710549187c6ee5eb4c845cb4"
+    },
+    {
+      "from": "tests/frontend/clock.live.browser.cjs",
+      "to": "archive/legacy/tests/frontend/clock.live.browser.cjs",
+      "sha256": "d57d7ec0b6bbc317a7ce0cb5f98892a98559a28c8a70eed5907e152151327cfa"
+    },
+    {
+      "from": "tests/frontend/weather-time.browser.cjs",
+      "to": "archive/legacy/tests/frontend/weather-time.browser.cjs",
+      "sha256": "b46f4ba7cda6505a39c83465416610280e5a910ea63364cd73db1d6d244dcd23"
+    },
+    {
+      "from": "tests/frontend/controls.browser.cjs",
+      "to": "archive/legacy/tests/frontend/controls.browser.cjs",
+      "sha256": "cfc7356dd65922c56992c72b33363923ee1dc6752cc0e2933d64e40da50c0f90"
+    },
+    {
+      "from": "tests/frontend/full-release.browser.cjs",
+      "to": "archive/legacy/tests/frontend/full-release.browser.cjs",
+      "sha256": "722a46d2ad3dd25875b51eedff506ce7f03b3634ff29c85c84ce50dce25945cf"
+    },
+    {
+      "from": "tests/frontend/workspaces.browser.cjs",
+      "to": "archive/legacy/tests/frontend/workspaces.browser.cjs",
+      "sha256": "9647272c00dbc6ea75e832587200d61c923a53fbc43c99bd91b828ee43295a24"
+    }
+  ],
+  "preserved_before_edits": [
+    "archive/legacy/tests/frontend/features.browser.cjs.before-migration",
+    "archive/legacy/tests/frontend/workspace-failures.browser.cjs.before-migration"
+  ]
+}
