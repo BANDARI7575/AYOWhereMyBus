@@ -63,6 +63,8 @@ def db():
 def install(app):
     from backend.services.geocoding_service import install_geocoding
     install_geocoding(app)
+    from backend.services.walking_service import install_walking
+    install_walking(app, schedule, db)
     production=os.getenv('AYO_ENV')=='production'
     if production:
         for name in (['PRIVACY_KEY'] if os.getenv('MODERATOR_TOKENS') else ['MODERATOR_TOKEN','PRIVACY_KEY']):

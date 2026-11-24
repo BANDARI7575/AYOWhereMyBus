@@ -37,9 +37,49 @@ document.addEventListener('DOMContentLoaded',()=>{
   }catch(error){if(signal?.aborted)throw error;throw Error(!navigator.onLine?t('Offline. Reconnect and retry.','Sin conexión. Conéctate y vuelve a intentar.'):error.name==='AbortError'?t('Request timed out. Please retry.','La solicitud tardó demasiado. Vuelve a intentar.'):error.message||t('Network unavailable. Please retry.','Red no disponible. Vuelve a intentar.'));}
   finally{clearTimeout(timeout);signal?.removeEventListener('abort',cancel);}
  }
+ let walking=null;
+ function closeWalking(){
+  const note=$('homeWalkingDuration');
+  if(note)note.textContent=t('Select Walk to This Stop to check walking time.','Selecciona Caminar hasta esta parada para consultar la duración.');
+  const w=walking;if(!w)return;walking=null;w.controller.abort();w.map?.remove();w.shell.remove();}
+ function addWalkingRoute(host){
+  const shell=text('section',null,host,'home-live-shell');
+  text('p',t('Request a walking route: your selected coordinates and stop will be sent to Geoapify. Map tiles are supplied by OpenStreetMap.','Solicita una ruta a pie: tus coordenadas elegidas y la parada se enviarán a Geoapify. Los mapas provienen de OpenStreetMap.'),shell,'home-note');
+  const message=text('p','',shell,'home-note');message.setAttribute('role','status');
+  let busy=false;
+  button(shell,t('Share location and show walking route','Compartir ubicación y mostrar ruta a pie'),async()=>{
+   if(busy||!validPoint(S.location)||!validPoint(S.stop))return;
+   closeWalking();busy=true;const origin=S.location,stop=S.stop,controller=new AbortController();
+   const resultShell=text('section',null,shell,'home-live-shell');const w=walking={controller,shell:resultShell,map:null};
+   const timeout=setTimeout(()=>controller.abort(),15000);
+   message.textContent=t('Loading walking route…','Cargando ruta a pie…');
+   try{
+    const r=await fetch('/api/walking-route',{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',signal:controller.signal,body:JSON.stringify({latitude:origin.latitude,longitude:origin.longitude,stop_id:String(stop.stop_id),consent:true})});
+    if(!r.ok)throw Error('Unavailable');const d=await r.json();
+    if(walking!==w||S.location!==origin||S.stop!==stop)return;
+    if(d.source!=='Geoapify'||d.mode!=='walking'||d.stop_id!==String(stop.stop_id)||!finite(d.distance_meters)||d.distance_meters<=0||!finite(d.duration_seconds)||d.duration_seconds<=0||age(d.retrieved_at,Date.now()/1000)>300||!Array.isArray(d.points)||d.points.length<2||!d.points.every(p=>Array.isArray(p)&&validPoint({latitude:p[0],longitude:p[1]})))throw Error('Invalid route');
+    message.textContent='';
+    const note=$('homeWalkingDuration');
+    if(note)note.textContent=t('Estimated walk: ','Caminata estimada: ')+AyoUnits.distance(d.distance_meters)+' · '+Math.ceil(d.duration_seconds/60)+' min';
+    text('p',AyoUnits.distance(d.distance_meters)+' · '+Math.ceil(d.duration_seconds/60)+' min',resultShell);
+    text('p',t('Estimated walking route. Sidewalk condition, crossings and accessibility are not verified.','Ruta a pie estimada. No se verifican aceras, cruces ni accesibilidad.'),resultShell,'home-note');
+    text('p','Powered by Geoapify · © OpenStreetMap contributors',resultShell,'home-note');
+    button(resultShell,t('Hide walking map','Ocultar mapa a pie'),()=>closeWalking(),'home-text-button');
+    if(!root.L){text('p',t('Map unavailable. Use external directions.','Mapa no disponible. Usa indicaciones externas.'),resultShell);return;}
+    const el=text('div',null,resultShell,'home-live-map');el.setAttribute('role','region');el.setAttribute('aria-label',t('Walking route map','Mapa de ruta a pie'));
+    w.map=root.L.map(el,{scrollWheelZoom:false});
+    root.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(w.map);
+    const line=root.L.polyline(d.points,{color:'#D4A843',weight:5}).addTo(w.map);
+    root.L.circleMarker([origin.latitude,origin.longitude],{radius:7}).addTo(w.map).bindTooltip(text('span',t('Start','Origen')));
+    root.L.circleMarker([stop.latitude,stop.longitude],{radius:7}).addTo(w.map).bindTooltip(text('span',stop.name));
+    w.map.fitBounds(line.getBounds().extend([origin.latitude,origin.longitude]).extend([stop.latitude,stop.longitude]),{padding:[28,28],maxZoom:17});
+   }catch{if(walking===w){closeWalking();message.textContent=t('Walking route unavailable. Use Apple Maps or Google Maps above.','Ruta a pie no disponible. Usa Apple Maps o Google Maps arriba.');}}
+   finally{clearTimeout(timeout);busy=false;}
+  });
+ }
  function show(screen,{focus=true}={}){
   S.screen=screen;for(const el of document.querySelectorAll('[data-home-screen]'))el.hidden=el.dataset.homeScreen!==screen;
-  if(screen!=='selected')closeMap();status();
+  if(screen!=='selected'){closeMap();closeWalking();}status();
   if(focus){const heading=document.querySelector(`[data-home-screen="${screen}"] h1`);if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}window.scrollTo({top:screen==='nearby'?S.listY:0,behavior:'instant'});}
  }
  function locationIndicator(){ $('homeLocationIndicator').textContent=S.location?.kind==='gps'?t('Location enabled','Ubicación activada'):t('Location selected','Ubicación seleccionada');}
@@ -117,11 +157,11 @@ document.addEventListener('DOMContentLoaded',()=>{
  $('homeMoreStops').onclick=async()=>{S.shown+=5;if(S.shown>S.rows.length&&S.next!=null){const shown=S.shown;await loadStops(true);S.shown=shown;}renderStops();};
  function label(kind){return {arrival:t('Live · predicted arrival','En vivo · llegada estimada'),departure:t('Live · predicted departure','En vivo · salida estimada'),scheduled:t('Scheduled','Programado'),canceled:t('Canceled','Cancelado'),unknown:t('Arrival unavailable','Llegada no disponible')}[kind]||t('Arrival unavailable','Llegada no disponible');}
  async function selectStop(stop){
-  closeMap();S.openIntent++;S.listY=window.scrollY;S.arrivalController?.abort();S.pendingArrivals=false;S.stop=stop;S.stopVersion++;S.arrivalsAt=0;$('homeArrivals').replaceChildren();S.arrivals=null;S.arrivalError=false;root.state.selectedStopId=stop.stop_id;show('selected');renderSelected();await arrivals();
+  closeMap();closeWalking();S.openIntent++;S.listY=window.scrollY;S.arrivalController?.abort();S.pendingArrivals=false;S.stop=stop;S.stopVersion++;S.arrivalsAt=0;$('homeArrivals').replaceChildren();S.arrivals=null;S.arrivalError=false;root.state.selectedStopId=stop.stop_id;show('selected');renderSelected();await arrivals();
  }
  function renderSelected(){
-  const host=$('homeSelectedStop');host.replaceChildren();text('h1',S.stop.name,host).id='homeStopTitle';favorite(host,S.stop);if(S.stop.direction_name)text('p',S.stop.direction_name,host);text('p',distance(S.stop),host);text('p',t('Walking duration is unavailable. Check a pedestrian navigation service.','La duración a pie no está disponible. Consulta un servicio de navegación peatonal.'),host,'home-note');
-  button(host,t('Walk to This Stop','Caminar hasta esta parada'),()=>{const links=$('homeWalkLinks');links.replaceChildren();const urls=walkingURLs(S.location,S.stop);if(!urls){text('p',t('Choose your starting location to open walking directions.','Elige tu ubicación de origen para abrir las indicaciones a pie.'),links);button(links,t('Choose location','Elegir ubicación'),()=>show('welcome'));}else{for(const [name,url]of [['Apple Maps',urls.apple],['Google Maps',urls.google]]){const a=text('a',name,links);a.href=url;a.target='_blank';a.rel='noopener noreferrer';}text('p',t('External walking directions use your selected start and this official stop. Distance, time and accessibility must be checked there.','Las indicaciones externas usan el origen elegido y esta parada oficial. Consulta allí la distancia, duración y accesibilidad.'),links);}links.hidden=false;});
+  const host=$('homeSelectedStop');host.replaceChildren();text('h1',S.stop.name,host).id='homeStopTitle';favorite(host,S.stop);if(S.stop.direction_name)text('p',S.stop.direction_name,host);text('p',distance(S.stop),host);text('p',t('Select Walk to This Stop to check walking time.','Selecciona Caminar hasta esta parada para consultar la duración.'),host,'home-note').id='homeWalkingDuration';
+  button(host,t('Walk to This Stop','Caminar hasta esta parada'),()=>{const links=$('homeWalkLinks');closeWalking();links.replaceChildren();const urls=walkingURLs(S.location,S.stop);if(!urls){text('p',t('Choose your starting location to open walking directions.','Elige tu ubicación de origen para abrir las indicaciones a pie.'),links);button(links,t('Choose location','Elegir ubicación'),()=>show('welcome'));}else{for(const [name,url]of [['Apple Maps',urls.apple],['Google Maps',urls.google]]){const a=text('a',name,links);a.href=url;a.target='_blank';a.rel='noopener noreferrer';}text('p',t('External walking directions use your selected start and this official stop. Distance, time and accessibility must be checked there.','Las indicaciones externas usan el origen elegido y esta parada oficial. Consulta allí la distancia, duración y accesibilidad.'),links);}links.hidden=false;if(urls)addWalkingRoute(links);});
   $('homeWalkLinks').hidden=true;$('homeWalkLinks').replaceChildren();$('homeLegacyTools').open=false;refreshStars();
  }
  $('homeBackStops').onclick=()=>{S.stopVersion++;show(S.location?'nearby':'welcome');};
@@ -196,9 +236,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   }else if(S.screen==='nearby'){for(const el of document.querySelectorAll('[data-stop-preview]')){const data=S.previews.get(el.dataset.stopPreview);if(data)renderPreview(el,!navigator.onLine?{...data,realtime_status:'unavailable'}:data);}if(navigator.onLine&&Date.now()-S.previewAt>=60000){S.previewAt=Date.now();previews(S.version);}}
  }
  function startTimer(){if(!S.timer)S.timer=setInterval(tick,1000);}
- document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick();});root.addEventListener('offline',()=>{S.arrivalError=true;S.live?.controller.abort();closeMap();tick();status(t('Offline. Reconnect to refresh transit information.','Sin conexión. Conéctate para actualizar el transporte.'));});root.addEventListener('online',()=>{if(S.screen==='selected')arrivals();else if(S.screen==='nearby'&&S.location)loadStops();});
- root.addEventListener('pagehide',()=>{clearInterval(S.timer);S.timer=null;S.request?.abort();closeMap();});root.addEventListener('pageshow',()=>{startTimer();tick();});
- function navigation(){const active=root.AyoSite?.activeView==='stops';document.body.classList.toggle('home-active',active);if(!active){S.locationIntent++;S.openIntent++;closeMap();}else{radiusUI();tick();}}
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick();});root.addEventListener('offline',()=>{S.arrivalError=true;S.live?.controller.abort();closeMap();closeWalking();tick();status(t('Offline. Reconnect to refresh transit information.','Sin conexión. Conéctate para actualizar el transporte.'));});root.addEventListener('online',()=>{if(S.screen==='selected')arrivals();else if(S.screen==='nearby'&&S.location)loadStops();});
+ root.addEventListener('pagehide',()=>{clearInterval(S.timer);S.timer=null;S.request?.abort();closeMap();closeWalking();});root.addEventListener('pageshow',()=>{startTimer();tick();});
+ function navigation(){const active=root.AyoSite?.activeView==='stops';document.body.classList.toggle('home-active',active);if(!active){S.locationIntent++;S.openIntent++;closeMap();closeWalking();}else{radiusUI();tick();}}
  root.addEventListener('ayo:screen-change',navigation);navigation();startTimer();
  root.AyoHome={get map(){return S.live?.map||null;},get location(){return S.location;},get screen(){return S.screen;},get radius(){return S.radius;},get selectedStop(){return S.stop;},openStop:openStopId,chooseLocation,refresh:arrivals,goHome(){S.stopVersion++;S.listY=0;show(S.location?'nearby':'welcome');}};
  // Permission state, not a saved preference, determines whether GPS can be
