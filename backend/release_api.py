@@ -49,6 +49,10 @@ def db():
             CREATE INDEX IF NOT EXISTS reports_expiry ON reports(expires);"""
             for statement in schema.split(';'):
                 if statement.strip():c.execute(statement)
+            report_columns={r[1] for r in c.execute('PRAGMA table_info(reports)')}
+            if 'category' not in report_columns:
+                c.execute("ALTER TABLE reports ADD COLUMN category TEXT NOT NULL DEFAULT 'other'")
+            c.execute('CREATE INDEX IF NOT EXISTS reports_stop_category_expiry ON reports(stop_id,category,expires)')
             fields={r[1] for r in c.execute('PRAGMA table_info(moderation_audit)')}
             for name in ['actor','reason']:
                 if name not in fields:c.execute('ALTER TABLE moderation_audit ADD COLUMN '+name+" TEXT DEFAULT ''")
@@ -230,22 +234,33 @@ def install(app):
         with schedule.connect() as c:
             coverage=c.execute('SELECT MIN(date),MAX(date) FROM calendar_dates').fetchone()
         return jsonify(schedule_start=coverage[0],schedule_end=coverage[1],schedule_active_today=bool(schedule.services(datetime.now(TZ).date())),timezone=str(TZ),moderation_configured=bool(os.getenv('MODERATOR_TOKEN') or os.getenv('MODERATOR_TOKENS')),support_email=os.getenv('SUPPORT_EMAIL') or None)
+    @app.get('/api/community/config')
+    def community_config():
+        from backend.services.community_service import CATEGORIES
+        return jsonify(categories=[{'id':key,**labels} for key,labels in CATEGORIES.items()],comment_max_length=500)
     @app.get('/api/winter/reports')
     def reports():
+        from backend.services.community_service import CATEGORIES
         with db() as c:
-            rows=c.execute("SELECT r.id,r.stop_id,r.text,r.created,r.expires,COALESCE(SUM(v.value),0) AS votes FROM reports r LEFT JOIN votes v ON r.id=v.report_id WHERE r.state='approved' AND r.expires>? GROUP BY r.id ORDER BY r.created DESC LIMIT 100",(int(time.time()),)).fetchall()
-        return jsonify(reports=[dict(r) for r in rows],source='Anonymous community reports; unverified')
+            rows=c.execute("SELECT r.id,r.stop_id,r.category,r.text,r.created,r.expires,COALESCE(SUM(v.value),0) AS votes FROM reports r LEFT JOIN votes v ON r.id=v.report_id WHERE r.state='approved' AND r.expires>? GROUP BY r.id ORDER BY r.created DESC LIMIT 100",(int(time.time()),)).fetchall()
+        return jsonify(reports=[{**dict(r),'category_labels':CATEGORIES.get(r['category'],CATEGORIES['other'])} for r in rows],source='Anonymous community reports; unverified')
     @app.post('/api/winter/reports')
     def report():
-        data=request.get_json(silent=True) or {}; stop=str(data.get('stop_id','')); text=data.get('text','')
-        if not isinstance(text,str) or not 10<=len(text.strip())<=500 or '<' in text or '>' in text or 'http' in text.lower(): raise ValueError('Use 10–500 characters of plain text, without links or personal information')
+        from backend.services.community_service import report_fields
+        stop,category,text=report_fields(request.get_json(silent=True) or {})
         with schedule.connect() as c:
-            if not c.execute('SELECT 1 FROM stops WHERE stop_id=?',(stop,)).fetchone(): raise ValueError('Choose a valid stop')
+            row=c.execute('SELECT * FROM stops WHERE stop_id=?',(stop,)).fetchone()
+            if not row or dict(row).get('location_type','') not in ('','0',None):raise ValueError('Choose a valid stop')
+        now=int(time.time())
         with db() as c:
-            duplicate=c.execute("SELECT 1 FROM reports WHERE stop_id=? AND LOWER(TRIM(text))=LOWER(TRIM(?)) AND expires>?",(stop,text.strip(),time.time())).fetchone()
+            # Serialize duplicate lookup and insertion across concurrent requests.
+            c.execute('BEGIN IMMEDIATE')
+            rows=c.execute('SELECT text FROM reports WHERE stop_id=? AND category=? AND expires>?',(stop,category,now)).fetchall()
+            import unicodedata
+            duplicate=any(' '.join(unicodedata.normalize('NFKC',r['text'] or '').split()).casefold()==text.casefold() for r in rows)
             if duplicate:return jsonify(message='This observation was already submitted. Please do not repeat it.'),409
-            cur=c.execute('INSERT INTO reports(stop_id,text,created,expires) VALUES(?,?,?,?)',(stop,text.strip(),int(time.time()),int(time.time())+86400))
-        return jsonify(id=cur.lastrowid,state='pending',message='Queued for moderation; expires in 24 hours'),202
+            cur=c.execute('INSERT INTO reports(stop_id,category,text,created,expires) VALUES(?,?,?,?,?)',(stop,category,text,now,now+86400))
+        return jsonify(id=cur.lastrowid,stop_id=stop,category=category,state='pending',created=now,expires=now+86400,message='Queued for moderation; expires in 24 hours'),202
     @app.post('/api/winter/reports/<int:report_id>/vote')
     def vote(report_id):
         data=request.get_json(silent=True) or {}; value=data.get('value')

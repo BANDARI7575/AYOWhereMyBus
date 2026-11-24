@@ -436,5 +436,13 @@
   "Nearby MCTS stops": "Paradas cercanas de MCTS",
   "Available community reports": "Informes comunitarios disponibles",
   "Refresh nearby summary": "Actualizar resumen cercano",
-  "Official notices retain their published details below. Nearby community reports are a separate, unverified source.": "Los avisos oficiales conservan sus detalles publicados abajo. Los informes comunitarios cercanos son una fuente separada y sin verificar."
+  "Official notices retain their published details below. Nearby community reports are a separate, unverified source.": "Los avisos oficiales conservan sus detalles publicados abajo. Los informes comunitarios cercanos son una fuente separada y sin verificar.",
+  "Submit a community observation": "Enviar una observación comunitaria",
+  "Use a nearby stop from Home's selected location and radius. Reports are unverified and reviewed before publication. They expire 24 hours after posting. Do not include names, contact details or links.": "Usa una parada cercana a la ubicación y el radio elegidos en Inicio. Los informes no están verificados y se revisan antes de publicarse. Vencen 24 horas después del envío. No incluyas nombres, datos de contacto ni enlaces.",
+  "Nearby bus stop": "Parada de autobús cercana",
+  "Choose a location on Home first": "Elige primero una ubicación en Inicio",
+  "Report category": "Categoría del informe",
+  "Loading report categories…": "Cargando categorías de informes…",
+  "Comment (optional, up to 500 characters)": "Comentario (opcional, hasta 500 caracteres)",
+  "Observations describe conditions, not guaranteed safety. Submitting does not publish your report immediately.": "Las observaciones describen condiciones, no garantizan seguridad. El envío no publica el informe de inmediato."
 }

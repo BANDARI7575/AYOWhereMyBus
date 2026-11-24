@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  }
  const $=id=>document.getElementById(id),retry=$('refreshNearbyConditions'),panel=$('nearbyConditions');
  let selectedKey=null,stops=null,reports=null,stopAt=0,reportAt=0,stopError=false,reportError=false,loading=false,request=null,serial=0,debounce=null,lastAttempt=0,expiryTimer=null;
+ let nearbySnapshot=null;root.AyoNearbySummary={get snapshot(){return nearbySnapshot;}};
  const current=()=>selection(root.AyoHome?.location||root.state?.selectedLocation,root.AyoHome?.radius??.5);
  const active=()=>root.AyoSite?.activeView==='alerts'&&!document.hidden;
  const fresh=stamp=>finite(stamp)&&Date.now()/1000-stamp>=-60&&Date.now()/1000-stamp<120;
@@ -42,6 +43,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   const selected=synchronize(),stopList=$('nearbyStopsList'),reportList=$('nearbyReportsList');
   stopList.replaceChildren();reportList.replaceChildren();
   panel.setAttribute('aria-busy',String(loading));retry.disabled=loading||!selected;
+  nearbySnapshot={key:selected?.key??null,stops:stops||[],available:!!(selected&&stops&&!stopError&&fresh(stopAt)&&!loading&&navigator.onLine)};
+  root.dispatchEvent(new CustomEvent('ayo:nearby-summary',{detail:nearbySnapshot}));
   $('nearbyStopCount').textContent=stops?String(stops.length):'—';
   const matched=stops&&reports?localReports(reports,stops):null;
   $('nearbyReportCount').textContent=matched?String(matched.length):'—';
@@ -64,7 +67,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(matched){
    if(!matched.length)row(reportList,t('No available approved reports for these stops. Conditions are unknown.','No hay informes aprobados disponibles para estas paradas. Se desconocen las condiciones.'));
    const names=new Map(stops.map(stop=>[String(stop.stop_id),stop.name]));
-   for(const report of matched){const expires=new Date(Math.min(report.expires,report.created+86400)*1000).toLocaleString(es()?'es-US':'en-US',{timeZone:'America/Chicago',dateStyle:'short',timeStyle:'short'});row(reportList,names.get(String(report.stop_id))+' · '+report.text+' · '+t('Expires ','Vence ')+expires+' America/Chicago');}
+   for(const report of matched){const expires=new Date(Math.min(report.expires,report.created+86400)*1000).toLocaleString(es()?'es-US':'en-US',{timeZone:'America/Chicago',dateStyle:'short',timeStyle:'short'});row(reportList,names.get(String(report.stop_id))+' · '+(typeof report.category_labels?.[es()?'es':'en']==='string'?report.category_labels[es()?'es':'en']+' · ':'')+report.text+' · '+t('Expires ','Vence ')+expires+' America/Chicago');}
   }
   const knownAt=Math.min(...[stopAt,reportAt].filter(stamp=>stamp>0));
   $('nearbyConditionsStatus').textContent=loading?loadingText:stopError||reportError||staleStops||staleReports?t('Some data is unavailable or stale. Last-known observations are not current conditions. Retry to refresh.','Algunos datos no están disponibles o están desactualizados. Las últimas observaciones no son condiciones actuales. Vuelve a consultar.'):finite(knownAt)?t('Checked ','Consultado ')+new Date(knownAt*1000).toLocaleString(es()?'es-US':'en-US',{timeZone:'America/Chicago',dateStyle:'short',timeStyle:'short'})+' America/Chicago':'';
@@ -103,6 +106,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  }
  function changed(){synchronize();render();clearTimeout(debounce);debounce=setTimeout(()=>refresh(true),250);}
  retry.onclick=()=>refresh(true);
+ window.addEventListener('ayo:community-submitted',()=>refresh(true));
  window.addEventListener('ayo:location-selected',changed);
  window.addEventListener('ayo:radius-changed',changed);
  window.addEventListener('ayo:alerts-updated',update);

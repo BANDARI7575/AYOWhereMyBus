@@ -105,6 +105,21 @@
         <h3>Available community reports</h3><ul id="nearbyReportsList" data-no-translate="true"></ul>
         <button id="refreshNearbyConditions" class="favorite-chip" type="button">Refresh nearby summary</button>
       </details>
+      <details id="communitySubmission" class="panel">
+        <summary>Submit a community observation</summary>
+        <p class="alert-center-note">Use a nearby stop from Home's selected location and radius. Reports are unverified and reviewed before publication. They expire 24 hours after posting. Do not include names, contact details or links.</p>
+        <form id="communityReportForm">
+          <label for="communityStop">Nearby bus stop</label>
+          <select id="communityStop" required disabled><option value="">Choose a location on Home first</option></select>
+          <label for="communityCategory">Report category</label>
+          <select id="communityCategory" required disabled><option value="">Loading report categories…</option></select>
+          <label for="communityComment">Comment (optional, up to 500 characters)</label>
+          <textarea id="communityComment" maxlength="500" rows="3" aria-describedby="communityFormHelp"></textarea>
+          <p id="communityFormHelp" class="tiny-note">Observations describe conditions, not guaranteed safety. Submitting does not publish your report immediately.</p>
+          <button id="submitCommunityReport" type="submit" disabled>Submit for moderation</button>
+        </form>
+        <p id="communitySubmissionStatus" role="status" aria-live="polite"></p>
+      </details>
       <div class="alert-section-heading"><div><p class="eyebrow">FROM THE SOURCE</p><h2>Official MCTS notices</h2></div><span class="alert-source-badge">MCTS</span></div>
       <p class="alert-center-note">Official notices retain their published details below. Nearby community reports are a separate, unverified source.</p>
       <div id="alertsHost"></div>
@@ -274,5 +289,6 @@
   <script src="/static/js/home-experience.js" defer></script>
   <script src="/static/js/home-stops.js" defer></script>
   <script src="/static/js/alerts-appearance.js" defer></script>
+  <script src="/static/js/community-reports.js" defer></script>
 </body>
 </html>

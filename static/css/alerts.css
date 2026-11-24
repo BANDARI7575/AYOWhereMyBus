@@ -19,6 +19,10 @@
 #alertsScreen .alert-center-note{font-size:12px;line-height:1.6;color:var(--muted);max-width:75ch;margin:0 0 20px}
 #alertsScreen #nearbyConditions{margin-bottom:24px}
 #alertsScreen #nearbyConditions li{overflow-wrap:anywhere;line-height:1.6;margin-bottom:8px}
+#alertsScreen #communitySubmission{margin-bottom:24px}
+#communityReportForm{display:grid;gap:10px;min-width:0}
+#communityReportForm select,#communityReportForm textarea{width:100%;min-width:0;box-sizing:border-box}
+#communitySubmissionStatus{overflow-wrap:anywhere}
 #alertsScreen #serviceAlerts{border:0;padding:0;background:transparent;margin:0 0 24px}
 #alertsScreen #serviceAlerts>.alert-summary{font-size:14px;padding:12px 0;color:var(--muted);border-bottom:1px solid var(--alert-line);margin-bottom:12px}
 #alertsScreen #serviceAlerts>.status-note{font-size:12px;color:var(--muted);line-height:1.6;margin:8px 0}
