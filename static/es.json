@@ -426,5 +426,15 @@
   "We wanted to create something simple, useful, and accessible — a place where Milwaukee riders can check available bus information, find nearby stops, plan journeys, and stay informed about service disruptions.": "Queríamos crear algo sencillo, útil y accesible: un lugar donde los pasajeros de Milwaukee puedan consultar la información disponible sobre autobuses, encontrar paradas cercanas, planificar viajes e informarse sobre interrupciones del servicio.",
   "Our goal isn't just to show where a bus is.": "Nuestro objetivo va más allá de mostrar dónde está un autobús.",
   "It's to help people spend less time waiting, make better travel decisions, and get where they're going with more confidence.": "Buscamos ayudar a las personas a esperar menos, tomar mejores decisiones de viaje y llegar a su destino con más confianza.",
-  "Built in Milwaukee. Inspired by everyday riders. Made for the journey.": "Hecho en Milwaukee. Inspirado en los pasajeros de cada día. Creado para el viaje."
+  "Built in Milwaukee. Inspired by everyday riders. Made for the journey.": "Hecho en Milwaukee. Inspirado en los pasajeros de cada día. Creado para el viaje.",
+  "Nearby stop count": "Número de paradas cercanas",
+  "Nearby community report count": "Número de informes comunitarios cercanos",
+  "Set your location on Home to see nearby stops.": "Elige tu ubicación en Inicio para ver paradas cercanas.",
+  "Choose a location to check available reports.": "Elige una ubicación para consultar los informes disponibles.",
+  "Nearby stops and community conditions": "Paradas cercanas y condiciones comunitarias",
+  "Uses Home's selected location and radius. Distances are straight-line estimates. Community observations are unverified; no report does not mean a stop is safe.": "Usa la ubicación y el radio elegidos en Inicio. Las distancias son estimaciones en línea recta. Las observaciones comunitarias no están verificadas; la ausencia de informes no significa que una parada sea segura.",
+  "Nearby MCTS stops": "Paradas cercanas de MCTS",
+  "Available community reports": "Informes comunitarios disponibles",
+  "Refresh nearby summary": "Actualizar resumen cercano",
+  "Official notices retain their published details below. Nearby community reports are a separate, unverified source.": "Los avisos oficiales conservan sus detalles publicados abajo. Los informes comunitarios cercanos son una fuente separada y sin verificar."
 }

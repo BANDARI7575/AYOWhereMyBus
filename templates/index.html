@@ -94,11 +94,19 @@
       <div class="alert-center-hero"><p class="eyebrow">AYO! ALERT CENTER</p><h1 id="alertsTitle">Know before you go.</h1><p class="alert-center-subtitle">Milwaukee transit disruptions, nearby stop conditions, and rider updates.</p><span class="alert-center-tag">Official notices · Clear sources</span></div>
       <section class="alert-dashboard" aria-label="Alert source summaries">
         <article class="alert-dashboard-card"><p>Official Alerts</p><strong id="officialAlertCount" aria-label="Official alert count">—</strong><span id="officialAlertState" role="status">Checking official notices…</span></article>
-        <article class="alert-dashboard-card"><p>Nearby Alerts</p><strong aria-label="Nearby alert count unavailable">—</strong><span id="nearbyAlertState">Set location on Home · summary not loaded.</span></article>
-        <article class="alert-dashboard-card"><p>Community Reports</p><strong aria-label="Community report count not loaded">—</strong><span>Summary not loaded · unverified rider reports.</span></article>
+        <article class="alert-dashboard-card"><p>Nearby Stops</p><strong id="nearbyStopCount" aria-label="Nearby stop count">—</strong><span id="nearbyAlertState" role="status">Set your location on Home to see nearby stops.</span></article>
+        <article class="alert-dashboard-card"><p>Community Reports</p><strong id="nearbyReportCount" aria-label="Nearby community report count">—</strong><span id="nearbyReportState" role="status">Choose a location to check available reports.</span></article>
       </section>
+      <details id="nearbyConditions" class="panel">
+        <summary>Nearby stops and community conditions</summary>
+        <p id="nearbyConditionsStatus" role="status"></p>
+        <p class="alert-center-note">Uses Home's selected location and radius. Distances are straight-line estimates. Community observations are unverified; no report does not mean a stop is safe.</p>
+        <h3>Nearby MCTS stops</h3><ul id="nearbyStopsList" data-no-translate="true"></ul>
+        <h3>Available community reports</h3><ul id="nearbyReportsList" data-no-translate="true"></ul>
+        <button id="refreshNearbyConditions" class="favorite-chip" type="button">Refresh nearby summary</button>
+      </details>
       <div class="alert-section-heading"><div><p class="eyebrow">FROM THE SOURCE</p><h2>Official MCTS notices</h2></div><span class="alert-source-badge">MCTS</span></div>
-      <p class="alert-center-note">Nearby matching and community summaries are not available on this page. Official notices retain their published details below.</p>
+      <p class="alert-center-note">Official notices retain their published details below. Nearby community reports are a separate, unverified source.</p>
       <div id="alertsHost"></div>
       <button type="button" data-workspace="alerts">Manage arrival alerts</button>
       <p class="tiny-note">Arrival notifications require reliable predictions and device permission. Background delivery may require operator setup.</p>

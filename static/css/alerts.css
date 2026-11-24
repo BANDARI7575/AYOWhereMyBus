@@ -17,6 +17,8 @@
 #alertsScreen .alert-section-heading .eyebrow{font-size:10px;margin-bottom:5px}#alertsScreen h2{font-size:21px;letter-spacing:-.025em;margin:0}
 #alertsScreen .alert-source-badge{padding:5px 10px;border:1px solid var(--alert-line);border-radius:8px;color:var(--alert-amber);font-size:11px;font-weight:700;letter-spacing:.08em}
 #alertsScreen .alert-center-note{font-size:12px;line-height:1.6;color:var(--muted);max-width:75ch;margin:0 0 20px}
+#alertsScreen #nearbyConditions{margin-bottom:24px}
+#alertsScreen #nearbyConditions li{overflow-wrap:anywhere;line-height:1.6;margin-bottom:8px}
 #alertsScreen #serviceAlerts{border:0;padding:0;background:transparent;margin:0 0 24px}
 #alertsScreen #serviceAlerts>.alert-summary{font-size:14px;padding:12px 0;color:var(--muted);border-bottom:1px solid var(--alert-line);margin-bottom:12px}
 #alertsScreen #serviceAlerts>.status-note{font-size:12px;color:var(--muted);line-height:1.6;margin:8px 0}

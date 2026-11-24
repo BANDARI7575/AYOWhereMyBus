@@ -44,6 +44,22 @@ class ReliabilityTests(test_release.ScheduleTests):
         self.assertNotIn('S',self.engine.services(datetime(2026,11,10).date()))
 
 class ModerationTests(test_release.ApiTests):
+    def test_report_expires_at_exactly_twenty_four_hours(self):
+        now=int(time.time())
+        with patch('backend.release_api.time.time',return_value=now):
+            response=self.client.post('/api/winter/reports',json={'stop_id':'1','text':'Isolated expiry boundary observation.'})
+            self.assertEqual(response.status_code,202)
+            rid=response.json['id']
+            with release_api.db() as c:
+                row=c.execute('SELECT created,expires FROM reports WHERE id=?',(rid,)).fetchone()
+                self.assertEqual(row['expires']-row['created'],86400)
+            with patch.dict('os.environ',{'MODERATOR_TOKEN':'test'}):
+                self.assertEqual(self.client.post(f'/api/moderation/reports/{rid}',json={'state':'approved'},headers={'Authorization':'Bearer test'}).status_code,200)
+        with patch('backend.release_api.time.time',return_value=now+86399):
+            self.assertEqual(len(self.client.get('/api/winter/reports').json['reports']),1)
+        with patch('backend.release_api.time.time',return_value=now+86400):
+            self.assertEqual(self.client.get('/api/winter/reports').json['reports'],[])
+
     def test_expired_unapproved_private_and_no_voting(self):
         with release_api.db() as c:
             c.execute("INSERT INTO reports(id,stop_id,text,state,created,expires) VALUES(101,'1','Approved but expired','approved',?,?)",(int(time.time())-100,int(time.time())-1))
