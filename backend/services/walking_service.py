@@ -7,6 +7,7 @@ import time
 from urllib.parse import urlencode
 from flask import jsonify, request
 from backend.services.feed_http import fetch_feed
+from backend.services.geoapify_budget import reserve
 
 _slots = threading.BoundedSemaphore(2)
 DAILY_REQUEST_LIMIT = 500
@@ -76,9 +77,12 @@ def install_walking(app, schedule, db):
                 c.execute('CREATE TABLE IF NOT EXISTS walking_budget(day INTEGER PRIMARY KEY, count INTEGER NOT NULL)')
                 c.execute('DELETE FROM walking_budget WHERE day<?',(day,))
                 c.execute('INSERT INTO walking_budget VALUES(?,0) ON CONFLICT(day) DO NOTHING',(day,))
-                admitted = c.execute('UPDATE walking_budget SET count=count+1 WHERE day=? AND count<?',(day,DAILY_REQUEST_LIMIT)).rowcount
-            if not admitted:
-                return jsonify(message='Daily walking request limit reached.'),429
+                count = c.execute('SELECT count FROM walking_budget WHERE day=?',(day,)).fetchone()[0]
+                if count >= DAILY_REQUEST_LIMIT:
+                    return jsonify(message='Daily walking request limit reached.'),429
+                if not reserve(c, day=day, legacy_walking=count):
+                    return jsonify(message='Daily Geoapify request limit reached.'),429
+                c.execute('UPDATE walking_budget SET count=count+1 WHERE day=?',(day,))
             params = dict(waypoints=f'{origin[0]},{origin[1]}|{destination[0]},{destination[1]}',mode='walk',units='metric',format='geojson',apiKey=token)
             raw = json.loads(fetch_feed('https://api.geoapify.com/v1/routing?'+urlencode(params)))
             result = parse_route(raw,origin,destination)

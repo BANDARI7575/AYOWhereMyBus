@@ -62,7 +62,7 @@ def db():
 
 def install(app):
     from backend.services.geocoding_service import install_geocoding
-    install_geocoding(app)
+    install_geocoding(app, db)
     from backend.services.walking_service import install_walking
     install_walking(app, schedule, db)
     production=os.getenv('AYO_ENV')=='production'

@@ -30,3 +30,16 @@ test('place adapters are inactive and never receive a query without approval and
  await assert.rejects(search.searchPlaces('query'),/Consent/);assert.equal(calls,0);
  assert.deepEqual(await search.searchPlaces('query',{consent:true}),[{kind:'place',name:'Place',latitude:43,longitude:-88}]);
 });
+
+test('configured browser geocoder sends explicit consent and never sends an unapproved query',async()=>{
+ const vm=require('node:vm'),fs=require('node:fs');const requests=[];
+ const window={document:{documentElement:{lang:'en'}},fetch:async(url,options)=>{requests.push({url,options});return {ok:true,json:async()=>url==='/api/location-config'?{configured:true}:{locations:[{name:'Verified place',latitude:43,longitude:-88}]}};}};
+ vm.runInNewContext(fs.readFileSync(require.resolve('../../static/js/location-search.js'),'utf8'),{window});
+ const api=window.AyoLocationSearch;await api.ready;
+ await assert.rejects(api.searchPlaces('private',{consent:false}),/Consent/);
+ await assert.rejects(api.searchPlaces('private',{consent:1}),/Consent/);
+ assert.equal(requests.length,1);
+ await api.searchPlaces('public place',{consent:true});
+ assert.equal(requests.length,2);assert.equal(requests[1].url,'/api/location-search');
+ assert.deepEqual(JSON.parse(requests[1].options.body),{q:'public place',consent:true,lang:'en'});
+});
