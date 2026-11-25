@@ -18,7 +18,7 @@
   <link rel="apple-touch-icon" href="/static/img/icon-192.png">
   <link rel="icon" href="/static/img/icon-192.png">
 </head>
-<body>
+<body{% if relay_tiles %} data-relay-street-tiles="true"{% endif %}>
   <a class="skip-link" href="#main">Skip to passenger tools</a>
   <header class="app-header" id="navbar">
     <a class="brand" href="#stops" aria-label="AYO home"><span class="brand-name">AYO<span aria-hidden="true">!</span></span><span class="brand-subtitle">Where's My Bus?</span></a>

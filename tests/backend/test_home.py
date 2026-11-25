@@ -111,8 +111,12 @@ class HomeTests(unittest.TestCase):
                 self.assertEqual(self.client.get(url).json['buses'],[])
             fleet['buses']=[bus,{**bus,'bus_id':'ambiguous'}]
             self.assertEqual(self.client.get(url).json['buses'],[])
+            fleet['buses']=[{**bus,'trip_id':'U'}]
+            self.assertEqual(self.client.get(url).json['reason'],'vehicle_not_reported')
             fleet['buses']=[bus];fleet['feed_timestamp']=now-181
-            self.assertEqual(self.client.get(url).json['buses'],[])
+            stale=self.client.get(url).json
+            self.assertEqual(stale['buses'],[])
+            self.assertEqual(stale['reason'],'stale_vehicle_feed')
 
     def test_vehicle_endpoint_rejects_invalid_or_mismatched_departure_identity(self):
         for query in ['service_date=20261110&stop_id=1&stop_sequence=1','service_date=20261109&stop_id=3&stop_sequence=1','service_date=20261109&stop_id=1&stop_sequence=999999999999999999999','service_date=20261109&stop_id=1&stop_sequence=1.5','service_date=bad&stop_id=1&stop_sequence=1']:

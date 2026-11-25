@@ -3,14 +3,15 @@ import os
 import time
 import threading
 import requests
-from backend.services.feed_http import fetch_feed
+from backend.services.feed_http import fetch_feed, fetch_mcts_relay
 from google.transit import gtfs_realtime_pb2 as pb
 
 class Realtime:
     def __init__(self): self.cache={}; self.locks={kind:threading.Lock() for kind in ['alerts','updates']}
     def feed(self, kind):
         url=os.getenv({'alerts':'ALERTS_URL','updates':'TRIP_UPDATES_URL'}[kind], 'https://realtime.ridemcts.com/gtfsrt/alerts' if kind=='alerts' else 'https://realtime.ridemcts.com/gtfsrt/trips')
-        if not url: return None,'unconfigured'
+        relay = os.getenv('AYO_MCTS_RELAY') == '1'
+        if not url and not relay: return None,'unconfigured'
         with self.locks[kind]:
             cached=self.cache.get(kind)
             if cached and time.monotonic()-cached[0]<20:
@@ -18,7 +19,7 @@ class Realtime:
                 if status=='fresh' and not -60<=time.time()-f.header.timestamp<=180: status='stale_or_invalid'
                 return f,status
             try:
-                raw=fetch_feed(url)
+                raw=fetch_mcts_relay('alerts' if kind=='alerts' else 'trips') if relay else fetch_feed(url)
                 f=pb.FeedMessage(); f.ParseFromString(raw)
                 age=time.time()-f.header.timestamp
                 status='fresh' if f.IsInitialized() and f.header.timestamp and -60<=age<=180 and f.header.incrementality==0 else 'stale_or_invalid'

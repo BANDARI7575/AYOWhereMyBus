@@ -133,7 +133,8 @@ def install(app):
         response.headers['X-AYO-Revision'] = app.config['AYO_SOURCE_REVISION']
         response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; connect-src 'self' https://api.open-meteo.com; media-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
         if request.is_secure: response.headers['Strict-Transport-Security']='max-age=31536000'
-        if request.path.startswith('/api/'): response.headers['Cache-Control']='no-store'
+        if request.path.startswith('/api/') and not (request.endpoint == 'walking_map_tile' and response.status_code == 200):
+            response.headers['Cache-Control']='no-store'
         return response
     @app.errorhandler(ValueError)
     def invalid(error): return jsonify(message=str(error)),400

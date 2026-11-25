@@ -14,11 +14,12 @@ GPS positions are not guaranteed arrival predictions.
 
 from datetime import datetime, timezone
 import math
+import os
 import threading
 import time
 
 import requests
-from backend.services.feed_http import fetch_feed
+from backend.services.feed_http import fetch_feed, fetch_mcts_relay
 from flask import Flask, jsonify, request, render_template
 from google.transit import gtfs_realtime_pb2
 
@@ -172,6 +173,15 @@ def parse_vehicle_feed(raw: bytes) -> dict:
 def live_vehicles() -> dict:
     """Fetch MCTS vehicles using a short-lived cache."""
 
+    url = os.getenv("VEHICLES_URL", FEED_URL)
+    relay = os.getenv("AYO_MCTS_RELAY") == "1"
+    if not url and not relay:
+        return {
+            "feed_timestamp": None,
+            "retrieved_at": datetime.now(timezone.utc).isoformat(),
+            "buses": [],
+        }
+
     now = time.monotonic()
 
     with _cache_lock:
@@ -185,7 +195,8 @@ def live_vehicles() -> dict:
         if now < _cache.get('retry_after',0):
             raise RuntimeError('Vehicle feed retry cooldown')
         try:
-            parsed = parse_vehicle_feed(fetch_feed(FEED_URL))
+            raw = fetch_mcts_relay("vehicles") if relay else fetch_feed(url)
+            parsed = parse_vehicle_feed(raw)
         except Exception:
             _cache['retry_after']=time.monotonic()+10
             raise
@@ -206,7 +217,7 @@ def live_vehicles() -> dict:
 def homepage():
     """Serve the AYO! website."""
 
-    return render_template("index.html")
+    return render_template("index.html", relay_tiles=os.getenv("AYO_WALKING_RELAY") == "1" and os.getenv("AYO_WALKING_ENABLED") == "1")
 
 
 @app.get("/ai")

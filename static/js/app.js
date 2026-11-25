@@ -21,6 +21,7 @@ const state = {
   version: 0,
   language: "en",
   map: null,
+  streetTiles: null,
   markers: null,
   markerIndex: new Map(),
   favorites: [],
@@ -161,18 +162,24 @@ function initializeMap() {
     return;
   }
 
+  const relayTiles = document.body.dataset.relayStreetTiles === "true";
   state.map = L.map("map", {
     scrollWheelZoom: false,
-    zoomControl: true
+    zoomControl: true,
+    minZoom: relayTiles ? 11 : 0
   }).setView(CENTER, 12);
 
-  L.tileLayer(
-    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+  const streetTiles = L.tileLayer(
+    relayTiles ? "/api/walking-map-tile?z={z}&x={x}&y={y}" : "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     {
       maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>'
+      updateWhenIdle: true,
+      noWrap: relayTiles,
+      attribution: (relayTiles ? 'Powered by <a href="https://www.geoapify.com/">Geoapify</a> · ' : '') + '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>'
     }
-  ).addTo(state.map);
+  );
+  if (!relayTiles || !document.getElementById("mapScreen").hidden) streetTiles.addTo(state.map);
+  state.streetTiles = streetTiles;
 
   state.markers = L.layerGroup().addTo(state.map);
 }
@@ -184,6 +191,7 @@ function resizeTransitMap() {
   const center = state.map.getCenter(), zoom = state.map.getZoom();
   state.map.invalidateSize({pan:false});
   state.map.setView(center, zoom, {animate:false});
+  if (state.streetTiles && !state.map.hasLayer(state.streetTiles)) state.streetTiles.addTo(state.map);
 }
 
 /* ==========================================================

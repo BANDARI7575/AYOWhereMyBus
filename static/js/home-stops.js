@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const w=walking;if(!w)return;walking=null;w.controller.abort();w.map?.remove();w.shell.remove();}
  function addWalkingRoute(host){
   const shell=text('section',null,host,'home-live-shell');
-  text('p',t('Request a walking route: your selected coordinates and stop will be sent to Geoapify. Map tiles are supplied by OpenStreetMap.','Solicita una ruta a pie: tus coordenadas elegidas y la parada se enviarán a Geoapify. Los mapas provienen de OpenStreetMap.'),shell,'home-note');
+  text('p',t('Request a walking route: your selected coordinates and stop will be sent to Geoapify. The street map uses tiles for the area you view.','Solicita una ruta a pie: tus coordenadas elegidas y la parada se enviarán a Geoapify. El mapa de calles usa imágenes del área que ves.'),shell,'home-note');
   const message=text('p','',shell,'home-note');message.setAttribute('role','status');
   let busy=false;
   button(shell,t('Share location and show walking route','Compartir ubicación y mostrar ruta a pie'),async()=>{
@@ -55,7 +55,13 @@ document.addEventListener('DOMContentLoaded',()=>{
    message.textContent=t('Loading walking route…','Cargando ruta a pie…');
    try{
     const r=await fetch('/api/walking-route',{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',signal:controller.signal,body:JSON.stringify({latitude:origin.latitude,longitude:origin.longitude,stop_id:String(stop.stop_id),consent:true})});
-    if(!r.ok)throw Error('Unavailable');const d=await r.json();
+    const d=await r.json();
+    if(!r.ok){
+     if(r.status===400&&d.code==='walking_distance_out_of_range'){
+      const error=Error('Walking distance out of range');error.code=d.code;throw error;
+     }
+     throw Error('Unavailable');
+    }
     if(walking!==w||S.location!==origin||S.stop!==stop)return;
     if(d.source!=='Geoapify'||d.mode!=='walking'||d.stop_id!==String(stop.stop_id)||!finite(d.distance_meters)||d.distance_meters<=0||!finite(d.duration_seconds)||d.duration_seconds<=0||age(d.retrieved_at,Date.now()/1000)>300||!Array.isArray(d.points)||d.points.length<2||!d.points.every(p=>Array.isArray(p)&&validPoint({latitude:p[0],longitude:p[1]})))throw Error('Invalid route');
     message.textContent='';
@@ -67,13 +73,43 @@ document.addEventListener('DOMContentLoaded',()=>{
     button(resultShell,t('Hide walking map','Ocultar mapa a pie'),()=>closeWalking(),'home-text-button');
     if(!root.L){text('p',t('Map unavailable. Use external directions.','Mapa no disponible. Usa indicaciones externas.'),resultShell);return;}
     const el=text('div',null,resultShell,'home-live-map');el.setAttribute('role','region');el.setAttribute('aria-label',t('Walking route map','Mapa de ruta a pie'));
-    w.map=root.L.map(el,{scrollWheelZoom:false});
-    root.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(w.map);
+    const proxyTiles=d.basemap==='geoapify';
+    w.map=root.L.map(el,{scrollWheelZoom:false,minZoom:proxyTiles?11:0,maxZoom:19});
+    w.map.attributionControl.setPosition('topright').setPrefix(false);
+    const osmCredit='<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>';
+    const attribution=proxyTiles?'Powered by <a href="https://www.geoapify.com/">Geoapify</a> · '+osmCredit:osmCredit;
+    const url=proxyTiles?'/api/walking-map-tile?z={z}&x={x}&y={y}':'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+    const tiles=root.L.tileLayer(url,{maxZoom:19,attribution,updateWhenIdle:true,noWrap:true});
+    const tileStatus=text('p','',resultShell,'home-note');tileStatus.setAttribute('role','status');
+    let automaticRetry=true,retryTimer=null,tileFailed=false;
+    const redraw=()=>{clearTimeout(retryTimer);tiles.redraw();};
+    const retryTiles=button(resultShell,t('Retry street tiles','Volver a cargar el mapa de calles'),redraw,'home-text-button');
+    retryTiles.hidden=true;
+    tiles.on('loading',()=>{tileFailed=false;tileStatus.textContent='';retryTiles.hidden=true;});
+    tiles.on('remove',()=>clearTimeout(retryTimer));
+    tiles.on('load',()=>{
+     if(!tileFailed||!automaticRetry)return;
+     automaticRetry=false;
+     retryTimer=setTimeout(redraw,500);
+    });
+    tiles.on('tileerror',()=>{
+     tileFailed=true;
+     tileStatus.textContent=t('Some street tiles could not load. Walking directions are still shown.','No se pudieron cargar algunas imágenes de calles. La ruta a pie sigue visible.');
+     retryTiles.hidden=false;
+    });
+    if(d.basemap!==false)tiles.addTo(w.map);
     const line=root.L.polyline(d.points,{color:'#D4A843',weight:5}).addTo(w.map);
     root.L.circleMarker([origin.latitude,origin.longitude],{radius:7}).addTo(w.map).bindTooltip(text('span',t('Start','Origen')));
     root.L.circleMarker([stop.latitude,stop.longitude],{radius:7}).addTo(w.map).bindTooltip(text('span',stop.name));
     w.map.fitBounds(line.getBounds().extend([origin.latitude,origin.longitude]).extend([stop.latitude,stop.longitude]),{padding:[28,28],maxZoom:17});
-   }catch{if(walking===w){closeWalking();message.textContent=t('Walking route unavailable. Use Apple Maps or Google Maps above.','Ruta a pie no disponible. Usa Apple Maps o Google Maps arriba.');}}
+   }catch(error){
+    if(walking===w){
+     closeWalking();
+     message.textContent=error.code==='walking_distance_out_of_range'
+      ?t('The starting point must be between 16 ft and 3.1 mi from this stop. You can still use Apple Maps or Google Maps above.','El punto de partida debe estar entre 16 ft y 3.1 mi de esta parada. También puedes usar Apple Maps o Google Maps arriba.')
+      :t('Walking route unavailable. Use Apple Maps or Google Maps above.','Ruta a pie no disponible. Usa Apple Maps o Google Maps arriba.');
+    }
+   }
    finally{clearTimeout(timeout);busy=false;}
   });
  }
@@ -215,9 +251,10 @@ document.addEventListener('DOMContentLoaded',()=>{
  async function refreshMap(live){
   if(live!==S.live||live.pending)return;live.pending=true;live.attempted=Date.now();live.message.textContent=t('Loading vehicle positions…','Cargando posiciones de vehículos…');
   try{const data=await api('/api/trips/'+encodeURIComponent(live.dep.trip_id)+'/vehicle?'+new URLSearchParams({service_date:live.dep.service_date,stop_id:S.stop.stop_id,stop_sequence:live.dep.stop_sequence}),{signal:live.controller.signal});if(live!==S.live)return;const bus=vehicleFor(live.dep,data);
-   if(!bus){if(live.marker){live.marker.remove();live.marker=null;}live.shape?.remove();live.shape=null;live.message.textContent=t('No reliably matched current vehicle is available for this trip. Vehicle positions may be stale or missing.','No hay un vehículo actual asociado de forma fiable con este viaje. Las posiciones pueden ser antiguas o faltar.');return;}
+   if(!bus){if(live.marker){live.marker.remove();live.marker=null;}live.shape?.remove();live.shape=null;const missing=data.reason==='vehicle_not_reported',stale=data.reason==='stale_vehicle_feed';
+    live.message.textContent=missing?t('MCTS has no vehicle position for this trip in its latest feed. Arrival predictions come from a separate feed.','MCTS no informa la posición de un vehículo para este viaje en su última actualización. Las predicciones de llegada provienen de otra fuente.'):stale?t('MCTS vehicle positions are out of date. The map will retry while it is open.','Las posiciones de los vehículos de MCTS están desactualizadas. Se volverán a consultar mientras el mapa esté abierto.'):t('No reliably matched current vehicle is available for this trip. Vehicle positions may be stale or missing.','No hay un vehículo actual asociado de forma fiable con este viaje. Las posiciones pueden ser antiguas o faltar.');return;}
    if(!root.L){live.message.textContent=t('The map could not load. Arrival information remains available.','No se pudo cargar el mapa. Las llegadas siguen disponibles.');return;}
-   if(!live.map){const element=text('div',null,live.shell,'home-live-map');element.setAttribute('role','region');element.setAttribute('aria-label',t('Selected bus and stop map','Mapa del autobús y la parada elegidos'));live.shell.insertBefore(element,live.shell.lastElementChild);live.map=L.map(element,{scrollWheelZoom:false});const tileStatus=text('p','',live.shell,'home-note');tileStatus.hidden=true;L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).on('loading',()=>{tileStatus.hidden=true;}).on('tileerror',()=>{tileStatus.hidden=false;tileStatus.textContent=t('Street map tiles could not load. Check your connection. Markers show reported positions, not walking directions.','No se pudo cargar el mapa de calles. Comprueba tu conexión. Los marcadores muestran posiciones informadas, no indicaciones a pie.');}).addTo(live.map);L.circleMarker([S.stop.latitude,S.stop.longitude],{radius:8,color:'#82bb9c',fillColor:'#82bb9c',fillOpacity:1,weight:2}).addTo(live.map).bindTooltip(text('span',S.stop.name));live.map.fitBounds([[S.stop.latitude,S.stop.longitude],[bus.latitude,bus.longitude]],{padding:[28,28],maxZoom:16});
+   if(!live.map){const element=text('div',null,live.shell,'home-live-map');element.setAttribute('role','region');element.setAttribute('aria-label',t('Selected bus and stop map','Mapa del autobús y la parada elegidos'));live.shell.insertBefore(element,live.shell.lastElementChild);const relayTiles=document.body.dataset.relayStreetTiles==='true';live.map=L.map(element,{scrollWheelZoom:false,minZoom:relayTiles?11:0});const tileStatus=text('p','',live.shell,'home-note');tileStatus.hidden=true;L.tileLayer(relayTiles?'/api/walking-map-tile?z={z}&x={x}&y={y}':'https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,updateWhenIdle:true,noWrap:relayTiles,attribution:(relayTiles?'Powered by <a href="https://www.geoapify.com/">Geoapify</a> · ':'')+'<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>'}).on('loading',()=>{tileStatus.hidden=true;}).on('tileerror',()=>{tileStatus.hidden=false;tileStatus.textContent=t('Street map tiles could not load. Check your connection. Markers show reported positions, not walking directions.','No se pudo cargar el mapa de calles. Comprueba tu conexión. Los marcadores muestran posiciones informadas, no indicaciones a pie.');}).addTo(live.map);L.circleMarker([S.stop.latitude,S.stop.longitude],{radius:8,color:'#82bb9c',fillColor:'#82bb9c',fillOpacity:1,weight:2}).addTo(live.map).bindTooltip(text('span',S.stop.name));live.map.fitBounds([[S.stop.latitude,S.stop.longitude],[bus.latitude,bus.longitude]],{padding:[28,28],maxZoom:16});
     api('/api/trips/'+encodeURIComponent(live.dep.trip_id)+'/shape',{signal:live.controller.signal}).then(shape=>{if(live!==S.live||shape.trip_id!==live.dep.trip_id||shape.route_id!==live.dep.route_id||!live.marker)return;const points=shape.points;if(Array.isArray(points)&&points.length>1&&points.every(p=>Array.isArray(p)&&validPoint({latitude:p[0],longitude:p[1]}))){live.shape=L.polyline(points,{color:'#f0c169',weight:3,opacity:.6,interactive:false}).addTo(live.map);text('p',t('Full scheduled trip shape · not a walking route','Trazado completo del viaje programado · no es una ruta a pie'),live.shell,'home-note');}}).catch(()=>{});
    }
    if(live.marker)live.marker.setLatLng([bus.latitude,bus.longitude]);else live.marker=L.marker([bus.latitude,bus.longitude],{icon:L.divIcon({className:'home-bus-marker',html:'<svg class="icon" aria-hidden="true"><use href="/static/img/icons.svg#stop"/></svg>',iconSize:[36,36],iconAnchor:[18,18]}),title:t('Reported bus location','Ubicación informada del autobús')}).addTo(live.map);

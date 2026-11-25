@@ -162,14 +162,23 @@ def install_features(app,get_schedule,realtime,db,journey_slots=None):
             stop=c.execute('SELECT 1 FROM stop_times WHERE trip_id=? AND stop_id=? AND CAST(stop_sequence AS INTEGER)=?',(trip_id,sid,sequence)).fetchone()
         if trip is None or stop is None or trip['service_id'] not in schedule.services(day):raise ValueError('Departure does not match the active GTFS timetable')
         data=live(trip['route_id']);now=time.time();matches=[]
+        candidates = [bus for bus in data['buses'] if bus.get('trip_id') == trip_id]
         if data['feed_fresh']:
-            for bus in data['buses']:
+            for bus in candidates:
                 stamp=bus.get('reported_at')
-                if bus.get('trip_id')!=trip_id or bus.get('trip_schedule_relationship',pb.TripDescriptor.SCHEDULED)!=pb.TripDescriptor.SCHEDULED or not isinstance(stamp,(int,float)) or not -60<=now-stamp<=120:continue
+                if bus.get('trip_schedule_relationship',pb.TripDescriptor.SCHEDULED)!=pb.TripDescriptor.SCHEDULED or not isinstance(stamp,(int,float)) or not -60<=now-stamp<=120:continue
                 if bus.get('direction_id') is not None and trip['direction_id'] not in (None,'') and str(bus['direction_id'])!=str(trip['direction_id']):continue
                 qualified=qualify_service_day(schedule,trip_id,stamp,bus.get('trip_start_date'))
                 if qualified and qualified[0]==date:matches.append({**bus,'qualified_service_date':qualified[0],'service_date_basis':qualified[1]})
-        return jsonify(status='matched' if len(matches)==1 else 'unavailable',buses=matches if len(matches)==1 else [],feed_fresh=data['feed_fresh'],feed_timestamp=data.get('feed_timestamp'),retrieved_at=int(now),source='MCTS GTFS-Realtime / active GTFS timetable')
+        result = dict(status='matched' if len(matches)==1 else 'unavailable',
+                      buses=matches if len(matches)==1 else [], feed_fresh=data['feed_fresh'],
+                      feed_timestamp=data.get('feed_timestamp'), retrieved_at=int(now),
+                      source='MCTS GTFS-Realtime / active GTFS timetable')
+        if not data['feed_fresh']:
+            result['reason'] = 'stale_vehicle_feed'
+        elif not candidates:
+            result['reason'] = 'vehicle_not_reported'
+        return jsonify(result)
     @app.get('/api/trips/<trip_id>/shape')
     def trip_shape(trip_id):
         trip_id=text(trip_id,'trip ID',128)

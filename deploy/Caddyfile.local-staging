@@ -1,0 +1,43 @@
+{
+    admin off
+    auto_https disable_redirects
+    local_certs
+    skip_install_trust
+    default_sni 127.0.0.1
+}
+
+http://:8080 {
+    redir https://127.0.0.1:8443{uri} 308
+}
+
+(staging_app) {
+    encode zstd gzip
+    request_body {
+        max_size 8KB
+    }
+    reverse_proxy app:8000 {
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+        # Strip upstream external origins, then allow only the weather API for fetches.
+        header_down Content-Security-Policy " https://[^ ;]+" ""
+        header_down Content-Security-Policy "connect-src [^;]+" "connect-src 'self' https://api.open-meteo.com"
+    }
+    # No access logs, public ACME issuer, or forward-proxy routes.
+}
+
+https://127.0.0.1:8443 {
+    tls internal
+    import staging_app
+}
+
+https://{$AYO_WIFI_HOST:ayo-staging.invalid}:8444 {
+    tls internal
+    @operator path /api/ready /api/moderation /api/moderation/*
+    respond @operator 404
+    import staging_app
+}
+
+http://:8081 {
+    bind 127.0.0.1
+    reverse_proxy /api/ready app:8000
+}

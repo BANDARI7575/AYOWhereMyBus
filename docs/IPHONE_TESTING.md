@@ -1,5 +1,7 @@
 # Private HTTPS, iPhone GPS and Voice testing
 
+For the Docker Desktop project, use [Local staging on macOS](LOCAL_STAGING.md#iphone-over-private-wi-fi). The steps below apply to the standalone development server.
+
 HTTP `http://192.168.1.33:5001` is not a secure context. iPhone geolocation and
 microphone APIs require trusted HTTPS and device/browser permission. Desktop
 loopback HTTP is a special case and does not establish iPhone compatibility.

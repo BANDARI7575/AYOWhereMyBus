@@ -1,5 +1,7 @@
 # Deployment
 
+For the Docker Desktop workflow on macOS, see [Local staging](LOCAL_STAGING.md).
+
 The repository supports a single application node using Flask, Gunicorn and local
 persistent SQLite storage. This document describes the existing deployment
 profile; restructuring does not authorize a deployment, provider purchase or

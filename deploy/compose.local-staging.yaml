@@ -1,0 +1,192 @@
+# Standalone local configuration. Do not combine with compose.yaml.
+# Reuse the staging credentials stored outside the repository.
+name: ayo-local-staging
+
+x-staging-environment: &staging-environment
+  AYO_ENV: production
+  BIND_HOST: 0.0.0.0
+  PORT: '8000'
+  PROXY_HOPS: '1'
+  ALLOWED_HOSTS: 127.0.0.1,localhost,${AYO_WIFI_HOST:-ayo-staging.invalid}
+  COMMUNITY_DB: /app/instance/community.sqlite
+  SCHEDULE_DB: /app/instance/schedule.sqlite
+  GTFS_DIR: /app/data/google_transit
+  VAPID_PRIVATE_KEY: /run/secrets/ayo/vapid-private.pem
+  # Disable inherited provider credentials and outbound proxies.
+  AYO_REALTIME_ENABLED: '0'
+  AYO_MCTS_RELAY: '1'
+  VEHICLES_URL: ''
+  ALERTS_URL: ''
+  TRIP_UPDATES_URL: ''
+  AYO_VOICE_SPEND_APPROVED: '0'
+  OPENAI_API_KEY: ''
+  GEOAPIFY_API_KEY: ''
+  HTTP_PROXY: ''
+  HTTPS_PROXY: ''
+  ALL_PROXY: ''
+  http_proxy: ''
+  https_proxy: ''
+  all_proxy: ''
+  NO_PROXY: '*'
+  no_proxy: '*'
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: ayo-local-staging:private-test
+    env_file:
+      - ${AYO_STAGING_ENV_FILE:-${HOME}/.ayo-staging/staging.env}
+    environment:
+      <<: *staging-environment
+      AYO_WALKING_ENABLED: '1'
+      AYO_WALKING_RELAY: '1'
+      AYO_WALKING_KEY_FILE: /run/secrets/ayo/geoapify-routing.key
+    networks: [isolated, routing, mcts-private]
+    volumes:
+      - state:/app/instance
+      - type: bind
+        source: ${AYO_STAGING_SECRET_DIR:-${HOME}/.ayo-staging/secrets}
+        target: /run/secrets/ayo
+        read_only: true
+        bind:
+          create_host_path: false
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+    # /api/ready waits for alerts. The worker must be able to start first.
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3).close()"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  alerts:
+    image: ayo-local-staging:private-test
+    command: [python, scripts/ops/run_alerts.py]
+    env_file:
+      - ${AYO_STAGING_ENV_FILE:-${HOME}/.ayo-staging/staging.env}
+    environment: *staging-environment
+    networks: [isolated, mcts-private]
+    depends_on:
+      app:
+        condition: service_healthy
+    volumes:
+      - state:/app/instance
+      - type: bind
+        source: ${AYO_STAGING_SECRET_DIR:-${HOME}/.ayo-staging/secrets}
+        target: /run/secrets/ayo
+        read_only: true
+        bind:
+          create_host_path: false
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, python, scripts/ops/check_worker.py]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  geoapify:
+    image: ayo-local-staging:private-test
+    command: [gunicorn, --config, python:backend.services.walking_relay, --bind, '0.0.0.0:8082', --workers, '1', --threads, '4', 'backend.services.walking_relay:app']
+    networks: [routing, geoapify-egress]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8082/health', timeout=3).close()"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+
+  mcts:
+    image: ayo-local-staging:private-test
+    command: [gunicorn, --config, 'python:backend.services.mcts_relay', --bind, '0.0.0.0:8083', --workers, '1', --threads, '6', 'backend.services.mcts_relay:app']
+    networks: [mcts-private, mcts-egress]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8083/health', timeout=3).close()"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+
+  proxy:
+    image: caddy:2-alpine@sha256:78bd35025c7ba85961dd149ae670315129954e77abe2383ac47c89106b35ade9
+    environment:
+      AYO_WIFI_HOST: ${AYO_WIFI_HOST:-ayo-staging.invalid}
+    ports:
+      - target: 8444
+        published: '18444'
+        host_ip: 127.0.0.1
+        name: wifi-relay-target
+        app_protocol: https
+      - target: 8080
+        published: '8080'
+        host_ip: 127.0.0.1
+        name: open-website
+        app_protocol: http
+      - target: 8443
+        published: '8443'
+        host_ip: 127.0.0.1
+        name: website-tls
+        app_protocol: https
+    networks: [ingress, isolated]
+    depends_on:
+      app:
+        condition: service_healthy
+    volumes:
+      - type: bind
+        source: ./Caddyfile.local-staging
+        target: /etc/caddy/Caddyfile
+        read_only: true
+        bind:
+          create_host_path: false
+      - tls:/data
+      - proxy_config:/config
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, -T, '3', 'http://127.0.0.1:8081/api/ready']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+networks:
+  # Only the fixed reverse proxy joins ingress. It is not a forward proxy.
+  ingress: {}
+  # App/worker have no external network, host networking, or Docker socket.
+  isolated:
+    internal: true
+  # Only the app can reach the fixed routing endpoint. Only the relay has egress here.
+  routing:
+    internal: true
+  geoapify-egress: {}
+  mcts-private:
+    internal: true
+  mcts-egress: {}
+
+volumes:
+  state:
+    name: ayo-local-staging_state
+    external: true
+  tls:
+    name: ayo-local-staging_tls
+    external: true
+  proxy_config:
+    name: ayo-local-staging_proxy_config
