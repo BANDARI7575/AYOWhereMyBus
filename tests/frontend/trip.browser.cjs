@@ -7,5 +7,17 @@ await page.locator('.journey-result-card>summary').click();await page.getByRole(
 // Existing Home coordinates are reused; no GPS permission call is needed.
 await page.evaluate(()=>{state.selectedLocation={latitude:43,longitude:-88,name:'Verified Home selection',kind:'manual'};});await page.locator('#planFrom').fill('');await page.locator('.journey-locate').first().click();await page.locator('#planFrom-list [role=option]').first().waitFor();assert.equal(await page.evaluate(()=>gpsCalls),0);await page.locator('#planFrom-list [role=option]').first().click();
 // Configured geocoding verifies a point and asks for a boarding platform, never guesses one.
-await page.evaluate(()=>AyoLocationSearch.registerProvider({id:'test-approved',approved:true,search:async()=>[{kind:'place',name:'Verified place',latitude:43.02,longitude:-88}]}));await page.locator('#planTo').fill('Mayfair');await page.locator('.journey-place-search').last().click();await page.locator('#planTo-list [role=option]').first().waitFor();await page.locator('#planTo-list [role=option]').first().click();await page.waitForFunction(()=>document.querySelector('#planTo-list [role=option]')?.textContent.includes('Stop')||document.querySelector('#planTo-list [role=option]')?.textContent.includes('Parada'));await page.locator('#planTo-list [role=option]').last().click();assert.match(await page.locator('#planTo').inputValue(),/Verified place/);assert.equal(await page.evaluate(()=>gpsCalls),0);
+await page.evaluate(()=>{
+ window.sharedPlaceQueries=[];
+ AyoLocationSearch.registerProvider({id:'test-approved',approved:true,search:async query=>{
+  sharedPlaceQueries.push(query);
+  return [{kind:'place',name:'Verified place',latitude:43.02,longitude:-88}];
+ }});
+});
+await page.locator('#planTo').fill('Mayfair');
+await page.clock.runFor(350);
+assert.deepEqual(await page.evaluate(()=>sharedPlaceQueries),[]);
+await page.locator('.journey-place-search').last().click();
+await page.waitForFunction(()=>sharedPlaceQueries.length===1);
+assert.deepEqual(await page.evaluate(()=>sharedPlaceQueries),['Mayfair']);await page.locator('#planTo-list [role=option]').first().waitFor();await page.locator('#planTo-list [role=option]').first().click();await page.waitForFunction(()=>document.querySelector('#planTo-list [role=option]')?.textContent.includes('Stop')||document.querySelector('#planTo-list [role=option]')?.textContent.includes('Parada'));await page.locator('#planTo-list [role=option]').last().click();assert.match(await page.locator('#planTo').inputValue(),/Verified place/);assert.equal(await page.evaluate(()=>gpsCalls),0);
 const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();assert.deepEqual(axe.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})),[]);assert.deepEqual(errors,[]);if(width===390&&lang==='en')await page.screenshot({path:`/private/tmp/ayo-trip-${engine}.png`});console.log('PASS Trip',engine,lang,width,'stable typing, verified selections, Home reuse, swap, time/unsupported deadline, walks, details/map and accessibility');await context.close();}}finally{await browser.close();}}})().catch(e=>{console.error(e);process.exitCode=1;});

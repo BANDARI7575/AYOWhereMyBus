@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT))
-from backend.app import app
+from app import PrivateDevelopmentRequestHandler, app
 
 if __name__ == '__main__':
     parser=argparse.ArgumentParser(description=__doc__)
@@ -33,4 +33,5 @@ if __name__ == '__main__':
             return original(environ,start_response)
         app.wsgi_app=private_surface
     print(f"AYO development: {'https' if context else 'http'}://{args.host}:{args.port}/",flush=True)
-    app.run(host=args.host,port=args.port,debug=False,use_reloader=False,ssl_context=context)
+    app.run(host=args.host,port=args.port,debug=False,use_reloader=False,ssl_context=context,
+            request_handler=PrivateDevelopmentRequestHandler)

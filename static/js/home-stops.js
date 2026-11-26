@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const w=walking;if(!w)return;walking=null;w.controller.abort();w.map?.remove();w.shell.remove();}
  function addWalkingRoute(host){
   const shell=text('section',null,host,'home-live-shell');
-  text('p',t('Request a walking route: your selected coordinates and stop will be sent to Geoapify. The street map uses tiles for the area you view.','Solicita una ruta a pie: tus coordenadas elegidas y la parada se enviarán a Geoapify. El mapa de calles usa imágenes del área que ves.'),shell,'home-note');
+  text('p',t('To request a walking route, share your selected location and the stop’s coordinates with Geoapify. Map tiles identify the area you view.','Para solicitar una ruta a pie, comparte con Geoapify tu ubicación elegida y las coordenadas de la parada. Las imágenes del mapa identifican el área que ves.'),shell,'home-note');
   const message=text('p','',shell,'home-note');message.setAttribute('role','status');
   let busy=false;
   button(shell,t('Share location and show walking route','Compartir ubicación y mostrar ruta a pie'),async()=>{
@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  }
  $('homeLocationQuery').addEventListener('input',()=>{cancelSearch();$('homeLocationMatches').replaceChildren();status();searchDelay=setTimeout(()=>searchLocations(false),300);});
  $('homeLocationForm').onsubmit=event=>{event.preventDefault();clearTimeout(searchDelay);searchLocations(true);};
- root.AyoLocationSearch.ready?.then(()=>{if(root.AyoLocationSearch.placesAvailable)$('homeSearchNote').textContent=t('Stop suggestions use MCTS data. Address searches use the configured location provider only when you submit.','Las sugerencias usan datos de MCTS. Las direcciones usan el proveedor configurado solo al enviar.');});
+ root.AyoLocationSearch.ready?.then(()=>{if(root.AyoLocationSearch.placesAvailable)$('homeSearchNote').textContent=t('Stop suggestions use MCTS data. When you submit Search locations, AYO sends the address or place you entered to Geoapify.','Las sugerencias de paradas usan datos de MCTS. Al pulsar Buscar ubicaciones, AYO envía a Geoapify la dirección o el lugar que escribiste.');});
  function radiusUI(smoke=false){
   const input=$('homeRadius'),w=input.getBoundingClientRect().width,ratio=(Number(input.value)-.1)/2.9;
   $('homeRadiusBus').style.setProperty('--thumb-x',(22+Math.max(0,w-44)*ratio)+'px');const value=Number(input.value).toFixed(1)+' '+t('miles','millas');$('homeRadiusValue').textContent=value;input.setAttribute('aria-valuetext',value);

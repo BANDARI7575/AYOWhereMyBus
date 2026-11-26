@@ -4,6 +4,12 @@
     local_certs
     skip_install_trust
     default_sni 127.0.0.1
+    log {
+        format filter {
+            # Runtime proxy errors can include the full URI and request headers.
+            request delete
+        }
+    }
 }
 
 http://:8080 {

@@ -65,7 +65,8 @@
     panel.classList.add('journey-experience');
     add('p', t('Your next ride starts here.', 'Tu próximo viaje empieza aquí.'), panel, 'journey-kicker');
     const providerNote=add('p',t('Search official stops and intersections. Full addresses and places require a configured geocoder.','Busca paradas y cruces oficiales. Direcciones y lugares requieren un geocodificador configurado.'),panel,'journey-provider-note');
-    win.AyoLocationSearch?.ready?.then(()=>{if(win.AyoLocationSearch.placesAvailable)providerNote.textContent=t('Official stop suggestions appear as you type. Submit Search places to use the configured address provider.','Las paradas oficiales aparecen al escribir. Pulsa Buscar lugares para usar el proveedor de direcciones.');});
+    providerNote.id='journeyProviderNote';
+    win.AyoLocationSearch?.ready?.then(()=>{if(win.AyoLocationSearch.placesAvailable)providerNote.textContent=t('Official stop suggestions appear as you type. When you select Search places, AYO sends the address or place you entered to Geoapify.','Las sugerencias de paradas oficiales aparecen al escribir. Al pulsar Buscar lugares, AYO envía a Geoapify la dirección o el lugar que escribiste.');});
     const form = add('form', '', panel);
     const fields = add('div', '', form, 'journey-search-grid');
     const modeLabel=add('label',t('Travel time','Hora de viaje'),form);const mode=add('select','',form);mode.id='journeyTimeMode';modeLabel.htmlFor=mode.id;for(const [value,label]of [['now',t('Leave now','Salir ahora')],['depart',t('Depart at','Salir a las')],['arrive',t('Arrive by','Llegar antes de')]]){const o=add('option',label,mode);o.value=value;}
@@ -129,7 +130,7 @@
       list.setAttribute('role', 'listbox'); list.setAttribute('aria-label', t(`${english} suggestions`, `Sugerencias: ${spanish}`)); list.hidden = true;
       const info = add('p', '', box, 'journey-location-info'); info.id = `${id}-info`;info.tabIndex=0; info.setAttribute('role', 'status');
       input.setAttribute('aria-describedby', info.id);
-      const placeSearch=add('button',t('Search places','Buscar lugares'),box,'journey-place-search');placeSearch.type='button';placeSearch.setAttribute('aria-label',placeSearch.textContent);placeSearch.addEventListener('pointerdown',event=>event.preventDefault());
+      const placeSearch=add('button',t('Search places','Buscar lugares'),box,'journey-place-search');placeSearch.type='button';placeSearch.setAttribute('aria-label',placeSearch.textContent);placeSearch.setAttribute('aria-describedby',providerNote.id);placeSearch.addEventListener('pointerdown',event=>event.preventDefault());
       const locate = add('button', t('Use My Location', 'Usar mi ubicación'), box, 'favorite-chip journey-locate'); locate.type = 'button';locate.setAttribute('aria-label',locate.textContent);
       let accessPoint=null;let chosen = null, candidates = [], active = -1, serial = 0, timer, controller, locationAccuracy=null;
       function close() { list.hidden = true; input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant'); active = -1; }

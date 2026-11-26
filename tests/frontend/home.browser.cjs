@@ -3,17 +3,26 @@ const {chromium,webkit}=require('playwright');
 const {default:AxeBuilder}=require('@axe-core/playwright');
 const assert=require('node:assert/strict'),fs=require('node:fs');
 const base=process.env.AYO_TEST_URL||'http://127.0.0.1:5098';
-async function setup(browser,{width=390,language='en',remember=false,permission='prompt',geoError=null}={}){
+async function setup(browser,{width=390,language='en',remember=false,permission='prompt',geoError=null,gps={latitude:43,longitude:-88}}={}){
  const context=await browser.newContext({viewport:{width,height:900},hasTouch:width<=768,serviceWorkers:'block',reducedMotion:'no-preference'}),page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.clock.install({time:new Date()});
- await page.addInitScript(({language,remember,permission,geoError})=>{localStorage.setItem('ayo-language',JSON.stringify(language));if(remember)localStorage.setItem('ayo-home-location-mode','gps');window.geoCalls=0;Object.defineProperty(navigator,'geolocation',{configurable:true,value:{getCurrentPosition(ok,no){geoCalls++;if(typeof geoError==='number')no({code:geoError});else ok({coords:{latitude:43,longitude:-88,accuracy:10}});}}});if(geoError==='unsupported')Object.defineProperty(navigator,'geolocation',{configurable:true,value:undefined});if(geoError==='insecure')Object.defineProperty(window,'isSecureContext',{configurable:true,value:false});Object.defineProperty(navigator,'permissions',{configurable:true,value:permission==='unsupported'?undefined:{query:async()=>({state:permission})}});},{language,remember,permission,geoError});
+ await page.addInitScript(({language,remember,permission,geoError,gps})=>{localStorage.setItem('ayo-language',JSON.stringify(language));if(remember)localStorage.setItem('ayo-home-location-mode','gps');window.geoCalls=0;Object.defineProperty(navigator,'geolocation',{configurable:true,value:{getCurrentPosition(ok,no){geoCalls++;if(typeof geoError==='number')no({code:geoError});else ok({coords:{...gps,accuracy:10}});}}});if(geoError==='unsupported')Object.defineProperty(navigator,'geolocation',{configurable:true,value:undefined});if(geoError==='insecure')Object.defineProperty(window,'isSecureContext',{configurable:true,value:false});Object.defineProperty(navigator,'permissions',{configurable:true,value:permission==='unsupported'?undefined:{query:async()=>({state:permission})}});},{language,remember,permission,geoError,gps});
  const now=Math.floor(Date.now()/1000),points=[20,40,80,160,250,600,900,1400];
  const stops=points.map((distance,i)=>({stop_id:String(i+1),name:'OFFICIAL STOP '+(i+1),latitude:43+distance/111195,longitude:-88,distance_meters:distance,scheduled_directions:[{route_id:'19',route_number:'19',headsign:'Official North destination',direction_id:'0'}]}));
  const d={trip_id:'T1',route_id:'19',route_number:'19',service_date:'20261115',stop_sequence:'4',stop_id:'1',trip_headsign:'Official North destination',direction_id:'0',scheduled_epoch:now+600,prediction_at:now+180,prediction_reported_at:now,data_type:'realtime',prediction_kind:'arrival'};
- const flags={delayedStop:false,noStops:false,feed:true,busDate:true,qualified:false,busFresh:true,busLatitude:43.001,noArrivals:false,offlineAPI:false};let discoveryCalls=0;
+ const flags={delayedStop:false,noStops:false,feed:true,busDate:true,qualified:false,busFresh:true,busLatitude:43.001,noArrivals:false,offlineAPI:false};let discoveryCalls=0;const weatherPoints=[],walkingRequests=[];let nearbyPoint;
  await page.route('**/*',r=>{
-  const u=new URL(r.request().url()),json=data=>r.fulfill({json:data});if(u.origin!==new URL(base).origin)return r.abort();if(flags.offlineAPI&&u.pathname.startsWith('/api/'))return r.abort();
-  if(u.pathname==='/api/explore/stops'){discoveryCalls++;const radius=Number(u.searchParams.get('radius')||.5);const rows=flags.noStops?[]:u.searchParams.has('lat')?stops.filter(s=>s.distance_meters<=radius*1609.344):stops;return json({stops:rows,total:rows.length,next_offset:null,retrieved_at:now,source:'MCTS GTFS'});}
+  const u=new URL(r.request().url()),json=data=>r.fulfill({json:data});if(u.hostname==='api.open-meteo.com'){
+   weatherPoints.push([u.searchParams.get('latitude'),u.searchParams.get('longitude')]);
+   assert.equal(r.request().headers().referer,undefined);
+   return json({current:{time:now,temperature_2m:32,weather_code:0,is_day:1}});
+  }
+  if(u.origin!==new URL(base).origin)return r.abort();
+  if(u.pathname==='/api/walking-route'){
+   walkingRequests.push(r.request().postDataJSON());
+   return json({source:'Geoapify',mode:'walking',stop_id:'1',distance_meters:50,duration_seconds:60,points:[[gps.latitude,gps.longitude],[stops[0].latitude,stops[0].longitude]],retrieved_at:now+900,basemap:false});
+  }if(flags.offlineAPI&&u.pathname.startsWith('/api/'))return r.abort();
+  if(u.pathname==='/api/explore/stops'){discoveryCalls++;if(u.searchParams.has('lat'))nearbyPoint=[Number(u.searchParams.get('lat')),Number(u.searchParams.get('lon'))];const radius=Number(u.searchParams.get('radius')||.5);const rows=flags.noStops?[]:u.searchParams.has('lat')?stops.filter(s=>s.distance_meters<=radius*1609.344):stops;return json({stops:rows,total:rows.length,next_offset:null,retrieved_at:now,source:'MCTS GTFS'});}
   if(u.pathname.startsWith('/api/explore/stops/')){const found=stops.find(s=>s.stop_id===u.pathname.split('/').pop())||stops[0];if(flags.delayedStop&&u.pathname.endsWith('/1'))return new Promise(resolve=>setTimeout(()=>resolve(json(found)),200));return json(found);}
   if(u.pathname==='/api/journey-locations')return json({locations:u.searchParams.get('q').includes('missing')?[]:[stops[0]]});
   if(/\/api\/stops\/\d+\/departures$/.test(u.pathname))return json({realtime_status:flags.feed?'fresh':'stale_or_invalid',feed_timestamp:now,retrieved_at:now,departures:flags.noArrivals?[]:[{...d,stop_id:u.pathname.split('/')[3],trip_id:'T3',data_type:'scheduled',prediction_at:null,scheduled_epoch:now+360},{...d,stop_id:u.pathname.split('/')[3],trip_id:'T2',prediction_at:now+300},{...d,stop_id:u.pathname.split('/')[3]}],total_departures:3,truncated:false});
@@ -25,7 +34,7 @@ async function setup(browser,{width=390,language='en',remember=false,permission=
   return r.continue();
  });
  await page.goto(base,{waitUntil:'load'});await page.evaluate(()=>AyoI18n.ready);await page.waitForFunction(()=>window.AyoHome);
- return {context,page,flags,errors,now,stops,discovery:()=>discoveryCalls,close:async()=>{await page.unrouteAll({behavior:'wait'});await context.close();}};
+ return {context,page,flags,errors,now,stops,weatherPoints,walkingRequests,nearbyPoint:()=>nearbyPoint,discovery:()=>discoveryCalls,close:async()=>{await page.unrouteAll({behavior:'wait'});await context.close();}};
 }
 async function only(page,id){assert.equal(await page.locator('[data-home-screen]:visible').count(),1);assert.equal(await page.locator(id).isVisible(),true);}
 (async()=>{for(const [engine,type]of [['chromium',chromium],['webkit',webkit]]){
@@ -79,6 +88,32 @@ async function only(page,id){assert.equal(await page.locator('[data-home-screen]
   assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));for(const screen of ['nearby','selected']){if(screen==='selected')await p.locator('.home-stop-open').first().click();const axe=await new AxeBuilder({page:p}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();assert.deepEqual(axe.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})),[]);}
   assert.deepEqual(f.errors,[]);console.log('PASS Home',engine,language,width,'three screens, radius, sorting, favorites, countdown, verified map, walking links, navigation and accessibility');await f.close();
  }
+ // Real Home controls preserve full GPS precision for transit and share it for walking only after consent.
+ const gps={latitude:43.003741,longitude:-88.004292};
+ const privacy=await setup(browser,{gps});
+ const p=privacy.page;
+ await p.waitForFunction(()=>document.querySelector('#weatherWidget').dataset.availability==='current');
+ assert.deepEqual(privacy.weatherPoints,[['43.04','-87.91']]);
+ const selectedWeather=p.waitForResponse(r=>new URL(r.url()).hostname==='api.open-meteo.com');
+ await p.locator('#homeLocate').click();
+ await p.locator('.home-stop-card').first().waitFor();
+ assert.deepEqual(privacy.nearbyPoint(),[gps.latitude,gps.longitude]);
+ await p.clock.runFor(400);
+ await selectedWeather;
+ assert.deepEqual(privacy.weatherPoints.at(-1),['43','-88']);
+ const refreshedWeather=p.waitForResponse(r=>new URL(r.url()).hostname==='api.open-meteo.com');
+ await p.clock.fastForward(15*60*1000);
+ await refreshedWeather;
+ assert.deepEqual(privacy.weatherPoints,[['43.04','-87.91'],['43','-88'],['43','-88']]);
+ await p.locator('.home-stop-open').first().click();
+ await p.getByRole('button',{name:'Walk to This Stop',exact:true}).click();
+ assert.deepEqual(privacy.walkingRequests,[]);
+ await p.getByRole('button',{name:'Share location and show walking route',exact:true}).click();
+ await p.getByRole('region',{name:'Walking route map'}).waitFor();
+ assert.deepEqual(privacy.walkingRequests,[{...gps,stop_id:'1',consent:true}]);
+ assert.deepEqual(privacy.errors,[]);
+ await privacy.close();
+ console.log('PASS Home',engine,'rounded initial, selected and periodic weather, precise nearby GPS and explicit walking consent');
  // Returning permissions and manual/error paths use new isolated profiles.
  for(const permission of ['granted','denied','unsupported']){const f=await setup(browser,{remember:permission!=='granted',permission});if(permission==='granted'){await f.page.locator('.home-stop-card').first().waitFor();await only(f.page,'#homeNearby');assert.equal(await f.page.evaluate(()=>geoCalls),1);}else{await only(f.page,'#homeWelcome');assert.equal(await f.page.evaluate(()=>geoCalls),0);}await f.close();}
  for(const geoError of [1,2,3,'unsupported','insecure']){const f=await setup(browser,{geoError});await f.page.locator('#homeLocate').click();await only(f.page,'#homeWelcome');assert.match(await f.page.locator('#homeStatus').innerText(),geoError===1?/permission denied/:geoError===2?/unavailable/:geoError===3?/timed out/:geoError==='unsupported'?/unsupported/:/HTTPS/);assert.equal(await f.page.locator('#homeLocationForm').isVisible(),true);await f.close();}

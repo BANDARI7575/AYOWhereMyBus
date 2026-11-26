@@ -32,6 +32,17 @@ security add-trusted-cert -r trustRoot -p ssl \
 
 Use a browser that honors macOS login Keychain trust. Keep the TLS volume across starts so the CA stays the same. [Caddy local HTTPS documentation](https://caddyserver.com/docs/running#local-https-with-docker)
 
+### Release browser suite over HTTPS
+
+Playwright navigates in the browser, but its `page.request` API makes HTTPS requests from Node. Browser trust does not automatically install the private staging CA in Node's trust store. If the PWA suite reports `UNABLE_TO_GET_ISSUER_CERT_LOCALLY` on the Leaflet source-map request, run it with the public CA exported above. Keep TLS verification enabled.
+
+```sh
+NODE_EXTRA_CA_CERTS="$cert_dir/root.crt" \
+AYO_TEST_URL=https://127.0.0.1:8443 npm run test:release
+```
+
+During Phase 1, the utility redesign suite also recorded an intermittent Playwright WebKit access-control error for `/api/buses?route=19`. That test intercepts the request and returns a synthetic fixture. The error did not recur in the full HTTPS rerun with Node's CA configured. Separate unmocked same-origin requests in Chrome and WebKit both returned HTTP 200 and a fresh Route 19 feed. The exact trigger of the one-off error remains unconfirmed. Keep the browser error assertion enabled. If it recurs, compare the fixture run with an unmocked same-origin request before diagnosing a staging API or CORS failure.
+
 ## iPhone over private Wi-Fi
 
 On the configured Mac, AirDrop `~/.ayo-staging/AYO-iPhone-WiFi.mobileconfig` to the test iPhone. The profile contains the public Caddy staging root certificate. In iPhone Settings, install it under **General → VPN & Device Management**, then turn on full trust for **AYO! Staging Root CA** under **General → About → Certificate Trust Settings**. Open [AYO! in Safari](https://bandaris-macbook-air.local:8444/) while both devices are on the same trusted Wi-Fi. Tap **Enable My Location** and allow the Safari site prompt. [Apple certificate trust instructions](https://support.apple.com/en-us/102390)

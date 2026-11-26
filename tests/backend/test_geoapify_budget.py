@@ -10,7 +10,7 @@ from backend.services import geocoding_service, walking_service, geoapify_budget
 from backend.services.transit_engine import ClosingConnection
 
 
-def test_shared_budget_and_walking_contract():
+def test_shared_budget_and_walking_contract(caplog):
     with tempfile.TemporaryDirectory() as td:
         dbpath = Path(td) / 'test.sqlite'
         def db():
@@ -55,6 +55,18 @@ def test_shared_budget_and_walking_contract():
             assert r.status_code==502 and 'test-secret' not in r.get_data(as_text=True)
             with db() as c:
                 assert c.execute('SELECT count FROM geoapify_budget').fetchone()[0]==1
+                c.execute('DELETE FROM geoapify_budget')
+                c.execute('DELETE FROM walking_budget')
+            private_values = ('43.000123', '-88.000456', 'synthetic-private-address', 'test-secret')
+            upstream_error = RuntimeError(' '.join(private_values))
+            w.side_effect = g.side_effect = upstream_error
+            responses = (
+                client.post('/api/walking-route', json={**walk, 'latitude': 43.000123, 'longitude': -88.000456}),
+                client.post('/api/location-search', json={**query, 'q': 'synthetic-private-address'}),
+            )
+            assert [response.status_code for response in responses] == [502, 502]
+            output = caplog.text + ''.join(response.get_data(as_text=True) for response in responses)
+            assert all(value not in output for value in private_values)
 
         key_file = Path(td) / 'geoapify-routing.key'
         with app.test_client() as client, patch.dict(os.environ, {

@@ -15,8 +15,8 @@
      ======================================================== */
 
   const MILWAUKEE = {
-    latitude: 43.0389,
-    longitude: -87.9065
+    latitude: 43.04,
+    longitude: -87.91
   };
 
   const WEATHER_REFRESH_MS = 15 * 60 * 1000;
@@ -220,6 +220,7 @@
     try {
       const response = await fetch(weatherURL(), {
         cache: "no-store",
+        referrerPolicy: "no-referrer",
         signal: controller.signal
       });
 
@@ -239,12 +240,9 @@
       updateWeatherDisplay(data);
       lastWeather = data;
 
-    } catch (error) {
+    } catch {
       if(version!==requestVersion)return;
-      console.warn(
-        "Weather information unavailable:",
-        error
-      );
+      console.warn("Weather information unavailable.");
 
       weatherUnavailable();
 
@@ -262,7 +260,34 @@
     document.addEventListener('visibilitychange',()=>document.documentElement.classList.toggle('weather-paused',document.hidden));
 
 
-    window.addEventListener('ayo:location-selected',event=>{const p=event.detail;if(!p||!Number.isFinite(p.latitude)||!Number.isFinite(p.longitude)||Math.abs(p.latitude)>90||Math.abs(p.longitude)>180)return;const same=Math.abs(p.latitude-weatherPoint.latitude)<.001&&Math.abs(p.longitude-weatherPoint.longitude)<.001;if(same)return;weatherPoint={latitude:p.latitude,longitude:p.longitude,name:p.name,timezone:p.timezone};lastWeather=null;requestVersion++;pendingController?.abort();applyTimezone(p.timezone||'America/Chicago');weatherUnavailable();clearTimeout(locationDelay);locationDelay=setTimeout(refreshWeather,300);});
+    window.addEventListener('ayo:location-selected', event => {
+      const point = event.detail;
+      if (!point || !Number.isFinite(point.latitude) || !Number.isFinite(point.longitude)
+        || Math.abs(point.latitude) > 90 || Math.abs(point.longitude) > 180) return;
+
+      // Only the weather widget uses a rounded point. Transit keeps its original coordinates.
+      const latitude = Number(point.latitude.toFixed(2));
+      const longitude = Number(point.longitude.toFixed(2));
+      const sameArea = latitude === weatherPoint.latitude && longitude === weatherPoint.longitude;
+      weatherPoint = {
+        latitude, longitude,
+        name: document.documentElement.lang === 'es' ? 'Ubicación aproximada' : 'Approximate location',
+        timezone: point.timezone
+      };
+      if (sameArea) {
+        if (lastWeather && document.getElementById('weatherWidget')?.dataset.availability === 'current') {
+          updateWeatherDisplay(lastWeather);
+        }
+        return;
+      }
+      lastWeather = null;
+      requestVersion++;
+      pendingController?.abort();
+      applyTimezone(point.timezone || 'America/Chicago');
+      weatherUnavailable();
+      clearTimeout(locationDelay);
+      locationDelay = setTimeout(refreshWeather, 300);
+    });
     // Obtain current weather after page initialization.
     refreshWeather();
     // A navigation-aborted language fetch must not create an unhandled weather promise.

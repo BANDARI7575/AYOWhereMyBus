@@ -13,6 +13,32 @@ from backend.services.transit_engine import TZ, MIN_TRANSFER_SECONDS
 
 NOW=test_journey.NOW
 
+
+def test_access_and_proxy_error_logs_exclude_request_data():
+    from backend.paths import PROJECT_ROOT
+
+    gunicorn = (PROJECT_ROOT / 'gunicorn.conf.py').read_text()
+    assert "access_log_format='%(m)s %(U)s %(s)s %(L)s'" in gunicorn
+    for filename in ('Caddyfile', 'Caddyfile.local-staging'):
+        global_options = (PROJECT_ROOT / 'deploy' / filename).read_text().split('\n}', 1)[0]
+        assert 'log {' in global_options
+        assert 'format filter {' in global_options
+        assert 'request delete' in global_options
+
+
+def test_development_request_logs_exclude_request_targets_and_errors():
+    from app import PrivateDevelopmentRequestHandler
+
+    handler = object.__new__(PrivateDevelopmentRequestHandler)
+    handler.path = '/api/explore/stops?lat=43.038321763&q=synthetic-private-query'
+    with patch.object(handler, 'log') as log:
+        handler.log_request(200, 120)
+        log.assert_called_once_with('info', 'HTTP response %s (%s bytes)', 200, 120)
+        log.reset_mock()
+        handler.log_error('Bad HTTP request: %r', handler.path)
+        log.assert_called_once_with('error', 'HTTP request could not be processed.')
+
+
 class ReliabilityTests(test_release.ScheduleTests):
     def test_minimum_and_tight_transfer_margin(self):
         result=self.engine.itinerary('1','3',NOW)

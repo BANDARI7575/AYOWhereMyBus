@@ -1,5 +1,11 @@
 {
     email {$TLS_EMAIL}
+    log {
+        format filter {
+            # Runtime proxy errors can include the full URI and request headers.
+            request delete
+        }
+    }
 }
 {$AYO_DOMAIN} {
     encode zstd gzip
