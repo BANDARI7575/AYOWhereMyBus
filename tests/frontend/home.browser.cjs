@@ -17,6 +17,7 @@ async function setup(browser,{width=390,language='en',remember=false,permission=
   if(u.pathname.startsWith('/api/explore/stops/')){const found=stops.find(s=>s.stop_id===u.pathname.split('/').pop())||stops[0];if(flags.delayedStop&&u.pathname.endsWith('/1'))return new Promise(resolve=>setTimeout(()=>resolve(json(found)),200));return json(found);}
   if(u.pathname==='/api/journey-locations')return json({locations:u.searchParams.get('q').includes('missing')?[]:[stops[0]]});
   if(/\/api\/stops\/\d+\/departures$/.test(u.pathname))return json({realtime_status:flags.feed?'fresh':'stale_or_invalid',feed_timestamp:now,retrieved_at:now,departures:flags.noArrivals?[]:[{...d,stop_id:u.pathname.split('/')[3],trip_id:'T3',data_type:'scheduled',prediction_at:null,scheduled_epoch:now+360},{...d,stop_id:u.pathname.split('/')[3],trip_id:'T2',prediction_at:now+300},{...d,stop_id:u.pathname.split('/')[3]}],total_departures:3,truncated:false});
+  if(u.pathname==='/api/trips/T1/vehicle'&&flags.vehicleReason)return json({status:'unavailable',reason:flags.vehicleReason,feed_fresh:flags.vehicleReason!=='stale_vehicle_feed',feed_timestamp:now,buses:[]});
   if(u.pathname==='/api/buses'||u.pathname==='/api/trips/T1/vehicle')return json({feed_fresh:true,feed_timestamp:now,buses:[{bus_id:'chosen',route:'19',trip_id:'T1',trip_start_date:flags.busDate?'20261115':null,qualified_service_date:flags.qualified?'20261115':null,service_date_basis:flags.qualified?'unique_active_gtfs_occurrence':null,direction_id:'0',latitude:flags.busLatitude,longitude:-88,reported_at:flags.busFresh?now:now-500},{bus_id:'other',route:'19',trip_id:'OTHER',trip_start_date:'20261115',latitude:43.9,longitude:-88,reported_at:now}]});
   if(u.pathname==='/api/trips/T1/shape')return json({trip_id:'T1',route_id:'19',points:[[43,-88],[43.001,-88]],geometry_scope:'full_scheduled_trip'});
   if(u.pathname==='/api/stops/search')return json({stops:[{stop_id:'1',stop_name:stops[0].name,stop_lat:43,stop_lon:-88}]});
@@ -48,6 +49,28 @@ async function only(page,id){assert.equal(await page.locator('[data-home-screen]
   assert.equal(await p.locator('.home-live-map').count(),0);await first.getByRole('button',{name:t('Show Live Bus Location','Ver ubicación del autobús'),exact:true}).click();await p.locator('.home-live-map').waitFor();assert.ok(await p.locator('.home-live-map .leaflet-control-zoom-in').evaluate(n=>n.getBoundingClientRect().height>=44));assert.equal(await p.evaluate(()=>Object.values(AyoHome.map._layers).filter(l=>l instanceof L.Marker).length),1);assert.equal(await p.evaluate(()=>Object.values(AyoHome.map._layers).filter(l=>l instanceof L.CircleMarker).length),1);
   await p.evaluate(()=>AyoHome.map.panBy([20,20],{animate:false}));const center=await p.evaluate(()=>AyoHome.map.getCenter());flags.busLatitude=43.002;await p.clock.fastForward(16000);await p.waitForFunction(()=>Object.values(AyoHome.map._layers).some(l=>l instanceof L.Marker&&l.getLatLng().lat===43.002));assert.deepEqual(await p.evaluate(()=>AyoHome.map.getCenter()),center);await p.evaluate(()=>window.originalHomeMap=AyoHome.map);await p.clock.fastForward(31000);await p.waitForFunction(()=>AyoHome.map&&AyoHome.map===originalHomeMap);assert.deepEqual(await p.evaluate(()=>AyoHome.map.getCenter()),center);
   await first.getByRole('button',{name:t('Hide Live Bus Location','Ocultar ubicación del autobús'),exact:true}).click();assert.equal(await p.locator('.home-live-map').count(),0);flags.busDate=false;await first.getByRole('button',{name:t('Show Live Bus Location','Ver ubicación del autobús'),exact:true}).click();await p.waitForFunction(()=>document.querySelector('.home-live-shell').textContent.includes(document.documentElement.lang==='es'?'No hay un vehículo':'No reliably matched'));assert.equal(await p.locator('.home-live-map').count(),0);await first.getByRole('button',{name:t('Hide Live Bus Location','Ocultar ubicación del autobús'),exact:true}).click();flags.qualified=true;await first.getByRole('button',{name:t('Show Live Bus Location','Ver ubicación del autobús'),exact:true}).click();await p.locator('.home-live-map').waitFor();assert.ok(await p.locator('.home-live-map .leaflet-control-zoom-in').evaluate(n=>n.getBoundingClientRect().height>=44));assert.equal(await p.evaluate(()=>Object.values(AyoHome.map._layers).filter(l=>l instanceof L.Marker).length),1);await first.getByRole('button',{name:t('Hide Live Bus Location','Ocultar ubicación del autobús'),exact:true}).click();flags.busDate=true;flags.qualified=false;
+  if(width===390){
+   const reasons=[
+    ['vehicle_not_reported','no vehicle position','no informa la posición'],
+    ['stale_vehicle_feed','positions are out of date','están desactualizadas'],
+    ['vehicle_feed_unavailable','temporarily unavailable','no están disponibles por el momento'],
+    ['stale_vehicle_position','no recent GPS update','actualización reciente del GPS'],
+    ['vehicle_route_mismatch','a different route','otra ruta'],
+    ['vehicle_direction_mismatch','a different direction','otro sentido de viaje'],
+    ['vehicle_service_date_mismatch','service date','fecha de servicio'],
+    ['ambiguous_vehicle_match','more than one possible bus','más de un autobús'],
+    ['vehicle_trip_unverified','this scheduled trip','viaje programado'],
+   ];
+   for(const [reason,en,es] of reasons){
+    flags.vehicleReason=reason;
+    await first.getByRole('button',{name:t('Show Live Bus Location','Ver ubicación del autobús'),exact:true}).click();
+    await first.locator('.home-live-shell [role=status]').filter({hasText:t(en,es)}).waitFor();
+    assert.equal(await first.locator('.home-bus-marker').count(),0);
+    assert.equal(await first.locator('.home-data-label').innerText(),t('Live · predicted arrival','En vivo · llegada estimada'));
+    await first.getByRole('button',{name:t('Hide Live Bus Location','Ocultar ubicación del autobús'),exact:true}).click();
+   }
+   flags.vehicleReason=null;
+  }
   await p.getByRole('button',{name:t('Walk to This Stop','Caminar hasta esta parada'),exact:true}).click();const google=new URL(await p.locator('#homeWalkLinks').getByRole('link',{name:'Google Maps'}).getAttribute('href'));assert.equal(google.searchParams.get('origin'),'43,-88');assert.equal(google.searchParams.get('travelmode'),'walking');assert.match(google.searchParams.get('destination'),/,-88$/);assert.equal(await p.locator('.home-warning').count(),0);
   await p.clock.fastForward(45000);await p.waitForFunction(()=>document.querySelector('.home-arrival[data-trip-key^="T1|"] .home-countdown').textContent==='2 min');flags.feed=false;await p.locator('#homeRefreshArrivals').click();await p.waitForFunction(()=>[...document.querySelectorAll('.home-arrival .home-data-label')].length===3&&[...document.querySelectorAll('.home-arrival .home-data-label')].every(n=>n.textContent.includes(document.documentElement.lang==='es'?'Programado':'Scheduled')));assert.equal(await p.locator('.home-arrival .home-data-label').filter({hasText:t('Scheduled','Programado')}).count(),3);assert.match(await p.locator('#homeArrivalFreshness').innerText(),t(/stale or unavailable/,/antiguos o no/));
   if(process.env.AYO_HOME_SHOTS&&language==='en'&&width===390)await p.screenshot({path:`${process.env.AYO_HOME_SHOTS}/${engine}-selected.png`});

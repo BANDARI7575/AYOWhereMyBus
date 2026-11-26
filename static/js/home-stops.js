@@ -14,6 +14,30 @@ function vehicleFor(departure,data,now=Date.now()/1000){
  const matches=(Array.isArray(data.buses)?data.buses:[]).filter(bus=>validPoint(bus)&&(bus.trip_schedule_relationship==null||bus.trip_schedule_relationship===0)&&bus.trip_id&&bus.trip_id===departure.trip_id&&String(bus.route).toUpperCase()===String(departure.route_id).toUpperCase()&&(bus.trip_start_date?bus.trip_start_date===departure.service_date:bus.qualified_service_date===departure.service_date&&bus.service_date_basis==='unique_active_gtfs_occurrence')&&age(bus.reported_at,now)<=120&&(bus.direction_id==null||departure.direction_id==null||String(bus.direction_id)===String(departure.direction_id)));
  return matches.length===1?matches[0]:null;
 }
+function vehicleUnavailableMessage(reason,t){
+ switch(reason){
+  case 'vehicle_not_reported':
+   return t('MCTS has no vehicle position for this trip in its latest feed. Arrival predictions come from a separate feed.','MCTS no informa la posición de un vehículo para este viaje en su última actualización. Las predicciones de llegada provienen de otra fuente.');
+  case 'stale_vehicle_feed':
+   return t('MCTS vehicle positions are out of date. The map will retry while it is open.','Las posiciones de los vehículos de MCTS están desactualizadas. Se volverán a consultar mientras el mapa esté abierto.');
+  case 'vehicle_feed_unavailable':
+   return t('MCTS vehicle locations are temporarily unavailable.','Las ubicaciones de los vehículos de MCTS no están disponibles por el momento.');
+  case 'stale_vehicle_position':
+   return t('MCTS has no recent GPS update for this bus.','MCTS no tiene una actualización reciente del GPS de este autobús.');
+  case 'vehicle_route_mismatch':
+   return t('The reported bus location is for a different route.','La posición informada corresponde a otra ruta.');
+  case 'vehicle_direction_mismatch':
+   return t('The reported bus location is for a different direction.','La posición informada corresponde a otro sentido de viaje.');
+  case 'vehicle_service_date_mismatch':
+   return t('The reported bus location could not be verified for this trip’s service date.','No se pudo verificar la posición informada para la fecha de servicio de este viaje.');
+  case 'ambiguous_vehicle_match':
+   return t('MCTS reported more than one possible bus for this trip.','MCTS informó de más de un autobús posible para este viaje.');
+  case 'vehicle_trip_unverified':
+   return t('The reported bus location could not be verified for this scheduled trip.','No se pudo verificar la posición informada para este viaje programado.');
+  default:
+   return t('No reliably matched current vehicle is available for this trip. Vehicle positions may be stale or missing.','No hay un vehículo actual asociado de forma fiable con este viaje. Las posiciones pueden ser antiguas o faltar.');
+ }
+}
 function walkingWarning(walk,departure,data,now=Date.now()/1000){if(!walk||walk.verified!==true||walk.mode!=='walking'||!walk.source||!finite(walk.duration_seconds)||walk.duration_seconds<0||age(walk.retrieved_at,now)>300)return false;const p=transit.departureState(departure,sourceStatus(data,now),now);return ['arrival','departure'].includes(p.kind)&&p.epoch>now&&walk.duration_seconds>p.epoch-now;}
 function walkingURLs(origin,stop){if(!validPoint(origin)||!validPoint(stop))return null;const start=`${origin.latitude},${origin.longitude}`,end=`${stop.latitude},${stop.longitude}`;return {google:'https://www.google.com/maps/dir/?'+new URLSearchParams({api:'1',origin:start,destination:end,travelmode:'walking'}),apple:'https://maps.apple.com/?'+new URLSearchParams({saddr:start,daddr:end,dirflg:'w'})};}
 const model={validPoint,age,key,sourceStatus,ordered,countdown,vehicleFor,walkingWarning,walkingURLs};
@@ -251,8 +275,8 @@ document.addEventListener('DOMContentLoaded',()=>{
  async function refreshMap(live){
   if(live!==S.live||live.pending)return;live.pending=true;live.attempted=Date.now();live.message.textContent=t('Loading vehicle positions…','Cargando posiciones de vehículos…');
   try{const data=await api('/api/trips/'+encodeURIComponent(live.dep.trip_id)+'/vehicle?'+new URLSearchParams({service_date:live.dep.service_date,stop_id:S.stop.stop_id,stop_sequence:live.dep.stop_sequence}),{signal:live.controller.signal});if(live!==S.live)return;const bus=vehicleFor(live.dep,data);
-   if(!bus){if(live.marker){live.marker.remove();live.marker=null;}live.shape?.remove();live.shape=null;const missing=data.reason==='vehicle_not_reported',stale=data.reason==='stale_vehicle_feed';
-    live.message.textContent=missing?t('MCTS has no vehicle position for this trip in its latest feed. Arrival predictions come from a separate feed.','MCTS no informa la posición de un vehículo para este viaje en su última actualización. Las predicciones de llegada provienen de otra fuente.'):stale?t('MCTS vehicle positions are out of date. The map will retry while it is open.','Las posiciones de los vehículos de MCTS están desactualizadas. Se volverán a consultar mientras el mapa esté abierto.'):t('No reliably matched current vehicle is available for this trip. Vehicle positions may be stale or missing.','No hay un vehículo actual asociado de forma fiable con este viaje. Las posiciones pueden ser antiguas o faltar.');return;}
+   if(!bus){if(live.marker){live.marker.remove();live.marker=null;}live.shape?.remove();live.shape=null;
+    live.message.textContent=vehicleUnavailableMessage(data.reason,t);return;}
    if(!root.L){live.message.textContent=t('The map could not load. Arrival information remains available.','No se pudo cargar el mapa. Las llegadas siguen disponibles.');return;}
    if(!live.map){const element=text('div',null,live.shell,'home-live-map');element.setAttribute('role','region');element.setAttribute('aria-label',t('Selected bus and stop map','Mapa del autobús y la parada elegidos'));live.shell.insertBefore(element,live.shell.lastElementChild);const relayTiles=document.body.dataset.relayStreetTiles==='true';live.map=L.map(element,{scrollWheelZoom:false,minZoom:relayTiles?11:0});const tileStatus=text('p','',live.shell,'home-note');tileStatus.hidden=true;L.tileLayer(relayTiles?'/api/walking-map-tile?z={z}&x={x}&y={y}':'https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,updateWhenIdle:true,noWrap:relayTiles,attribution:(relayTiles?'Powered by <a href="https://www.geoapify.com/">Geoapify</a> · ':'')+'<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>'}).on('loading',()=>{tileStatus.hidden=true;}).on('tileerror',()=>{tileStatus.hidden=false;tileStatus.textContent=t('Street map tiles could not load. Check your connection. Markers show reported positions, not walking directions.','No se pudo cargar el mapa de calles. Comprueba tu conexión. Los marcadores muestran posiciones informadas, no indicaciones a pie.');}).addTo(live.map);L.circleMarker([S.stop.latitude,S.stop.longitude],{radius:8,color:'#82bb9c',fillColor:'#82bb9c',fillOpacity:1,weight:2}).addTo(live.map).bindTooltip(text('span',S.stop.name));live.map.fitBounds([[S.stop.latitude,S.stop.longitude],[bus.latitude,bus.longitude]],{padding:[28,28],maxZoom:16});
     api('/api/trips/'+encodeURIComponent(live.dep.trip_id)+'/shape',{signal:live.controller.signal}).then(shape=>{if(live!==S.live||shape.trip_id!==live.dep.trip_id||shape.route_id!==live.dep.route_id||!live.marker)return;const points=shape.points;if(Array.isArray(points)&&points.length>1&&points.every(p=>Array.isArray(p)&&validPoint({latitude:p[0],longitude:p[1]}))){live.shape=L.polyline(points,{color:'#f0c169',weight:3,opacity:.6,interactive:false}).addTo(live.map);text('p',t('Full scheduled trip shape · not a walking route','Trazado completo del viaje programado · no es una ruta a pie'),live.shell,'home-note');}}).catch(()=>{});

@@ -106,17 +106,43 @@ class HomeTests(unittest.TestCase):
             self.assertEqual(data['status'],'matched')
             self.assertEqual(data['buses'][0]['qualified_service_date'],'20261109')
             self.assertIsNone(data['buses'][0]['trip_start_date'],'Do not fabricate a raw vehicle descriptor date')
-            for changes in [{'reported_at':now-121},{'trip_id':'U'},{'trip_start_date':'20261110'},{'direction_id':1},{'trip_schedule_relationship':6}]:
-                fleet['buses']=[{**bus,**changes}]
-                self.assertEqual(self.client.get(url).json['buses'],[])
-            fleet['buses']=[bus,{**bus,'bus_id':'ambiguous'}]
-            self.assertEqual(self.client.get(url).json['buses'],[])
-            fleet['buses']=[{**bus,'trip_id':'U'}]
-            self.assertEqual(self.client.get(url).json['reason'],'vehicle_not_reported')
-            fleet['buses']=[bus];fleet['feed_timestamp']=now-181
-            stale=self.client.get(url).json
-            self.assertEqual(stale['buses'],[])
-            self.assertEqual(stale['reason'],'stale_vehicle_feed')
+            self.assertNotIn('reason',data)
+            wrong_route={**bus,'route':'OTHER_ROUTE'}
+            cases=[
+                ('vehicle_not_reported',[],now),
+                ('vehicle_not_reported',[{**bus,'trip_id':'U'}],now),
+                ('stale_vehicle_feed',[bus],now-181),
+                ('stale_vehicle_position',[{**bus,'reported_at':now-121}],now),
+                ('stale_vehicle_position',[{**bus,'reported_at':None}],now),
+                ('vehicle_route_mismatch',[wrong_route],now),
+                ('vehicle_direction_mismatch',[{**bus,'direction_id':1}],now),
+                ('vehicle_service_date_mismatch',[{**bus,'trip_start_date':'20261110'}],now),
+                ('vehicle_trip_unverified',[{**bus,'trip_schedule_relationship':6}],now),
+                ('ambiguous_vehicle_match',[bus,{**bus,'bus_id':'duplicate-bus'}],now),
+            ]
+            for reason,buses,stamp in cases:
+                with self.subTest(reason=reason,buses=len(buses)), self.assertLogs('backend.app',level='WARNING') as logs:
+                    fleet.update(buses=buses,feed_timestamp=stamp)
+                    data=self.client.get(url).json
+                    self.assertEqual((data['status'],data['reason'],data['buses']),('unavailable',reason,[]))
+                    self.assertIn(f'vehicle_match_unavailable reason={reason}',logs.output[0])
+                    self.assertNotRegex(logs.output[0],r'duplicate-bus|OTHER_ROUTE|latitude|longitude|stop_id|trip_id')
+            fleet.update(buses=[wrong_route,bus],feed_timestamp=now)
+            self.assertEqual([x['bus_id'] for x in self.client.get(url).json['buses']],['verified'])
+            fleet['buses']=[wrong_route,{**bus,'direction_id':1}]
+            with self.assertLogs('backend.app',level='WARNING') as logs:
+                self.assertEqual(self.client.get(url).json['reason'],'vehicle_direction_mismatch')
+            self.assertIn("'vehicle_route_mismatch': 1",logs.output[0])
+            self.assertIn("'vehicle_direction_mismatch': 1",logs.output[0])
+
+    def test_vehicle_endpoint_handles_provider_failure_without_logging_error_details(self):
+        url='/api/trips/T/vehicle?service_date=20261109&stop_id=1&stop_sequence=1'
+        with patch('backend.app.live_vehicles',side_effect=OSError('private request details')), self.assertLogs('backend.app',level='WARNING') as logs:
+            response=self.client.get(url)
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(response.json['reason'],'vehicle_feed_unavailable')
+        self.assertEqual(response.json['buses'],[])
+        self.assertNotIn('private request details',response.get_data(as_text=True)+logs.output[0])
 
     def test_vehicle_endpoint_rejects_invalid_or_mismatched_departure_identity(self):
         for query in ['service_date=20261110&stop_id=1&stop_sequence=1','service_date=20261109&stop_id=3&stop_sequence=1','service_date=20261109&stop_id=1&stop_sequence=999999999999999999999','service_date=20261109&stop_id=1&stop_sequence=1.5','service_date=bad&stop_id=1&stop_sequence=1']:

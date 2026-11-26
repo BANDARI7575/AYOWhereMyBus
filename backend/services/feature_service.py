@@ -5,9 +5,12 @@ import re
 import json
 import time
 import threading
+from collections import Counter
 from datetime import datetime, timedelta
+from aiohttp import ClientError
 from flask import jsonify,request
 from google.transit import gtfs_realtime_pb2 as pb
+from google.protobuf.message import DecodeError
 from backend.services.transit_engine import TZ, service_epoch, seconds
 from backend.services.alert_service import snapshot as alert_snapshot, filter_route
 from backend.services.stops_service import distance_km
@@ -161,15 +164,40 @@ def install_features(app,get_schedule,realtime,db,journey_slots=None):
             trip=c.execute('SELECT route_id,service_id,direction_id FROM trips WHERE trip_id=?',(trip_id,)).fetchone()
             stop=c.execute('SELECT 1 FROM stop_times WHERE trip_id=? AND stop_id=? AND CAST(stop_sequence AS INTEGER)=?',(trip_id,sid,sequence)).fetchone()
         if trip is None or stop is None or trip['service_id'] not in schedule.services(day):raise ValueError('Departure does not match the active GTFS timetable')
-        data=live(trip['route_id']);now=time.time();matches=[]
+        # Look up the exact trip before checking route so a conflicting provider
+        # descriptor is distinguishable from an absent GPS report.
+        try:
+            data = live()
+        except (ClientError, DecodeError, RuntimeError, OSError, ValueError) as error:
+            app.logger.warning('vehicle_match_unavailable reason=vehicle_feed_unavailable error_type=%s',
+                               type(error).__name__)
+            return jsonify(status='unavailable', reason='vehicle_feed_unavailable', buses=[],
+                           feed_fresh=False, feed_timestamp=None, retrieved_at=int(time.time()),
+                           source='MCTS GTFS-Realtime / active GTFS timetable')
+        now = time.time()
+        matches = []
+        rejected = Counter()
         candidates = [bus for bus in data['buses'] if bus.get('trip_id') == trip_id]
         if data['feed_fresh']:
             for bus in candidates:
-                stamp=bus.get('reported_at')
-                if bus.get('trip_schedule_relationship',pb.TripDescriptor.SCHEDULED)!=pb.TripDescriptor.SCHEDULED or not isinstance(stamp,(int,float)) or not -60<=now-stamp<=120:continue
-                if bus.get('direction_id') is not None and trip['direction_id'] not in (None,'') and str(bus['direction_id'])!=str(trip['direction_id']):continue
-                qualified=qualify_service_day(schedule,trip_id,stamp,bus.get('trip_start_date'))
-                if qualified and qualified[0]==date:matches.append({**bus,'qualified_service_date':qualified[0],'service_date_basis':qualified[1]})
+                stamp = bus.get('reported_at')
+                if bus['route'].upper() != trip['route_id'].upper():
+                    rejected['vehicle_route_mismatch'] += 1
+                    continue
+                if bus.get('trip_schedule_relationship', pb.TripDescriptor.SCHEDULED) != pb.TripDescriptor.SCHEDULED:
+                    rejected['vehicle_trip_unverified'] += 1
+                    continue
+                if not isinstance(stamp, (int, float)) or not -60 <= now-stamp <= 120:
+                    rejected['stale_vehicle_position'] += 1
+                    continue
+                if bus.get('direction_id') is not None and trip['direction_id'] not in (None, '') and str(bus['direction_id']) != str(trip['direction_id']):
+                    rejected['vehicle_direction_mismatch'] += 1
+                    continue
+                qualified = qualify_service_day(schedule, trip_id, stamp, bus.get('trip_start_date'))
+                if not qualified or qualified[0] != date:
+                    rejected['vehicle_service_date_mismatch'] += 1
+                    continue
+                matches.append({**bus, 'qualified_service_date': qualified[0], 'service_date_basis': qualified[1]})
         result = dict(status='matched' if len(matches)==1 else 'unavailable',
                       buses=matches if len(matches)==1 else [], feed_fresh=data['feed_fresh'],
                       feed_timestamp=data.get('feed_timestamp'), retrieved_at=int(now),
@@ -178,6 +206,21 @@ def install_features(app,get_schedule,realtime,db,journey_slots=None):
             result['reason'] = 'stale_vehicle_feed'
         elif not candidates:
             result['reason'] = 'vehicle_not_reported'
+        elif len(matches) > 1:
+            result['reason'] = 'ambiguous_vehicle_match'
+        elif not matches:
+            # Report the check reached by the strongest candidates. Keep all
+            # rejection counts in the log when candidates fail different checks.
+            result['reason'] = next(reason for reason in (
+                'vehicle_service_date_mismatch', 'vehicle_direction_mismatch',
+                'stale_vehicle_position', 'vehicle_trip_unverified', 'vehicle_route_mismatch',
+            ) if rejected[reason])
+        if 'reason' in result:
+            app.logger.warning(
+                'vehicle_match_unavailable reason=%s feed_timestamp=%s candidates=%d qualified=%d rejected=%s',
+                result['reason'], result['feed_timestamp'], len(candidates), len(matches),
+                dict(sorted(rejected.items())),
+            )
         return jsonify(result)
     @app.get('/api/trips/<trip_id>/shape')
     def trip_shape(trip_id):
