@@ -38,7 +38,21 @@ const base=process.env.AYO_TEST_URL||'http://127.0.0.1:5098';
    assert.equal(bio.style,'normal');assert.equal(bio.weight,'400');assert.equal(bio.size,width<=560?16:18);assert.ok(bio.line>=1.65&&bio.line<=1.75);assert.equal(bio.border,'2px');assert.match(bio.font,/DM Sans/);
    if(language==='en')assert.equal(bio.text,"I build data pipelines for a living and products for fun. I co-founded A Work Connect Private Limited, a DPIIT-recognized startup in India, and learned most of what I know about data engineering building it. I built AYO! because Milwaukee riders shouldn't have to wait in freezing weather without knowing when the bus is coming.");
    const swing=await founder.locator('.founder-light').evaluate(n=>{const a=n.getAnimations()[0],svg=n.querySelector('svg');a.pause();const sample=time=>{a.currentTime=time;const m=svg.getScreenCTM(),p=new DOMPoint(300,0).matrixTransform(m),q=new DOMPoint(300,266).matrixTransform(m),matrix=new DOMMatrix(getComputedStyle(n).transform);return {x:p.x,y:p.y,bottom:q.x,angle:Math.atan2(matrix.b,matrix.a)*180/Math.PI};};const left=sample(0),right=sample(4000);a.play();return {left,right};});
-   assert.ok(Math.abs(swing.left.angle+(width<=560?4:6))<.1);assert.ok(Math.abs(swing.right.angle-(width<=560?4:6))<.1);assert.ok(Math.abs(swing.left.x-swing.right.x)<.1&&Math.abs(swing.left.y-swing.right.y)<.1,'actual cable suspension stays fixed');assert.ok(Math.abs(swing.left.bottom-swing.right.bottom)>30,'lamp underside visibly travels sideways');
+   assert.ok(Math.abs(swing.left.angle+2)<.1);assert.ok(Math.abs(swing.right.angle-2)<.1);assert.ok(Math.abs(swing.left.x-swing.right.x)<.1&&Math.abs(swing.left.y-swing.right.y)<.1,'actual cable suspension stays fixed');assert.ok(Math.abs(swing.left.bottom-swing.right.bottom)>15,'lamp underside visibly travels sideways');
+   const breath=await img.evaluate(n=>{
+    const animation=n.getAnimations()[0];
+    animation.pause();
+    const sample=time=>{
+     animation.currentTime=time;
+     const rect=n.getBoundingClientRect();
+     return {height:rect.height,elbowY:rect.top+rect.height*430/1312};
+    };
+    const resting=sample(0),breathing=sample(3000);
+    animation.play();
+    return {resting,breathing};
+   });
+   assert.ok(breath.breathing.height>breath.resting.height,'character breathes');
+   assert.ok(Math.abs(breath.breathing.elbowY-breath.resting.elbowY)<.1,'breathing keeps the elbow anchored');
    for(const theme of ['dark','light']){
     if(theme==='light')await page.evaluate(()=>document.body.classList.add('day-mode'));
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'no horizontal overflow');
@@ -47,7 +61,7 @@ const base=process.env.AYO_TEST_URL||'http://127.0.0.1:5098';
     if([390,1440].includes(width)){const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();assert.deepEqual(axe.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})),[]);}
     if(language==='en'&&theme==='dark'&&[390,1440].includes(width)){fs.mkdirSync('/private/tmp/ayo-founder-lean-shots',{recursive:true});await page.screenshot({path:`/private/tmp/ayo-founder-lean-shots/${engine}-${width}.png`,fullPage:true});}
    }
-   await page.emulateMedia({reducedMotion:'reduce'});for(const s of ['.founder-light','.founder-illumination','.founder-character','.founder-scene'])assert.equal(await founder.locator(s).evaluate(n=>getComputedStyle(n).animationName),'none');
+   await page.emulateMedia({reducedMotion:'reduce'});for(const s of ['.founder-light','.founder-illumination','.founder-character img','.founder-scene'])assert.equal(await founder.locator(s).evaluate(n=>getComputedStyle(n).animationName),'none');
    // Actual keyboard focus and retained control click behavior without opening external services.
    const github=founder.getByRole('link',{name:'GitHub',exact:true});await github.focus();assert.equal(await github.evaluate(n=>n===document.activeElement),true);
    if(engine==='Chrome'){await page.keyboard.press('Tab');assert.equal(await founder.getByRole('link',{name:'LinkedIn',exact:true}).evaluate(n=>n===document.activeElement),true);await page.keyboard.press('Tab');assert.equal(await founder.getByRole('link',{name:language==='es'?'Contacto':'Contact',exact:true}).evaluate(n=>n===document.activeElement),true);}
