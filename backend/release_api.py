@@ -1,7 +1,9 @@
 """Integrated rider APIs, persistent moderation and bounded request budgets."""
 import hashlib
 import hmac
+import json
 import os
+import re
 import secrets
 import sqlite3
 import time
@@ -10,6 +12,7 @@ import copy
 from pathlib import Path
 from backend.paths import PROJECT_ROOT
 from backend.services.alert_service import snapshot as alert_snapshot
+from backend.services.community_service import CATEGORIES, NEARBY_BODY_LIMIT, nearby_stop_ids
 from flask import request, jsonify
 from backend.services.transit_engine import Schedule, TZ, ClosingConnection
 from backend.services.realtime_service import Realtime
@@ -23,6 +26,14 @@ _journey_cache={}
 _journey_cache_lock=threading.Lock()
 _db_lock=threading.Lock()
 _db_initialized=set()
+# Drive the lookup from the selected stops, even if most stored reports are approved.
+NEARBY_REPORTS_QUERY = """
+    SELECT r.id, r.stop_id, r.category, r.text, r.created, MIN(r.expires, r.created + 86400) AS expires
+    FROM json_each(?) AS selected
+    CROSS JOIN reports AS r INDEXED BY reports_approved_stop_expiry
+    WHERE r.stop_id = selected.value AND r.state = 'approved' AND r.expires > ? AND r.created > ? AND r.created <= ?
+    ORDER BY r.created DESC, r.id DESC
+"""
 
 def authorized_moderator():
     from backend.services.moderation_service import moderator_identity
@@ -53,6 +64,7 @@ def db():
             if 'category' not in report_columns:
                 c.execute("ALTER TABLE reports ADD COLUMN category TEXT NOT NULL DEFAULT 'other'")
             c.execute('CREATE INDEX IF NOT EXISTS reports_stop_category_expiry ON reports(stop_id,category,expires)')
+            c.execute("CREATE INDEX IF NOT EXISTS reports_approved_stop_expiry ON reports(stop_id,expires) WHERE state='approved'")
             fields={r[1] for r in c.execute('PRAGMA table_info(moderation_audit)')}
             for name in ['actor','reason']:
                 if name not in fields:c.execute('ALTER TABLE moderation_audit ADD COLUMN '+name+" TEXT DEFAULT ''")
@@ -73,11 +85,9 @@ def install(app):
         app.config['TRUSTED_HOSTS'] = [h.strip() for h in os.environ['ALLOWED_HOSTS'].split(',') if h.strip()]
         if not app.config['TRUSTED_HOSTS']: raise RuntimeError('ALLOWED_HOSTS must not be empty')
     if os.getenv('MODERATOR_TOKENS'):
-        import json,re
         tokens=json.loads(os.environ['MODERATOR_TOKENS'])
         if not isinstance(tokens,dict) or not tokens or any(not re.fullmatch('[A-Za-z0-9_-]{1,40}',n) or not isinstance(v,str) or len(v)<32 for n,v in tokens.items()):raise RuntimeError('Invalid named moderator credentials')
     if production:
-        import re
         if not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+',os.getenv('SUPPORT_EMAIL','')):raise RuntimeError('SUPPORT_EMAIL must be the real public operator contact')
         if os.getenv('RETENTION_APPROVED')!='1':raise RuntimeError('Approve the retention policy and set RETENTION_APPROVED=1')
         from backend.services.push_service import validate_configuration
@@ -106,10 +116,18 @@ def install(app):
         if not request.path.startswith('/api/'): return
         if request.path in ['/api/health','/api/ready']: return
         if production and not request.is_secure: return jsonify(message='HTTPS is required'),400
-        if request.method=='POST' and not isinstance(request.get_json(silent=True),dict): return jsonify(message='Expected a JSON object'),400
+        if request.endpoint == 'nearby_reports':
+            request.max_content_length = NEARBY_BODY_LIMIT
         if request.method=='POST' and (request.headers.get('Sec-Fetch-Site')=='cross-site' or (request.headers.get('Origin') and request.headers['Origin'].rstrip('/')!=request.host_url.rstrip('/'))):
             return jsonify(message='Cross-origin writes are blocked'),403
-        kind='write' if request.method=='POST' else 'read'; bucket=int(time.time()//60)
+        if request.method=='POST':
+            try:
+                payload = request.get_json(silent=True)
+            except RecursionError:
+                payload = None
+            if not isinstance(payload, dict):
+                return jsonify(message='Expected a JSON object'),400
+        kind='write' if request.method=='POST' and request.endpoint!='nearby_reports' else 'read'; bucket=int(time.time()//60)
         identity=hmac.new(_privacy_key,(str(bucket//1440)+':'+(request.remote_addr or '')).encode(),hashlib.sha256).hexdigest()
         with db() as c:
             c.execute("DELETE FROM limits WHERE (kind IN ('read','write','journey') AND bucket<?) OR (kind IN ('report','vote','flag','push') AND bucket<?)",(bucket-2,bucket//60-2))
@@ -243,10 +261,20 @@ def install(app):
         return jsonify(categories=[{'id':key,**labels} for key,labels in CATEGORIES.items()],comment_max_length=500)
     @app.get('/api/winter/reports')
     def reports():
-        from backend.services.community_service import CATEGORIES
+        now = int(time.time())
         with db() as c:
-            rows=c.execute("SELECT r.id,r.stop_id,r.category,r.text,r.created,r.expires,COALESCE(SUM(v.value),0) AS votes FROM reports r LEFT JOIN votes v ON r.id=v.report_id WHERE r.state='approved' AND r.expires>? GROUP BY r.id ORDER BY r.created DESC LIMIT 100",(int(time.time()),)).fetchall()
+            rows=c.execute("SELECT r.id,r.stop_id,r.category,r.text,r.created,MIN(r.expires,r.created+86400) AS expires,COALESCE(SUM(v.value),0) AS votes FROM reports r LEFT JOIN votes v ON r.id=v.report_id WHERE r.state='approved' AND r.expires>? AND r.created>? GROUP BY r.id ORDER BY r.created DESC LIMIT 100",(now,now-86400)).fetchall()
         return jsonify(reports=[{**dict(r),'category_labels':CATEGORIES.get(r['category'],CATEGORIES['other'])} for r in rows],source='Anonymous community reports; unverified')
+    @app.post('/api/winter/reports/nearby')
+    def nearby_reports():
+        ids = nearby_stop_ids(request.get_json())
+        now = int(time.time())
+        rows = []
+        if ids:
+            with db() as c:
+                rows = c.execute(NEARBY_REPORTS_QUERY, (json.dumps(ids), now, now - 86400, now)).fetchall()
+        reports = [{**dict(row), 'category_labels': CATEGORIES.get(row['category'], CATEGORIES['other'])} for row in rows]
+        return jsonify(reports=reports, count=len(reports), retrieved_at=now)
     @app.post('/api/winter/reports')
     def report():
         from backend.services.community_service import report_fields

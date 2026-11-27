@@ -9,7 +9,12 @@
 }
 {$AYO_DOMAIN} {
     encode zstd gzip
-    request_body {
+    @nearby_reports path /api/winter/reports/nearby
+    @other_requests not path /api/winter/reports/nearby
+    request_body @nearby_reports {
+        max_size 32KiB
+    }
+    request_body @other_requests {
         max_size 8KB
     }
     reverse_proxy app:8000 {

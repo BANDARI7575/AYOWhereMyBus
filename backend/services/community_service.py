@@ -10,6 +10,18 @@ CATEGORIES = {
     'other': {'en': 'Other condition', 'es': 'Otra condición'},
 }
 
+NEARBY_STOP_LIMIT = 4096
+NEARBY_BODY_LIMIT = 32 * 1024
+
+
+def nearby_stop_ids(data):
+    ids = data.get('stop_ids')
+    if set(data) != {'stop_ids'} or not isinstance(ids, list) or len(ids) > NEARBY_STOP_LIMIT:
+        raise ValueError('Expected a bounded list of stop IDs')
+    if any(not isinstance(stop, str) or not re.fullmatch(r'[a-zA-Z0-9_.:-]{1,128}', stop) for stop in ids):
+        raise ValueError('Invalid stop ID')
+    return list(dict.fromkeys(ids))
+
 
 def clean_comment(value, minimum=0):
     if not isinstance(value, str) or len(value) > 500:

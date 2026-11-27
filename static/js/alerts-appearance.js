@@ -47,8 +47,10 @@ document.addEventListener('DOMContentLoaded',()=>{
   root.dispatchEvent(new CustomEvent('ayo:nearby-summary',{detail:nearbySnapshot}));
   $('nearbyStopCount').textContent=stops?String(stops.length):'—';
   const matched=stops&&reports?localReports(reports,stops):null;
-  $('nearbyReportCount').textContent=matched?String(matched.length):'—';
-  if(matched?.length){const expiry=Math.min(...matched.map(report=>Math.min(report.expires,report.created+86400)));expiryTimer=setTimeout(render,Math.max(1,Math.min(2147483647,expiry*1000-Date.now())));}
+  const staleStops=stops&&(stopError||!fresh(stopAt)),staleReports=matched&&(reportError||!fresh(reportAt)||staleStops);
+  const showEmpty=matched&&!matched.length&&!staleReports&&!loading;
+  $('nearbyReportCount').textContent=matched&&(matched.length||showEmpty)?String(matched.length):'—';
+  if(matched?.length){const expiry=matched.reduce((earliest,report)=>Math.min(earliest,report.expires,report.created+86400),Infinity);expiryTimer=setTimeout(render,Math.max(1,Math.min(2147483647,expiry*1000-Date.now())));}
   if(!selected){
    nearby.textContent=t('Set your location on Home to see nearby stops.','Elige tu ubicación en Inicio para ver paradas cercanas.');
    $('nearbyReportState').textContent=t('Choose a location to check available reports.','Elige una ubicación para consultar los informes disponibles.');
@@ -57,7 +59,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   const radius=new Intl.NumberFormat(es()?'es-US':'en-US',{minimumFractionDigits:1,maximumFractionDigits:1}).format(selected.radius)+' mi';
   const unavailable=t('Unavailable. Retry the summary.','No disponible. Vuelve a consultar el resumen.');
   const loadingText=t('Loading nearby data…','Cargando datos cercanos…');
-  const staleStops=stops&&(stopError||!fresh(stopAt)),staleReports=matched&&(reportError||!fresh(reportAt)||staleStops);
   nearby.textContent=stops?(staleStops?t('Last known stops','Últimas paradas conocidas'):t('MCTS GTFS stops','Paradas de MCTS GTFS'))+' · '+radius:loading?loadingText:unavailable;
   $('nearbyReportState').textContent=matched?(staleReports?t('Last known · unverified observations','Últimos datos · observaciones sin verificar'):t('Available approved reports · unverified','Informes aprobados disponibles · sin verificar')):loading?loadingText:unavailable;
   if(stops){
@@ -65,31 +66,48 @@ document.addEventListener('DOMContentLoaded',()=>{
    for(const stop of stops){const distance=root.AyoUnits?.distance(stop.distance_meters,es()?'es':'en');row(stopList,stop.name+' · '+t('Stop ','Parada ')+stop.stop_id+(distance&&distance!=='—'?' · '+distance:''));}
   }
   if(matched){
-   if(!matched.length)row(reportList,t('No available approved reports for these stops. Conditions are unknown.','No hay informes aprobados disponibles para estas paradas. Se desconocen las condiciones.'));
+   if(showEmpty)row(reportList,t('No available approved reports for these stops. Conditions are unknown.','No hay informes aprobados disponibles para estas paradas. Se desconocen las condiciones.'));
    const names=new Map(stops.map(stop=>[String(stop.stop_id),stop.name]));
-   for(const report of matched){const expires=new Date(Math.min(report.expires,report.created+86400)*1000).toLocaleString(es()?'es-US':'en-US',{timeZone:'America/Chicago',dateStyle:'short',timeStyle:'short'});row(reportList,names.get(String(report.stop_id))+' · '+(typeof report.category_labels?.[es()?'es':'en']==='string'?report.category_labels[es()?'es':'en']+' · ':'')+report.text+' · '+t('Expires ','Vence ')+expires+' America/Chicago');}
+   const formatter=new Intl.DateTimeFormat(es()?'es-US':'en-US',{timeZone:'America/Chicago',dateStyle:'short',timeStyle:'short'});
+   for(const report of matched){const expires=formatter.format(Math.min(report.expires,report.created+86400)*1000);row(reportList,names.get(String(report.stop_id))+' · '+(typeof report.category_labels?.[es()?'es':'en']==='string'?report.category_labels[es()?'es':'en']+' · ':'')+report.text+' · '+t('Expires ','Vence ')+expires+' America/Chicago');}
   }
   const knownAt=Math.min(...[stopAt,reportAt].filter(stamp=>stamp>0));
   $('nearbyConditionsStatus').textContent=loading?loadingText:stopError||reportError||staleStops||staleReports?t('Some data is unavailable or stale. Last-known observations are not current conditions. Retry to refresh.','Algunos datos no están disponibles o están desactualizados. Las últimas observaciones no son condiciones actuales. Vuelve a consultar.'):finite(knownAt)?t('Checked ','Consultado ')+new Date(knownAt*1000).toLocaleString(es()?'es-US':'en-US',{timeZone:'America/Chicago',dateStyle:'short',timeStyle:'short'})+' America/Chicago':'';
  }
- async function json(url,signal){
-  const response=await fetch(url,{cache:'no-store',signal});
+ async function json(url,signal,options={}){
+  const response=await fetch(url,{cache:'no-store',signal,...options});
   if(!response.ok)throw Error('Nearby source unavailable');
   return response.json();
  }
  async function nearbyStops(selected,signal){
-  const found=new Map();let offset=0,stamp=null;
+  const found=new Map();let offset=0,stamp=null,total=null;
   do{
    const query=new URLSearchParams({lat:selected.latitude,lon:selected.longitude,radius:selected.radius,offset});
    const data=await json('/api/explore/stops?'+query,signal);
-   if(!Array.isArray(data.stops)||data.stops.some(stop=>!stop||typeof stop.name!=='string'||!stop.stop_id))throw Error('Invalid stop response');
+   if(!Array.isArray(data.stops)||data.stops.some(stop=>!stop||typeof stop.name!=='string'||!stop.stop_id)||
+      !Number.isSafeInteger(data.total)||data.total<0||(total!==null&&total!==data.total))throw Error('Invalid stop response');
+   total=data.total;
    for(const stop of data.stops)found.set(String(stop.stop_id),stop);
    const retrieved=finite(data.retrieved_at)?data.retrieved_at:Date.now()/1000;stamp=stamp===null?retrieved:Math.min(stamp,retrieved);
-   if(data.next_offset==null){if(finite(data.total)&&found.size<data.total)throw Error('Incomplete nearby stops');break;}
-   if(!Number.isInteger(data.next_offset)||data.next_offset<=offset||data.next_offset>10000)throw Error('Invalid nearby pagination');
+   if(found.size!==offset+data.stops.length||found.size>total)throw Error('Incomplete nearby stops');
+   if(data.next_offset===null){if(found.size!==total)throw Error('Incomplete nearby stops');break;}
+   if(data.next_offset!==found.size||data.next_offset<=offset||data.next_offset>=total||data.next_offset>10000)throw Error('Invalid nearby pagination');
    offset=data.next_offset;
   }while(true);
   return {stops:[...found.values()],stamp};
+ }
+ async function nearbyReports(stops,signal){
+  const ids=new Set(stops.map(stop=>String(stop.stop_id)));
+  if(!ids.size)return {reports:[],stamp:Date.now()/1000};
+  const data=await json('/api/winter/reports/nearby',signal,{
+   method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({stop_ids:[...ids]})
+  });
+  if(!Array.isArray(data.reports)||data.count!==data.reports.length||!finite(data.retrieved_at)||
+     new Set(data.reports.map(report=>report?.id)).size!==data.count||
+     data.reports.some(report=>!Number.isSafeInteger(report?.id)||!ids.has(report.stop_id)||typeof report.text!=='string'||
+      !finite(report.created)||!finite(report.expires)||report.created>data.retrieved_at||report.expires<=data.retrieved_at||
+      report.expires>report.created+86400||(report.state!=null&&report.state!=='approved')))throw Error('Incomplete nearby reports');
+  return {reports:data.reports,stamp:data.retrieved_at};
  }
  async function refresh(force=false){
   const selected=synchronize();render();
@@ -97,11 +115,19 @@ document.addEventListener('DOMContentLoaded',()=>{
   const generation=++serial,controller=request=new AbortController();loading=true;lastAttempt=Date.now();render();
   const timeout=setTimeout(()=>controller.abort(),12000);
   try{
-   const results=await Promise.allSettled([nearbyStops(selected,controller.signal),json('/api/winter/reports',controller.signal).then(data=>{if(!Array.isArray(data.reports))throw Error('Invalid report response');return data.reports;})]);
+   const next=await nearbyStops(selected,controller.signal).catch(()=>null);
    if(generation!==serial||current()?.key!==selected.key)return;
-   stopError=results[0].status==='rejected';reportError=results[1].status==='rejected';
-   if(!stopError){stops=results[0].value.stops;stopAt=results[0].value.stamp;}
-   if(!reportError){reports=results[1].value;reportAt=Date.now()/1000;}
+   stopError=!next;
+   if(stopError)return;
+   if(stops?.length!==next.stops.length||stops.some((stop,index)=>stop.stop_id!==next.stops[index].stop_id)){reports=null;reportAt=0;}
+   stops=next.stops;stopAt=next.stamp;
+   try{
+    const result=await nearbyReports(stops,controller.signal);
+    if(generation!==serial||current()?.key!==selected.key)return;
+    reports=result.reports;reportAt=result.stamp;reportError=false;
+   }catch{
+    if(generation===serial&&current()?.key===selected.key)reportError=true;
+   }
   }finally{clearTimeout(timeout);if(generation===serial){loading=false;request=null;render();}}
  }
  function changed(){synchronize();render();clearTimeout(debounce);debounce=setTimeout(()=>refresh(true),250);}

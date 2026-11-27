@@ -20,7 +20,10 @@ const base=process.env.AYO_TEST_URL||'http://127.0.0.1:5055';
     posts.push(r.request().postDataJSON());const fulfill=()=>r.fulfill({status:code,json:code===202?{id:1,state:'pending',created:now,expires:now+86400}:{message:'Isolated rejection'}});
     if(hold)return new Promise(resolve=>{release=()=>fulfill().finally(resolve);});return fulfill();
    }
-   if(u.pathname==='/api/winter/reports')return json({reports:approved?[{id:1,stop_id:'1',category:'snow_ice',category_labels:{en:'Snow or ice',es:'Nieve o hielo'},text:'',created:expiry?expiry-86400:now,expires:expiry||now+86400}]:[]});
+   if(u.pathname==='/api/winter/reports/nearby'){
+    assert.deepEqual(r.request().postDataJSON(),{stop_ids:['1']});
+    return json({count:approved?1:0,retrieved_at:now,reports:approved?[{id:1,stop_id:'1',category:'snow_ice',category_labels:{en:'Snow or ice',es:'Nieve o hielo'},text:'',created:expiry?expiry-86400:now,expires:expiry||now+86400}]:[]});
+   }
    if(u.pathname.startsWith('/api/'))return json({configured:false,status:'unavailable',reports:[],stops:[],routes:[],departures:[],buses:[],alerts:[]});return r.continue();
   });
   await p.goto(base+'/#alerts');await p.evaluate(()=>AyoI18n.ready);await p.waitForFunction(()=>window.AyoHome);
@@ -32,7 +35,7 @@ const base=process.env.AYO_TEST_URL||'http://127.0.0.1:5055';
   await p.locator('#communityCategory').selectOption('snow_ice');hold=true;await p.locator('#submitCommunityReport').click();await p.waitForFunction(()=>document.getElementById('communityReportForm').getAttribute('aria-busy')==='true');assert.equal(await p.locator('#submitCommunityReport').isDisabled(),true);await p.locator('#communityReportForm').dispatchEvent('submit');assert.equal(posts.length,1);assert.deepEqual(posts[0],{stop_id:'1',category:'snow_ice',comment:''});hold=false;await release();
   await p.waitForFunction(()=>document.getElementById('communityReportForm').getAttribute('aria-busy')==='false');
   assert.match(await p.locator('#communitySubmissionStatus').innerText(),language==='es'?/No será público hasta aprobarse/:/not public until approved/);
-  assert.equal(await p.locator('#communityComment').inputValue(),'');assert.equal(await p.locator('#nearbyReportCount').innerText(),'0');
+  assert.equal(await p.locator('#communityComment').inputValue(),'');await p.waitForFunction(()=>document.getElementById('nearbyReportCount').textContent==='0');
   await p.waitForFunction(()=>!document.getElementById('submitCommunityReport').disabled);await p.locator('#communityCategory').selectOption('snow_ice');await p.locator('#submitCommunityReport').click();assert.equal(posts.length,1,'same-session repeat must not consume another request');
   approved=true;await p.locator('#nearbyConditions>summary').click();await p.locator('#refreshNearbyConditions').click();await p.waitForFunction(()=>document.getElementById('nearbyReportCount').textContent==='1');assert.match(await p.locator('#nearbyReportsList').innerText(),language==='es'?/Nieve o hielo/:/Snow or ice/);
   await p.locator('#communityCategory').selectOption('lighting');await p.locator('#communityComment').fill('Fixture observation only.');

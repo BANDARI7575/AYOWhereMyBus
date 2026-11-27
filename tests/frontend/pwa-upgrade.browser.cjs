@@ -40,7 +40,15 @@ const server = http.createServer(async (request, response) => {
         await page.reload({waitUntil:'load'});
         await page.waitForFunction(()=>navigator.serviceWorker.controller);
         await waitForAsync(page,async()=>{const r=await navigator.serviceWorker.getRegistration();return r.active?.state==='activated'&&!r.installing&&!r.waiting&&await caches.has('ayo-shell-v26');});
-        await page.evaluate(()=>localStorage.setItem('ayo-favorites',JSON.stringify(['19'])));
+        const saved = {
+          stops:[{id:'1',name:'Saved stop'}],
+          routes:[{id:'19',name:'Saved route'}],
+          journeys:[{id:'1>2',name:'Saved journey',from:{stop_id:'1'},to:{stop_id:'2'}}]
+        };
+        await page.evaluate(saved=>{
+          localStorage.setItem('ayo-favorites',JSON.stringify(['19']));
+          localStorage.setItem('ayo-workspace-favorites',JSON.stringify(saved));
+        },saved);
         oldShell = false;
         await page.evaluate(()=>{window.__upgradeControlled=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{window.__upgradeControlled=true;},{once:true});});
         await page.evaluate(async()=>{const registration=await navigator.serviceWorker.ready;await registration.update();});
@@ -49,11 +57,12 @@ const server = http.createServer(async (request, response) => {
         await page.waitForFunction(()=>window.__upgradeControlled);
         await waitForAsync(page,async()=>{const r=await navigator.serviceWorker.getRegistration();return r.active?.state==='activated'&&!r.installing&&!r.waiting;});
         await page.reload({waitUntil:'load'});
-        await waitForAsync(page,async()=>{const c=await caches.open('ayo-shell-v34');return !!await c.match('/static/js/app.js')&&!!await c.match('/static/css/home.css');});
+        await waitForAsync(page,async()=>{const c=await caches.open('ayo-shell-v35');return !!await c.match('/static/js/app.js')&&!!await c.match('/static/css/home.css');});
         assert.equal(await page.locator('script[src="/static/js/app.js"]').count(),1);
         assert.equal(await page.evaluate(()=>localStorage.getItem('ayo-favorites')),JSON.stringify(['19']));
+        assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('ayo-workspace-favorites'))),saved);
         assert.equal(await page.locator('#voiceShortcut').count(),1);
-        const assets=await page.evaluate(async()=>{const c=await caches.open('ayo-shell-v34');return(await c.keys()).map(r=>new URL(r.url).pathname);});
+        const assets=await page.evaluate(async()=>{const c=await caches.open('ayo-shell-v35');return(await c.keys()).map(r=>new URL(r.url).pathname);});
         for(const asset of ['/static/js/app.js','/static/css/home.css','/static/js/home-stops.js','/static/css/style.css','/static/img/icons.svg','/static/privacy.html'])assert.ok(assets.includes(asset),asset);
         assert.ok(!assets.some(path=>path.startsWith('/api/')));
         await context.setOffline(true);await page.reload({waitUntil:'load'});
@@ -61,7 +70,7 @@ const server = http.createServer(async (request, response) => {
         await page.locator('.app-nav [data-view=trip]').click();assert.equal(await page.locator('#planFrom').isVisible(),true);
         await openMap(page);assert.equal(await page.locator('#map').isVisible(),true);
         assert.deepEqual(errors,[]);
-        await context.close();console.log('PASS',engine,'real v26→v34 worker upgrade, legacy asset delivery, favorite preservation and offline navigation');
+        await context.close();console.log('PASS',engine,'real v26→v35 worker upgrade, legacy asset delivery, favorite preservation and offline navigation');
       } finally {await browser.close();}
     }
   } finally {await new Promise(resolve=>server.close(resolve));}

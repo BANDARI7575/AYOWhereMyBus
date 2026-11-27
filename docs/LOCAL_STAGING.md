@@ -43,6 +43,34 @@ AYO_TEST_URL=https://127.0.0.1:8443 npm run test:release
 
 During Phase 1, the utility redesign suite also recorded an intermittent Playwright WebKit access-control error for `/api/buses?route=19`. That test intercepts the request and returns a synthetic fixture. The error did not recur in the full HTTPS rerun with Node's CA configured. Separate unmocked same-origin requests in Chrome and WebKit both returned HTTP 200 and a fresh Route 19 feed. The exact trigger of the one-off error remains unconfirmed. Keep the browser error assertion enabled. If it recurs, compare the fixture run with an unmocked same-origin request before diagnosing a staging API or CORS failure.
 
+### Nearby community report counts
+
+Phase 2, Step 2.1 uses a no-store, read-only POST with public GTFS stop IDs.
+Flask and Caddy cap the request at 32 KiB, and Flask accepts at most 4,096
+IDs before deduplication. The full bundled feed fits at 3,694 IDs and
+25,301 bytes of compact JSON. Chrome and WebKit each loaded 935 stops for
+a three-mile downtown selection over Docker HTTPS with zero geolocation
+calls. Both browsers accepted the full feed and received HTTP 413 for an
+oversized request.
+
+The SQLite benchmark used an isolated database with 100,000 background
+rows and 800 selected stop IDs. The query plan used the partial
+`reports_approved_stop_expiry` index for stop ID and expiry. Browser
+medians are from five runs at 390 px with the report list expanded and
+include JSON parsing, validation, DOM updates, and forced layout.
+
+| Matching reports | Median SQLite query | Uncompressed JSON | Chrome | WebKit |
+| ---: | ---: | ---: | ---: | ---: |
+| 101 | 0.27 ms | 27,811 bytes | 2.6 ms | 4 ms |
+| 1,000 | 0.93 ms | 276,727 bytes | 17 ms | 28 ms |
+| 5,000 | 5.25 ms | 1,388,187 bytes | 84.3 ms | 203 ms |
+
+The response is unpaginated and includes every eligible report. Transfer
+size and rendering cost grow with the match count and comment length. If
+the list is paginated later, the count must stay exact across all pages.
+Synthetic reports were confined to temporary SQLite databases and browser
+fixtures.
+
 ## iPhone over private Wi-Fi
 
 On the configured Mac, AirDrop `~/.ayo-staging/AYO-iPhone-WiFi.mobileconfig` to the test iPhone. The profile contains the public Caddy staging root certificate. In iPhone Settings, install it under **General → VPN & Device Management**, then turn on full trust for **AYO! Staging Root CA** under **General → About → Certificate Trust Settings**. Open [AYO! in Safari](https://bandaris-macbook-air.local:8444/) while both devices are on the same trusted Wi-Fi. Tap **Enable My Location** and allow the Safari site prompt. [Apple certificate trust instructions](https://support.apple.com/en-us/102390)
